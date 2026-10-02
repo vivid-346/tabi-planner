@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>旅のプランナー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Figtree:wght@500;700;800&display=swap">
+<style>
+/* 旅のノートと同じ色・文字。一覧 → 旅行ごとに「日程」「行きたい場所」の2画面 */
+:root{
+  --ground:#EEF1F5; --paper:#FFFFFF; --ink:#14213D; --muted:#5C6880; --line:#D9DFE8;
+  --azul:#1F4E9E; --azul-soft:#E1E9F6; --ochre:#C0822A; --ochre-soft:#F6EBDA;
+  --es:#B8322A; --it:#2E7D4F; --it-soft:#E0F0E6; --warn:#B8322A; --warn-soft:#F7E4E2;
+  --shadow:0 1px 2px rgba(20,33,61,.06),0 8px 24px rgba(20,33,61,.08);
+  --serif:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --num:"Figtree",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --ground:#0D1320;--paper:#151E2D;--ink:#E8EDF5;--muted:#99A6BB;--line:#283448;--azul:#7FA9EE;--azul-soft:#1A2B45;--ochre:#E0AE5E;--ochre-soft:#3A2C17;--es:#EE7B72;--it:#6CC593;--it-soft:#16301F;--warn:#EE7B72;--warn-soft:#3A1F1D;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --ground:#0D1320;--paper:#151E2D;--ink:#E8EDF5;--muted:#99A6BB;--line:#283448;--azul:#7FA9EE;--azul-soft:#1A2B45;--ochre:#E0AE5E;--ochre-soft:#3A2C17;--es:#EE7B72;--it:#6CC593;--it-soft:#16301F;--warn:#EE7B72;--warn-soft:#3A1F1D;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--azul)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+
+/* 上のバー */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:56px}
+.brand{background:none;border:0;padding:0;cursor:pointer;font-family:var(--serif);font-weight:800;font-size:18px;letter-spacing:.06em;white-space:nowrap}
+.crumb{min-width:0;flex:0 1 auto}
+.crumb select{max-width:100%;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 30px 5px 12px;font-weight:700;font-size:13.5px;cursor:pointer;text-overflow:ellipsis}
+.sync{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+
+.page{max-width:1080px;margin:0 auto;padding:24px 16px 80px;display:flex;flex-direction:column;gap:24px}
+.eyebrow{font-family:var(--num);font-weight:700;font-size:12px;letter-spacing:.22em;color:var(--ochre);text-transform:uppercase}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(26px,4.4vw,40px);line-height:1.2;letter-spacing:.03em}
+h2{font-family:var(--serif);font-weight:800;font-size:22px;letter-spacing:.03em}
+.muted{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ボタン */
+.btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.danger{color:var(--warn);border-color:var(--warn)}
+.btn.danger.fill{background:var(--warn);color:var(--paper)}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--line)}
+.ib{width:32px;height:32px;display:inline-grid;place-items:center;border:0;background:none;border-radius:8px;color:var(--muted);cursor:pointer;flex:none}
+.ib:hover{background:var(--ground);color:var(--ink)}
+.ib svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ib:disabled{opacity:.3;cursor:default}
+
+/* 旅行一覧 */
+.trips{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.tcard{background:var(--paper);border:0;border-radius:16px;box-shadow:var(--shadow);padding:0;overflow:hidden;text-align:left;cursor:pointer;display:flex;flex-direction:column;transition:transform .18s}
+.tcard:hover{transform:translateY(-3px)}
+.tcard .band{position:relative;padding:20px 18px 16px;color:#fff;background:var(--c,#1F4E9E);display:flex;flex-direction:column;gap:4px;min-height:132px;justify-content:flex-end}
+.tcard .band::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 12px,transparent 12px 24px);pointer-events:none}
+.tcard .band b{font-family:var(--serif);font-weight:800;font-size:24px;line-height:1.25;position:relative}
+.tcard .band .num{font-weight:700;font-size:13px;letter-spacing:.08em;opacity:.9;position:relative}
+.tcard .body{padding:12px 18px 16px;display:flex;flex-direction:column;gap:6px}
+.tcard .route{font-size:13px;color:var(--muted)}
+.tcard .stats{display:flex;gap:14px;font-size:12.5px;color:var(--muted)}
+.tcard .stats b{color:var(--ink);font-family:var(--num)}
+.tnew{border:2px dashed var(--line);border-radius:16px;background:none;min-height:220px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-weight:700}
+.tnew:hover{border-color:var(--azul);color:var(--azul)}
+.cd{display:inline-block;align-self:flex-start;font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 8px;background:var(--azul-soft);color:var(--azul)}
+.cd.now{background:var(--ochre-soft);color:var(--ochre)}
+.cd.past{background:var(--ground);color:var(--muted)}
+
+/* 旅行の見出し */
+.thead{display:grid;grid-template-columns:1fr auto;gap:12px 20px;align-items:end}
+.thead .meta{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);margin-top:6px}
+.thead .meta b{font-family:var(--num);color:var(--ink)}
+@media (max-width:620px){.thead{grid-template-columns:1fr}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--ochre)}
+.tabs .n{font-family:var(--num);font-size:12px;margin-left:4px;color:var(--muted)}
+
+/* 日程 */
+.strip{position:sticky;top:calc(env(safe-area-inset-top,0px) + 57px);z-index:10;background:var(--ground);padding-block:8px;overflow-x:auto;scrollbar-width:thin}
+.strip .in{display:flex;gap:6px;width:max-content}
+.strip button{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:4px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.25;min-width:52px}
+.strip button b{font-family:var(--num);font-size:14px}
+.strip button small{font-size:10.5px;color:var(--muted)}
+.strip button.today{border-color:var(--ochre)}
+.strip button.empty b{color:var(--muted)}
+.days{display:flex;flex-direction:column;gap:16px}
+.day{background:var(--paper);border-radius:14px;border:1px solid var(--line);scroll-margin-top:130px}
+.day.today{border-color:var(--ochre);box-shadow:0 0 0 1px var(--ochre)}
+.dh{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.dno{font-family:var(--num);font-weight:800;font-size:12px;letter-spacing:.16em;color:var(--ochre)}
+.ddate{font-family:var(--num);font-weight:800;font-size:22px;line-height:1}
+.ddate small{font-family:var(--sans);font-size:13px;font-weight:700;margin-left:4px;color:var(--muted)}
+.ddate small.sun{color:var(--es)}.ddate small.sat{color:var(--azul)}
+.dcity{min-width:0}
+.dcity input{width:100%;border:0;border-bottom:1px dashed transparent;background:none;font-family:var(--serif);font-weight:800;font-size:18px;padding:2px 0}
+.dcity input:hover{border-bottom-color:var(--line)}
+.dcity input:focus{outline:none;border-bottom-color:var(--azul)}
+.dcity input::placeholder{color:var(--muted);font-weight:600;opacity:.7}
+.items{list-style:none;margin:0;padding:4px 8px 4px 16px}
+.item{display:grid;grid-template-columns:64px 1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:start}
+.item:last-child{border-bottom:0}
+.item .t{font-family:var(--num);font-weight:700;font-size:14px;padding-top:1px;overflow-wrap:anywhere}
+.item .b{min-width:0;display:flex;flex-direction:column;gap:2px}
+.item .ti{font-weight:700;overflow-wrap:anywhere}
+.item .no{font-size:13px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.item .acts{display:flex;gap:0}
+@media (max-width:560px){.item{grid-template-columns:52px 1fr}.item .acts{grid-column:2;margin-top:-4px;margin-left:-8px}}
+.kind{display:inline-block;align-self:flex-start;font-size:11px;font-weight:700;border-radius:6px;padding:0 7px;line-height:1.7}
+.k-move{background:var(--azul-soft);color:var(--azul)}
+.k-see{background:var(--it-soft);color:var(--it)}
+.k-food{background:var(--ochre-soft);color:var(--ochre)}
+.k-stay{background:var(--ground);color:var(--ink);border:1px solid var(--line)}
+.k-other{background:var(--ground);color:var(--muted)}
+.dmemo{padding:0 16px 12px}
+.dmemo textarea{width:100%;border:1px dashed var(--line);border-radius:10px;background:var(--ground);padding:8px 10px;font-size:13px;resize:vertical;min-height:38px}
+.dfoot{padding:8px 16px 14px;display:flex;gap:8px;flex-wrap:wrap}
+.emptyday{padding:14px 16px;color:var(--muted);font-size:13.5px}
+
+/* フォーム */
+.form{background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:8px 0}
+.form.page-form{background:var(--paper);box-shadow:var(--shadow);border:0;padding:20px}
+.form .f{display:flex;flex-direction:column;gap:4px;min-width:0;grid-column:span 6}
+.form .f.s2{grid-column:span 2}.form .f.s3{grid-column:span 3}.form .f.s4{grid-column:span 4}
+@media (max-width:560px){.form .f.s2,.form .f.s3,.form .f.s4{grid-column:span 6}.form .f.s2.half{grid-column:span 3}}
+.form label{font-size:12px;font-weight:700;color:var(--muted)}
+.form input,.form select,.form textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;min-width:0}
+.form textarea{min-height:64px;resize:vertical}
+.form .acts{grid-column:span 6;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form .acts .sp{flex:1}
+.form h3{grid-column:span 6;font-family:var(--serif);font-size:18px}
+.swatches{display:flex;gap:8px}
+.swatches label{cursor:pointer}
+.swatches input{position:absolute;opacity:0;width:0;height:0}
+.swatches span{display:block;width:30px;height:30px;border-radius:50%;background:var(--c);border:3px solid var(--paper);box-shadow:0 0 0 1px var(--line)}
+.swatches input:checked+span{box-shadow:0 0 0 2px var(--ink)}
+.swatches input:focus-visible+span{outline:2px solid var(--azul);outline-offset:3px}
+.stars{display:inline-flex;gap:0}
+.stars button{border:0;background:none;padding:0 1px;cursor:pointer;font-size:17px;line-height:1;color:var(--line)}
+.stars button.on{color:var(--ochre)}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--warn);padding:6px 0}
+
+/* 行きたい場所 */
+.tools{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center}
+.tools input[type=search]{flex:1 1 200px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;min-width:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.spots{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;align-items:start}
+.spot{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.spot.done{background:color-mix(in srgb,var(--paper) 70%,var(--ground))}
+.spot .top{display:flex;gap:8px;align-items:flex-start}
+.spot .nm{font-family:var(--serif);font-weight:800;font-size:18px;line-height:1.35;flex:1;min-width:0;overflow-wrap:anywhere}
+.spot .sub{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
+.spot .note{font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.spot .fee{font-size:12.5px;font-family:var(--num);font-weight:700}
+.book{font-size:11px;font-weight:700;border-radius:6px;padding:0 7px;background:var(--warn-soft);color:var(--warn)}
+.planned{font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;background:var(--it-soft);color:var(--it);border:0;cursor:pointer}
+.spot .bot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.picker{display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:var(--ground);border-radius:10px}
+.picker button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:3px 8px;font-size:12.5px;cursor:pointer;line-height:1.3;text-align:left}
+.picker button small{display:block;color:var(--muted);font-size:10.5px;max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picker{flex-direction:column;align-items:stretch;gap:8px}
+.ptime{display:flex;flex-direction:column;gap:6px}
+.ptime label,.plabel{font-size:12px;font-weight:700;color:var(--muted)}
+.tctl{display:flex;gap:6px;align-items:center}
+.tctl select{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:6px 8px;font-family:var(--num);font-weight:700;min-width:0}
+.tctl select:disabled{opacity:.4}
+.pdays{display:flex;gap:6px;flex-wrap:wrap}
+.form label.far{display:flex;gap:6px;align-items:center;font-weight:500;margin-top:4px;cursor:pointer}
+.form label.far input{width:16px;height:16px}
+.item .t small.arr{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.warn{margin:0;padding:8px 12px;border-radius:8px;background:var(--warn-soft);color:var(--warn);font-size:13px;font-weight:700}
+.pdays button:disabled{opacity:.55;cursor:not-allowed;background:var(--ground)}
+.pdays small.ng{color:var(--warn);font-weight:700;max-width:none;white-space:normal}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:28px 20px;text-align:center;color:var(--muted)}
+.note-bar{font-size:12.5px;color:var(--muted)}
+
+/* 行きたい場所＋小さな日程 */
+.split{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px;align-items:start}
+.smain{min-width:0;display:flex;flex-direction:column;gap:16px}
+.mini{position:sticky;top:calc(env(safe-area-inset-top,0px) + 72px);background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.mtoggle{display:none}
+.mlist{max-height:calc(100dvh - 110px);overflow-y:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+.mhead{font-family:var(--serif);font-weight:800;font-size:16px;display:flex;flex-direction:column}
+.mhead small{font-family:var(--sans);font-weight:500;font-size:11.5px;color:var(--muted)}
+.mday{border-top:1px solid var(--line);padding-top:8px}
+.mdate{border:0;background:none;padding:0;cursor:pointer;display:flex;gap:6px;align-items:baseline;text-align:left;width:100%}
+.mdate b{font-size:14px}
+.mdate small{font-size:11.5px;font-weight:700;color:var(--muted)}
+.mdate small.sun{color:var(--es)}.mdate small.sat{color:var(--azul)}
+.mdate span{font-weight:700;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mdate:hover span{color:var(--azul);text-decoration:underline}
+.mday ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:1px}
+.mday li{display:grid;grid-template-columns:44px 1fr;gap:6px;font-size:12px;line-height:1.5;color:var(--muted)}
+.mday li .num{font-weight:700}
+.mday li span:last-child{overflow-wrap:anywhere}
+.mday li.sp span:last-child{color:var(--it);font-weight:700}
+.mnone{margin:2px 0 0;font-size:12px;color:var(--muted)}
+@media (max-width:900px){
+  .split{grid-template-columns:1fr;gap:12px}
+  .mini{position:static;order:-1}
+  .mtoggle{display:flex;width:100%;gap:10px;align-items:center;border:0;background:none;padding:10px 14px;font-weight:700;cursor:pointer;text-align:left}
+  .mtoggle .num{margin-left:auto;font-size:12.5px;color:var(--muted);font-weight:500}
+  .mini .mlist{display:none;max-height:55dvh;border-top:1px solid var(--line)}
+  .mini.open .mlist{display:flex}
+  .mhead{display:none}
+}
+[hidden]{display:none!important}
+.undo{padding:5px 12px;flex:none}
+@media (max-width:560px){.undo .ul{display:none}.undo{width:36px;height:36px;padding:0;justify-content:center;font-size:17px}.sync{display:none}}
+#toast{position:fixed;width:max-content;display:flex;gap:12px;align-items:center;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 16px;font-size:13.5px;font-weight:700;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+#toast button{flex:none;border:0;border-radius:8px;background:var(--ochre);color:#fff;font-weight:800;padding:5px 10px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.tcard{transition:none}.tcard:hover{transform:none}}
+</style>
+
+<header class="topbar"><div class="in">
+  <button class="brand" data-act="home">旅のプランナー</button>
+  <span class="crumb" id="crumb"></span>
+  <span class="sync" id="sync">読み込み中…</span>
+  <button class="btn undo" id="undoBtn" data-act="undo" hidden><span aria-hidden="true">↶</span><span class="ul">元に戻す</span></button>
+</div></header>
+<main class="page" id="app"></main>
+<div id="toast" hidden></div>
+
+<script src="sample-data.js"></script>
+<script>/* 最初に開いたときだけサンプルデータを入れる */
+try{if(window.SAMPLE_DATA&&!localStorage.getItem("planner-local"))localStorage.setItem("planner-local",JSON.stringify(window.SAMPLE_DATA))}catch(e){}
+</script>
+<script>
+/* ---------------- 保存先（クラウド、使えないときはこの端末） ---------------- */
+const Store={mode:"loading",db:null,ls:{},subs:[],
+  async init(){let d=null;try{d=await window.claude?.use?.("db")}catch(e){}
+    if(d){this.db=d;this.mode="cloud"}else{this.mode="local";try{this.ls=JSON.parse(localStorage.getItem("planner-local")||"{}")}catch(e){this.ls={}}}},
+  watch(col,cb){
+    if(this.mode==="cloud"){return this.db.collection(col).onSnapshot(q=>cb(q.docs.map(x=>({id:x.id,...x.data()}))),e=>{if(e&&e.code==="revoked")setSync("保存できない状態です")})}
+    const s={col,cb};this.subs.push(s);this._emit(s);return()=>{this.subs=this.subs.filter(x=>x!==s)}},
+  _emit(s){const out=[];for(const k in this.ls){const i=k.lastIndexOf("/");if(k.slice(0,i)===s.col)out.push({id:k.slice(i+1),...this.ls[k]})}s.cb(out)},
+  _save(){try{localStorage.setItem("planner-local",JSON.stringify(this.ls))}catch(e){}this.subs.forEach(s=>this._emit(s))},
+  async set(path,data){Undo.rec(path);
+    if(this.mode==="cloud"){try{await this.db.doc(path).set(data)}catch(e){fail(e)}return}
+    this.ls[path]=JSON.parse(JSON.stringify(data));this._save()},
+  async del(path){Undo.rec(path);
+    if(this.mode==="cloud"){try{await this.db.doc(path).delete()}catch(e){fail(e)}return}
+    delete this.ls[path];this._save()}
+};
+function fail(e){const c=e&&e.code;toast(c==="invalid_argument"?"編集する権限がないため保存できませんでした":c==="quota_exceeded"?"保存できる件数の上限に達しました":"保存できませんでした。通信を確認してもう一度試してください")}
+
+/* ---------------- 元に戻す ---------------- */
+/* 保存・削除の直前に「変わる前の中身」を控える。同じタイミングの変更は1回分にまとめる */
+function snapshot(path){const g=path.split("/");let o=null;
+  if(g.length===2)o=S.trips.find(t=>t.id===g[1]);
+  else if(g.length===4&&g[1]===S.tripId){const L=g[2]==="items"?S.items:g[2]==="spots"?S.spots:g[2]==="days"?Object.values(S.days):[];o=L.find(x=>x.id===g[3])}
+  if(!o)return null;const r=JSON.parse(JSON.stringify(o));delete r.id;return r}
+const Undo={stack:[],cur:null,label:"",replaying:false,
+  rec(path){if(this.replaying)return;
+    if(!this.cur){this.cur={label:this.label||"変更しました",ops:[]};this.stack.push(this.cur);if(this.stack.length>30)this.stack.shift();setTimeout(()=>this.done(),0)}
+    if(!this.cur.ops.some(o=>o.path===path))this.cur.ops.push({path,prev:snapshot(path)})},
+  done(){const c=this.cur;this.cur=null;this.label="";renderUndo();if(c)toast(c.label,true)},
+  async undo(){const c=this.stack.pop();if(!c){toast("戻せる操作はありません");return}
+    this.replaying=true;try{for(const o of [...c.ops].reverse()){o.prev?await Store.set(o.path,o.prev):await Store.del(o.path)}}finally{this.replaying=false}
+    renderUndo();toast("元に戻しました（"+c.label.replace(/しました$|ました$/,"")+"）")}
+};
+function renderUndo(){const b=$("undoBtn");if(!b)return;const c=Undo.stack[Undo.stack.length-1];b.hidden=!c;if(c){b.title="元に戻す："+c.label;b.setAttribute("aria-label","元に戻す："+c.label)}}
+
+/* ---------------- 共通 ---------------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const WD=["日","月","火","水","木","金","土"];
+const todayStr=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+const D=s=>new Date(s+"T00:00:00Z");
+const md=s=>{const d=D(s);return `${d.getUTCMonth()+1}/${d.getUTCDate()}`};
+const wd=s=>WD[D(s).getUTCDay()];
+function dateRange(a,b){const out=[];if(!a||!b||b<a)return a?[a]:[];let d=D(a);const e=D(b);while(d<=e&&out.length<120){out.push(d.toISOString().slice(0,10));d=new Date(d.getTime()+864e5)}return out}
+const COLORS={azul:"#1F4E9E",ochre:"#B5741F",red:"#A83A2E",green:"#2E6E4A",ink:"#26324D"};
+const KINDS={move:"移動",see:"観光",food:"ごはん",stay:"宿",other:"メモ"};
+const CATS={see:"観光",food:"ごはん",shop:"買い物",act:"体験",view:"景色"};
+const CAT2KIND={food:"food"};
+const ICON={up:"M6 15l6-6 6 6",down:"M6 9l6 6 6-6",edit:"M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4",del:"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"};
+const icon=k=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
+function countdown(t){const td=todayStr();if(!t.start)return"";
+  if(td<t.start){const n=Math.round((D(t.start)-D(td))/864e5);return `<span class="cd">出発まで <b class="num">${n}</b> 日</span>`}
+  if(t.end&&td<=t.end){const n=Math.round((D(td)-D(t.start))/864e5)+1;return `<span class="cd now">旅行中 DAY ${n}</span>`}
+  return `<span class="cd past">おわった旅</span>`}
+function setSync(t){$("sync").textContent=t}
+let toastT=0;function toast(t,undo){const e=$("toast");e.innerHTML=`<span></span>${undo?`<button type="button" data-act="undo">元に戻す</button>`:""}`;e.firstChild.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,undo?6000:3500)}
+function mapUrl(s){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent([s.name,s.city].filter(Boolean).join(" "))}
+function timeKey(t){t=(t||"").trim();const m=t.match(/^(\d{1,2}):(\d{2})/);if(m)return +m[1]*60+ +m[2];
+  const W=[["早朝",300],["朝",420],["午前",570],["昼",720],["午後",840],["夕方",1020],["夜",1140],["深夜",1380]];for(const [w,v] of W)if(t.startsWith(w))return v;return null}
+
+/* ---------------- 状態 ---------------- */
+const S={trips:[],tripId:null,tab:"days",items:[],spots:[],days:{},ui:null,confirm:null,assign:null,q:"",city:"",status:"all",loaded:{trips:false}};
+let unsub=[];
+function trip(){return S.trips.find(t=>t.id===S.tripId)}
+function openTrip(id,tab){
+  unsub.forEach(f=>{try{f()}catch(e){}});unsub=[];
+  S.tripId=id;S.items=[];S.spots=[];S.days={};S.ui=null;S.confirm=null;S.assign=null;S.q="";S.city="";S.status="all";
+  if(tab)S.tab=tab;
+  try{localStorage.setItem("planner-last",id||"")}catch(e){}
+  if(id){const b="trips/"+id;
+    unsub.push(Store.watch(b+"/items",d=>{S.items=d;render()}));
+    unsub.push(Store.watch(b+"/spots",d=>{S.spots=d;render()}));
+    unsub.push(Store.watch(b+"/days",d=>{S.days=Object.fromEntries(d.map(x=>[x.id,x]));render()}));}
+  render();window.scrollTo(0,0);
+}
+
+/* 入力中は画面を描き直さない（打った文字が消えないように） */
+let dirty=false;
+function busy(){const a=document.activeElement;return a&&$("app").contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)}
+function render(){if(busy()){dirty=true;return}dirty=false;draw()}
+document.addEventListener("focusout",()=>setTimeout(()=>{if(dirty&&!busy())render()},0));
+
+/* 上のバーの旅行切り替えメニュー */
+function tripSwitch(){
+  const list=[...S.trips].sort((a,b)=>(a.start||"9").localeCompare(b.start||"9"));
+  return `<select id="tripSel" aria-label="旅行を切り替える"><option value="">旅行の一覧</option>${list.map(t=>`<option value="${esc(t.id)}" ${t.id===S.tripId?"selected":""}>${esc(t.title)}</option>`).join("")}</select>`;
+}
+function draw(){
+  const t=trip();
+  if(S.tripId&&!t&&S.loaded.trips){S.tripId=null}
+  $("crumb").innerHTML=S.trips.length?tripSwitch():"";
+  $("app").innerHTML=t?tripView(t):homeView();
+  if(S.focus){const f=document.querySelector(S.focus);S.focus=null;if(f){f.focus();f.scrollIntoView({block:"center"})}}
+}
+
+/* ---------------- 旅行一覧 ---------------- */
+function homeView(){
+  if(S.ui&&S.ui.type==="trip")return tripForm(null);
+  const list=[...S.trips].sort((a,b)=>(a.start||"9").localeCompare(b.start||"9"));
+  const cards=list.map(t=>`<button class="tcard" data-act="open" data-id="${esc(t.id)}">
+    <div class="band" style="--c:${COLORS[t.color]||COLORS.azul}"><span class="num">${t.start?esc(t.start.replace(/-/g,"."))+" — "+esc(md(t.end||t.start)):"日付未定"}</span><b>${esc(t.title)}</b></div>
+    <div class="body">${countdown(t)}${t.route?`<span class="route">${esc(t.route)}</span>`:""}
+    <span class="stats"><span><b>${dateRange(t.start,t.end).length}</b> 日間</span>${t.people?`<span><b>${esc(t.people)}</b> 人</span>`:""}</span></div></button>`).join("");
+  return `<div><div class="eyebrow">My trips</div><h1>旅行の一覧</h1><p class="muted" style="margin:6px 0 0">旅行を開くと、日ごとの予定と行きたい場所リストを書き込めます。</p></div>
+  ${!S.loaded.trips?`<div class="empty">旅行を読み込んでいます…</div>`:""}
+  <div class="trips">${cards}<button class="tnew" data-act="newTrip">＋ 新しい旅行を作る</button></div>
+  <p class="note-bar">${Store.mode==="cloud"?"書いた内容はクラウドに保存され、スマホとパソコンで同じものが見られます。":Store.mode==="local"?"この表示ではクラウドに保存できないため、この端末のブラウザに保存しています。":""}</p>`;
+}
+function tripForm(t){
+  const v=t||{title:"",start:"",end:"",people:"",route:"",color:"azul"};
+  return `<form class="form page-form" data-form="trip" data-id="${esc(t?t.id:"")}">
+    <h3>${t?"旅行の設定":"新しい旅行"}</h3>
+    <div class="f"><label for="tf_title">旅行の名前</label><input id="tf_title" name="title" required maxlength="60" value="${esc(v.title)}" placeholder="例：台湾 3泊4日"></div>
+    <div class="f s2 half"><label for="tf_start">出発日</label><input id="tf_start" type="date" name="start" required value="${esc(v.start)}"></div>
+    <div class="f s2 half"><label for="tf_end">帰る日</label><input id="tf_end" type="date" name="end" required value="${esc(v.end)}"></div>
+    <div class="f s2"><label for="tf_people">人数</label><input id="tf_people" type="number" min="1" max="99" name="people" value="${esc(v.people)}"></div>
+    <div class="f"><label for="tf_route">ルート（一覧に表示）</label><input id="tf_route" name="route" maxlength="200" value="${esc(v.route)}" placeholder="例：台北 → 九份 → 台北"></div>
+    <div class="f"><label>表紙の色</label><div class="swatches">${Object.entries(COLORS).map(([k,c])=>`<label><input type="radio" name="color" value="${k}" ${v.color===k?"checked":""} aria-label="${k}"><span style="--c:${c}"></span></label>`).join("")}</div></div>
+    <div class="acts"><button class="btn primary" type="submit">${t?"保存":"作る"}</button><button class="btn ghost" type="button" data-act="cancel">やめる</button><span class="sp"></span>
+    ${t?(S.confirm==="trip"?`<span class="confirm">旅行と中身をすべて削除します<button class="btn danger fill" type="button" data-act="delTripYes">削除する</button><button class="btn ghost" type="button" data-act="noConfirm">やめる</button></span>`:`<button class="btn danger" type="button" data-act="delTrip">この旅行を削除</button>`):""}</div>
+  </form>`;
+}
+
+/* ---------------- 旅行の中 ---------------- */
+function tripView(t){
+  if(S.ui&&S.ui.type==="trip")return tripForm(t);
+  const dates=dateRange(t.start,t.end);
+  const head=`<div class="thead"><div><div class="eyebrow">${esc((t.start||"").replace(/-/g,"."))}${t.end?" — "+esc(md(t.end)):""}</div><h1>${esc(t.title)}</h1>
+    <div class="meta">${countdown(t)}<span><b>${dates.length}</b> 日間</span>${t.people?`<span><b>${esc(t.people)}</b> 人</span>`:""}${t.route?`<span>${esc(t.route)}</span>`:""}</div></div>
+    <div class="row"><button class="btn ghost" data-act="home">← 旅行の一覧</button><button class="btn" data-act="editTrip">旅行の設定</button></div></div>
+  <div class="tabs" role="tablist"><button role="tab" aria-selected="${S.tab==="days"}" data-act="tab" data-tab="days">日程<span class="n">${S.items.length}</span></button><button role="tab" aria-selected="${S.tab==="spots"}" data-act="tab" data-tab="spots">行きたい場所<span class="n">${S.spots.length}</span></button></div>`;
+  return head+(S.tab==="days"?daysView(t,dates):`<div class="split"><div class="smain">${spotsView(t,dates)}</div>${miniPlan(dates)}</div>`);
+}
+
+/* 行きたい場所タブの横に出す小さな日程 */
+function miniPlan(dates){
+  const n=S.items.length;
+  return `<aside class="mini ${S.miniOpen?"open":""}" aria-label="現在の日程">
+    <button class="mtoggle" data-act="miniToggle" aria-expanded="${!!S.miniOpen}"><span>今の日程を見る</span><span class="num">${dates.length}日・${n}件</span><span aria-hidden="true">${S.miniOpen?"▲":"▼"}</span></button>
+    <div class="mlist"><div class="mhead">現在の日程<small>日付を押すと日程タブへ。緑の文字は行きたい場所から入れた予定</small></div>
+    ${dates.map((d,i)=>{const its=itemsOf(d),c=(S.days[d]||{}).city||"";const w=D(d).getUTCDay();
+      return `<div class="mday"><button class="mdate" data-act="goDay" data-d="${d}"><b class="num">${md(d)}</b><small class="${w===0?"sun":w===6?"sat":""}">${wd(d)}</small><span>${esc(c||"DAY "+(i+1))}</span></button>
+      ${its.length?`<ul>${its.map(it=>`<li class="${it.spotId?"sp":""}"><span class="num">${esc(it.time||"")}</span><span>${esc(it.title)}</span></li>`).join("")}</ul>`:`<p class="mnone">予定なし</p>`}</div>`}).join("")}
+    </div></aside>`;
+}
+/* その日にいる都市の場所かどうか（日の都市名に場所の都市名が入っていれば一致） */
+function cityMatch(sp,d){const c=(S.days[d]||{}).city||"";if(!c||!sp.city)return true;return c.includes(sp.city)||sp.city.includes(c)}
+/* 時間に合わせて、その日の予定のどこに入れるかを決める */
+function orderFor(d,time,skipId){const k=timeKey(time);const its=itemsOf(d).filter(i=>i.id!==skipId);if(k==null||!its.length)return nextOrder(d);
+  let last=-1,prev=null;for(const it of its){const ik=timeKey(it.time)??last;last=ik;if(ik>k){const a=prev?prev.order||0:(it.order||0)-1;return (a+(it.order||0))/2}prev=it}
+  return Math.max(...its.map(i=>i.order||0))+1}
+/* 時間の選択（時は1時間ごと、分は15分ごと。ざっくりした時間も選べる） */
+const WORDS=["朝","午前","昼","午後","夕方","夜"];
+function timeCtl(p,val,nm="time"){val=(val||"").trim();const m=val.match(/^(\d{1,2}):(\d{2})/);
+  const h=m?String(+m[1]):val;let mm=m?m[2]:"00";const mins=["00","15","30","45"];if(!mins.includes(mm))mins.push(mm);
+  const other=!m&&val&&!WORDS.includes(val)?`<option value="${esc(val)}" selected>${esc(val)}</option>`:"";
+  return `<span class="tctl"><select id="${p}_h" name="${nm}_h" aria-label="時"><option value="">時間なし</option>
+    <optgroup label="時間">${Array.from({length:24},(_,i)=>`<option value="${i}" ${h===String(i)?"selected":""}>${i}時</option>`).join("")}</optgroup>
+    <optgroup label="ざっくり">${WORDS.map(w=>`<option value="${w}" ${h===w?"selected":""}>${w}</option>`).join("")}${other}</optgroup></select>
+    <select id="${p}_m" name="${nm}_m" aria-label="分" ${m?"":"disabled"}>${mins.sort().map(x=>`<option value="${x}" ${mm===x?"selected":""}>${x}分</option>`).join("")}</select></span>`}
+function joinTime(h,m){if(!h)return "";if(!/^\d+$/.test(h))return h;return String(h).padStart(2,"0")+":"+(m||"00")}
+function readTime(p){const h=$(p+"_h"),m=$(p+"_m");return h?joinTime(h.value,m&&m.value):""}
+/* その時間に予定を入れられるか（移動中・初日の到着前・最終日の帰りの出発後はだめ） */
+function dest(mv){const t=(mv.title||"").replace(/（.*?）|\(.*?\)/g,"");const a=t.split("→");
+  if(a.length>1)return a[a.length-1].replace(/(駅|空港)?へ?$/,"").trim()||"目的地";
+  const m=t.match(/(?:で)?([^\sで]+?)へ/);return m?m[1]:"目的地"}
+function conflict(d,time,skipId){
+  const t=timeKey(time);if(t==null)return "";const tr=trip();if(!tr)return "";
+  const moves=itemsOf(d).filter(i=>i.kind==="move"&&i.id!==skipId&&timeKey(i.time)!=null);
+  for(const mv of moves){const dep=timeKey(mv.time),arr=timeKey(mv.arrive);
+    if(arr!=null&&arr>dep&&t>=dep&&t<arr)return `この時間は移動中です（${mv.title} ${mv.time}〜${mv.arrive}）`}
+  const dates=dateRange(tr.start,tr.end);
+  if(d===dates[0]){const first=moves.find(m=>timeKey(m.arrive)!=null&&timeKey(m.arrive)>timeKey(m.time));
+    if(first&&t<timeKey(first.arrive))return `${dest(first)}到着前です（${first.arrive}着）`}
+  if(d===dates[dates.length-1]&&dates.length>1&&moves.length){const last=moves[moves.length-1];
+    if(t>=timeKey(last.time))return `帰りの出発（${last.time}）より後です`}
+  return "";
+}
+function spotOptions(list){return `<option value="">選ばない</option>`+list.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}${s.city?"（"+esc(s.city)+"）":""}</option>`).join("")}
+function itemsOf(d){return S.items.filter(i=>i.date===d).sort((a,b)=>(a.order||0)-(b.order||0))}
+
+function daysView(t,dates){
+  const td=todayStr();
+  const strip=`<nav class="strip" aria-label="日付へ移動"><div class="in">${dates.map((d,i)=>`<button data-act="jump" data-d="${d}" class="${d===td?"today":""} ${itemsOf(d).length?"":"empty"}"><small>DAY ${i+1}</small><b>${md(d)}</b><small>${wd(d)}</small></button>`).join("")}</div></nav>`;
+  const out=S.items.filter(i=>!dates.includes(i.date));
+  const days=dates.map((d,i)=>dayCard(d,i,dates)).join("");
+  const extra=out.length?`<section class="day"><div class="dh"><span class="dno">OUTSIDE</span><div class="dcity"><b>旅行の日付から外れた予定</b><div class="muted" style="font-size:12.5px">日付を変えた旅行の設定の外にある予定です。編集して日付を直してください。</div></div></div><ul class="items">${out.map(it=>itemRow(it,[it],dates)).join("")}</ul></section>`:"";
+  return strip+`<div class="days">${days}${extra}</div>`;
+}
+function dayCard(d,i,dates){
+  const its=itemsOf(d),info=S.days[d]||{};const w=D(d).getUTCDay();
+  const adding=S.ui&&S.ui.type==="item"&&S.ui.id==="new"&&S.ui.date===d;
+  return `<section class="day ${d===todayStr()?"today":""}" id="day-${d}">
+    <div class="dh"><div><div class="dno">DAY ${i+1}</div><div class="ddate">${md(d)}<small class="${w===0?"sun":w===6?"sat":""}">${wd(d)}</small></div></div>
+      <div class="dcity"><input id="city-${d}" data-day="${d}" data-field="city" value="${esc(info.city||"")}" placeholder="都市やテーマを入力（例：バルセロナ）" aria-label="${md(d)}の都市"></div></div>
+    ${its.length?`<ul class="items">${its.map((it,k)=>itemRow(it,its,dates,k)).join("")}</ul>`:(adding?"":`<div class="emptyday">まだ予定がありません。</div>`)}
+    ${adding?`<div style="padding:0 16px">${itemForm(null,d,dates)}</div>`:""}
+    <div class="dmemo"><textarea id="memo-${d}" data-day="${d}" data-field="memo" rows="1" placeholder="この日のメモ（予約番号、注意点など）" aria-label="${md(d)}のメモ">${esc(info.memo||"")}</textarea></div>
+    ${adding?"":`<div class="dfoot"><button class="btn" data-act="addItem" data-d="${d}">＋ 予定を追加</button>${its.length>1?`<button class="btn ghost" data-act="sortDay" data-d="${d}">時間順に並べる</button>`:""}</div>`}
+  </section>`;
+}
+function itemRow(it,list,dates,k){
+  if(S.ui&&S.ui.type==="item"&&S.ui.id===it.id)return `<li>${itemForm(it,it.date,dates)}</li>`;
+  const sp=it.spotId&&S.spots.find(s=>s.id===it.spotId);
+  return `<li class="item"><span class="t">${esc(it.time||"")}${it.kind==="move"&&it.arrive?`<small class="arr">→${esc(it.arrive)}</small>`:""}</span>
+    <div class="b"><span class="kind k-${esc(it.kind||"other")}">${KINDS[it.kind]||"メモ"}</span><span class="ti">${esc(it.title)}</span>${it.note?`<span class="no">${esc(it.note)}</span>`:""}
+    ${sp?`<a class="no" href="${esc(mapUrl(sp))}" target="_blank" rel="noopener">Googleマップで見る</a>`:""}
+    ${S.confirm===it.id?`<span class="confirm">この予定を削除しますか？<button class="btn danger fill" data-act="delItemYes" data-id="${esc(it.id)}">削除</button><button class="btn ghost" data-act="noConfirm">やめる</button></span>`:""}</div>
+    <div class="acts"><button class="ib" data-act="mv" data-dir="-1" data-id="${esc(it.id)}" aria-label="上へ" ${k===0||k==null?"disabled":""}>${icon("up")}</button><button class="ib" data-act="mv" data-dir="1" data-id="${esc(it.id)}" aria-label="下へ" ${k==null||k===list.length-1?"disabled":""}>${icon("down")}</button><button class="ib" data-act="editItem" data-id="${esc(it.id)}" aria-label="編集">${icon("edit")}</button><button class="ib" data-act="delItem" data-id="${esc(it.id)}" aria-label="削除">${icon("del")}</button></div></li>`;
+}
+function itemForm(it,d,dates){
+  const v=it||{time:"",kind:"see",title:"",note:"",date:d,spotId:""};
+  const free=S.spots.filter(s=>!S.items.some(i=>i.spotId===s.id)||s.id===v.spotId).sort((a,b)=>(b.stars||0)-(a.stars||0));
+  const near=free.filter(s=>cityMatch(s,d));
+  const cw=v.kind!=="move"?conflict(v.date||d,v.time,it&&it.id):"";
+  return `<form class="form" data-form="item" data-id="${esc(it?it.id:"")}" data-d="${esc(v.date||d)}">
+    ${!it&&free.length?`<div class="f"><label for="if_spot">行きたい場所から選ぶ（任意）${near.length<free.length?`・${esc((S.days[d]||{}).city||"")}の場所`:""}</label><select id="if_spot" name="spotId" data-d="${d}">${spotOptions(near.length?near:free)}</select>
+      ${near.length&&near.length<free.length?`<label class="far"><input type="checkbox" id="if_all">ほかの都市の場所も出す（${free.length-near.length}か所）</label>`:""}</div>`:`<input type="hidden" name="spotId" value="${esc(v.spotId||"")}">`}
+    <div class="f s2"><label for="if_h">時間</label>${timeCtl("if",v.time)}</div>
+    <div class="f s2 half"><label for="if_kind">種類</label><select id="if_kind" name="kind">${Object.entries(KINDS).map(([k,l])=>`<option value="${k}" ${v.kind===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div class="f s2"><label for="if_date">日付</label><select id="if_date" name="date">${dates.map((x,i)=>`<option value="${x}" ${v.date===x?"selected":""}>DAY ${i+1}・${md(x)}（${wd(x)}）</option>`).join("")}${dates.includes(v.date)?"":`<option value="${esc(v.date)}" selected>${esc(v.date)}</option>`}</select></div>
+    <div class="f s2" id="if_arrbox" ${v.kind==="move"?"":"hidden"}><label for="ia_h">到着</label>${timeCtl("ia",v.arrive,"arr")}</div>
+    <p class="warn f" id="if_warn" ${cw?"":"hidden"}>${esc(cw)}</p>
+    <div class="f"><label for="if_title">予定</label><input id="if_title" name="title" maxlength="120" value="${esc(v.title)}" placeholder="例：サグラダ・ファミリア（予約済み）"></div>
+    <div class="f"><label for="if_note">メモ</label><textarea id="if_note" name="note" maxlength="1000" placeholder="行き方、料金、予約番号など">${esc(v.note)}</textarea></div>
+    <div class="acts"><button class="btn primary" type="submit" ${cw?"disabled":""}>${it?"保存":"追加"}</button><button class="btn ghost" type="button" data-act="cancel">やめる</button></div>
+  </form>`;
+}
+
+/* ---------------- 行きたい場所 ---------------- */
+function spotDates(s){return S.items.filter(i=>i.spotId===s.id).map(i=>i.date).sort()}
+function spotsView(t,dates){
+  const cities=[...new Set(S.spots.map(s=>s.city).filter(Boolean))];
+  let list=S.spots.filter(s=>{
+    if(S.city&&s.city!==S.city)return false;
+    const p=spotDates(s).length>0;if(S.status==="todo"&&p)return false;if(S.status==="done"&&!p)return false;
+    if(S.q){const q=S.q.toLowerCase();if(![s.name,s.city,s.note].join(" ").toLowerCase().includes(q))return false}
+    return true});
+  list.sort((a,b)=>(b.stars||0)-(a.stars||0)||(a.city||"").localeCompare(b.city||"")||(a.created||0)-(b.created||0));
+  const adding=S.ui&&S.ui.type==="spot"&&S.ui.id==="new";
+  const nPlanned=S.spots.filter(s=>spotDates(s).length).length;
+  return `<div class="tools"><input type="search" id="q" value="${esc(S.q)}" placeholder="名前・メモで探す" aria-label="行きたい場所を探す">
+      <button class="btn primary" data-act="addSpot">＋ 場所を追加</button></div>
+    <div class="tools"><div class="chips">${[["all","すべて"],["todo","まだ日程にない"],["done","日程に入れた"]].map(([k,l])=>`<button class="chip" data-act="status" data-v="${k}" aria-pressed="${S.status===k}">${l}</button>`).join("")}</div>
+    ${cities.length?`<div class="chips"><button class="chip" data-act="city" data-v="" aria-pressed="${!S.city}">全都市</button>${cities.map(c=>`<button class="chip" data-act="city" data-v="${esc(c)}" aria-pressed="${S.city===c}">${esc(c)}</button>`).join("")}</div>`:""}</div>
+    ${S.spots.length?`<div class="tools"><p class="note-bar" style="margin:0;flex:1 1 240px">${S.spots.length}か所のうち ${nPlanned}か所を日程に入れました。★が多い順に並んでいます。</p>
+      ${nPlanned&&S.confirm!=="allSpots"?(S.confirm==="unplanAll"?`<span class="confirm">日程に入れた${nPlanned}か所を日程から外します。行きたい場所のリストには残ります<button class="btn danger fill" data-act="unplanAllYes">外す</button><button class="btn ghost" data-act="noConfirm">やめる</button></span>`:`<button class="btn" data-act="unplanAll">日程から外す（${nPlanned}件）</button>`):""}
+      ${S.confirm==="unplanAll"?"":S.confirm==="allSpots"?`<span class="confirm">${S.spots.length}か所すべてを削除します。日程に入れた予定は残ります<button class="btn danger fill" data-act="delAllSpotsYes">削除する</button><button class="btn ghost" data-act="noConfirm">やめる</button></span>`:`<button class="btn danger" data-act="delAllSpots">すべて削除</button>`}</div>`:""}
+    ${adding?spotForm(null):""}
+    ${list.length?`<div class="spots">${list.map(s=>S.ui&&S.ui.type==="spot"&&S.ui.id===s.id?spotForm(s):spotCard(s,dates)).join("")}</div>`:
+      (S.spots.length?`<div class="empty">条件に合う場所がありません。</div>`:(adding?"":`<div class="empty">行きたい場所を追加すると、ここに並びます。<br>「日程に入れる」を押すと、選んだ日の予定になります。</div>`))}`;
+}
+function starBtns(s){return `<span class="stars" role="group" aria-label="行きたい度">${[1,2,3].map(n=>`<button class="${(s.stars||0)>=n?"on":""}" data-act="star" data-id="${esc(s.id)}" data-n="${n}" aria-label="行きたい度${n}">★</button>`).join("")}</span>`}
+function spotCard(s,dates){
+  const ds=spotDates(s);
+  return `<article class="spot ${ds.length?"done":""}">
+    <div class="top"><span class="nm">${esc(s.name)}</span>${starBtns(s)}</div>
+    <div class="sub">${s.city?`<span>${esc(s.city)}</span>`:""}<span class="kind k-${s.cat==="food"?"food":"see"}">${CATS[s.cat]||"観光"}</span>${s.book?`<span class="book">要予約</span>`:""}${s.fee?`<span class="fee">${esc(s.fee)}</span>`:""}</div>
+    ${s.note?`<div class="note">${esc(s.note)}</div>`:""}
+    <div class="bot">${ds.map(d=>`<button class="planned" data-act="goDay" data-d="${d}">${md(d)}の予定に入っています</button>`).join("")}
+      ${ds.length?"":`<button class="btn" data-act="assign" data-id="${esc(s.id)}">日程に入れる</button>`}
+      <a class="btn ghost" href="${esc(mapUrl(s))}" target="_blank" rel="noopener">地図</a>${s.url?`<a class="btn ghost" href="${esc(s.url)}" target="_blank" rel="noopener">リンク</a>`:""}
+      <span style="flex:1"></span><button class="ib" data-act="editSpot" data-id="${esc(s.id)}" aria-label="編集">${icon("edit")}</button><button class="ib" data-act="delSpot" data-id="${esc(s.id)}" aria-label="削除">${icon("del")}</button></div>
+    ${S.assign===s.id?assignPicker(s,dates):""}
+    ${S.confirm===s.id?`<span class="confirm">この場所を削除しますか？${ds.length?"（日程の予定は残ります）":""}<button class="btn danger fill" data-act="delSpotYes" data-id="${esc(s.id)}">削除</button><button class="btn ghost" data-act="noConfirm">やめる</button></span>`:""}
+  </article>`;
+}
+function assignPicker(s,dates){
+  const near=dates.filter(d=>cityMatch(s,d)&&(S.days[d]||{}).city);
+  const show=S.assignAll||!near.length?dates:near;
+  return `<div class="picker"><div class="ptime"><label for="as_h">時間（任意）</label>${timeCtl("as",S.assignTime)}</div>
+    <div class="plabel">${near.length&&!S.assignAll?`${esc(s.city)}にいる日`:"入れる日"}を選ぶ</div>
+    <div class="pdays" role="group" aria-label="入れる日">${show.map(d=>{const w=conflict(d,S.assignTime);return `<button data-act="assignDay" data-id="${esc(s.id)}" data-d="${d}" ${w?"disabled":""} title="${esc(w)}"><b class="num">${md(d)}</b> ${wd(d)}<small>${esc((S.days[d]||{}).city||"DAY "+(dates.indexOf(d)+1))}</small>${w?`<small class="ng">${esc(shortNg(w))}</small>`:""}</button>`}).join("")}</div>
+    <div class="row">${near.length&&near.length<dates.length?`<button class="btn ghost" data-act="assignAll">${S.assignAll?"この都市の日だけ出す":"ほかの日も出す"}</button>`:""}<button class="btn ghost" data-act="noConfirm">やめる</button></div></div>`;
+}
+function spotForm(s){
+  const v=s||{name:"",city:S.city||"",cat:"see",stars:2,fee:"",book:false,note:"",url:""};
+  return `<form class="form" data-form="spot" data-id="${esc(s?s.id:"")}" style="margin:0">
+    <div class="f s4"><label for="sf_name">場所の名前</label><input id="sf_name" name="name" required maxlength="100" value="${esc(v.name)}" placeholder="例：グエル公園"></div>
+    <div class="f s2"><label for="sf_city">都市</label><input id="sf_city" name="city" maxlength="40" value="${esc(v.city)}" list="citylist" placeholder="バルセロナ"><datalist id="citylist">${[...new Set([...S.spots.map(x=>x.city),...Object.values(S.days).map(x=>x.city)].filter(Boolean))].map(c=>`<option value="${esc(c)}">`).join("")}</datalist></div>
+    <div class="f s2 half"><label for="sf_cat">種類</label><select id="sf_cat" name="cat">${Object.entries(CATS).map(([k,l])=>`<option value="${k}" ${v.cat===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div class="f s2 half"><label for="sf_stars">行きたい度</label><select id="sf_stars" name="stars">${[3,2,1].map(n=>`<option value="${n}" ${(+v.stars||2)===n?"selected":""}>${"★".repeat(n)}</option>`).join("")}</select></div>
+    <div class="f s2"><label for="sf_fee">料金</label><input id="sf_fee" name="fee" maxlength="40" value="${esc(v.fee)}" placeholder="€26 / 無料"></div>
+    <div class="f"><label style="display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink)"><input type="checkbox" name="book" ${v.book?"checked":""} style="width:18px;height:18px">事前の予約が必要</label></div>
+    <div class="f"><label for="sf_note">メモ</label><textarea id="sf_note" name="note" maxlength="1000" placeholder="見どころ、営業時間、インスタで見た投稿など">${esc(v.note)}</textarea></div>
+    <div class="f"><label for="sf_url">参考リンク（任意）</label><input id="sf_url" name="url" type="url" maxlength="500" value="${esc(v.url)}" placeholder="https://"></div>
+    <div class="acts"><button class="btn primary" type="submit">${s?"保存":"追加"}</button><button class="btn ghost" type="button" data-act="cancel">やめる</button></div>
+  </form>`;
+}
+
+/* ---------------- 操作 ---------------- */
+const base=()=>"trips/"+S.tripId;
+function nextOrder(d){const its=itemsOf(d);return its.length?Math.max(...its.map(i=>i.order||0))+1:1}
+function clean(o){const r={};for(const k in o)if(o[k]!==undefined)r[k]=o[k];return r}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const a=b.dataset.act,id=b.dataset.id,d=b.dataset.d;
+  Undo.label=({delTripYes:"旅行を削除しました",delItemYes:"予定を削除しました",mv:"予定を移動しました",sortDay:"時間順に並べました",delSpotYes:"場所を削除しました",star:"行きたい度を変えました"})[a]||"";
+  switch(a){
+    case"undo":Undo.undo();break;
+    case"unplanAll":S.confirm="unplanAll";S.assign=null;draw();break;
+    case"unplanAllYes":{const its=S.items.filter(i=>i.spotId&&S.spots.some(s=>s.id===i.spotId));Undo.label=`日程から${its.length}件外しました`;
+      its.forEach(i=>Store.del(base()+"/items/"+i.id));S.confirm=null;break}
+    case"delAllSpots":S.confirm="allSpots";S.assign=null;draw();break;
+    case"delAllSpotsYes":{const ids=new Set(S.spots.map(s=>s.id));Undo.label=`行きたい場所をすべて削除しました（${ids.size}か所）`;
+      S.spots.forEach(s=>Store.del(base()+"/spots/"+s.id));
+      S.items.filter(i=>ids.has(i.spotId)).forEach(i=>Store.set(base()+"/items/"+i.id,{...strip(i),spotId:""}));
+      S.confirm=null;S.city="";S.status="all";break}
+    case"home":openTrip(null);location.hash="";break;
+    case"open":openTrip(id,"days");break;
+    case"newTrip":S.ui={type:"trip",id:"new"};S.focus="#tf_title";draw();break;
+    case"editTrip":S.ui={type:"trip",id:S.tripId};S.confirm=null;draw();break;
+    case"cancel":S.ui=null;S.confirm=null;draw();break;
+    case"noConfirm":S.confirm=null;S.assign=null;draw();break;
+    case"delTrip":S.confirm="trip";draw();break;
+    case"delTripYes":{const bs=base();[...S.items.map(i=>bs+"/items/"+i.id),...S.spots.map(s=>bs+"/spots/"+s.id),...Object.keys(S.days).map(k=>bs+"/days/"+k)].forEach(p=>Store.del(p));
+      Store.del(bs);S.ui=null;S.confirm=null;openTrip(null);break}
+    case"tab":S.tab=b.dataset.tab;S.ui=null;S.confirm=null;S.assign=null;draw();break;
+    case"jump":case"goDay":{if(a==="goDay"){S.tab="days";draw()}const el=$("day-"+d);if(el)el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});break}
+    case"addItem":S.ui={type:"item",id:"new",date:d};S.focus="#if_h";draw();break;
+    case"editItem":S.ui={type:"item",id};S.confirm=null;S.focus="#if_title";draw();break;
+    case"delItem":S.confirm=id;draw();break;
+    case"delItemYes":Store.del(base()+"/items/"+id);S.confirm=null;break;
+    case"mv":{const it=S.items.find(i=>i.id===id);if(!it)break;const its=itemsOf(it.date);const k=its.indexOf(it),o=its[k+ +b.dataset.dir];if(!o)break;
+      let oa=it.order||0,ob=o.order||0;if(oa===ob){ob=oa+ +b.dataset.dir}
+      Store.set(base()+"/items/"+it.id,{...strip(it),order:ob});Store.set(base()+"/items/"+o.id,{...strip(o),order:oa});break}
+    case"sortDay":{const its=itemsOf(d);let last=-1;const keyed=its.map((it,i)=>{const k=timeKey(it.time);if(k!=null)last=k;return{it,k:k??last,i}});
+      keyed.sort((x,y)=>x.k-y.k||x.i-y.i);keyed.forEach((x,n)=>{if((x.it.order||0)!==n+1)Store.set(base()+"/items/"+x.it.id,{...strip(x.it),order:n+1})});break}
+    case"addSpot":S.ui={type:"spot",id:"new"};S.focus="#sf_name";draw();break;
+    case"editSpot":S.ui={type:"spot",id};S.confirm=null;S.focus="#sf_name";draw();break;
+    case"delSpot":S.confirm=id;S.assign=null;draw();break;
+    case"delSpotYes":{Store.del(base()+"/spots/"+id);S.items.filter(i=>i.spotId===id).forEach(i=>Store.set(base()+"/items/"+i.id,{...strip(i),spotId:""}));S.confirm=null;break}
+    case"star":{const s=S.spots.find(x=>x.id===id);if(s){const n=+b.dataset.n;Store.set(base()+"/spots/"+id,{...strip(s),stars:s.stars===n&&n>1?n-1:n})}break}
+    case"assign":S.assign=S.assign===id?null:id;S.assignAll=false;S.assignTime="";S.confirm=null;draw();break;
+    case"assignAll":S.assignAll=!S.assignAll;draw();break;
+    case"assignDay":{const s=S.spots.find(x=>x.id===id);if(!s)break;const time=$("as_h")?readTime("as"):(S.assignTime||"");{const w=conflict(d,time);if(w){toast(w);break}}Undo.label=`${md(d)}${time?" "+time:""}の予定に入れました`;
+      Store.set(base()+"/items/"+uid(),{date:d,time,kind:CAT2KIND[s.cat]||"see",title:s.name,note:[s.fee,s.book?"要予約":""].filter(Boolean).join("・"),spotId:s.id,order:orderFor(d,time)});
+      S.assign=null;S.assignTime="";break}
+    case"miniToggle":S.miniOpen=!S.miniOpen;draw();break;
+    case"status":S.status=b.dataset.v;draw();break;
+    case"city":S.city=b.dataset.v;draw();break;
+  }
+});
+/* 時間を変えたら、入れられない日・警告をその場で更新 */
+const shortNg=w=>w.startsWith("この時間は移動中")?"移動中のため不可":w.replace(/です（.*$|（.*$/,"")+"のため不可";
+function refreshPicker(){document.querySelectorAll(".pdays button").forEach(b=>{const w=conflict(b.dataset.d,S.assignTime);b.disabled=!!w;b.title=w;let n=b.querySelector(".ng");
+  if(w){if(!n){n=document.createElement("small");n.className="ng";b.append(n)}n.textContent=shortNg(w)}else if(n)n.remove()})}
+function itemWarn(){const f=document.querySelector('form[data-form="item"]');if(!f)return;const w=$("if_warn"),sub=f.querySelector("[type=submit]");
+  const msg=$("if_kind").value==="move"?"":conflict($("if_date").value,readTime("if"),f.dataset.id||null);w.textContent=msg;w.hidden=!msg;sub.disabled=!!msg}
+function strip(o){const r={...o};delete r.id;return r}
+
+document.addEventListener("submit",e=>{
+  const f=e.target.closest("[data-form]");if(!f)return;e.preventDefault();
+  const fd=Object.fromEntries(new FormData(f).entries());const kind=f.dataset.form,id=f.dataset.id;
+  if(kind==="trip"){
+    if(fd.end<fd.start){toast("帰る日は出発日より後にしてください");return}
+    const old=id?S.trips.find(t=>t.id===id):null;const nid=id||uid();Undo.label=id?"旅行の設定を保存しました":"旅行を作りました";
+    Store.set("trips/"+nid,clean({title:fd.title.trim(),start:fd.start,end:fd.end,people:fd.people?+fd.people:"",route:fd.route.trim(),color:fd.color||"azul",created:old?.created||Date.now()}));
+    S.ui=null;if(!id){S.pendingOpen=nid;openTrip(nid,"days")}else{draw()}return}
+  if(kind==="item"){
+    const old=id?S.items.find(i=>i.id===id):null;
+    let title=fd.title.trim();const sp=fd.spotId&&S.spots.find(s=>s.id===fd.spotId);
+    if(!title&&sp)title=sp.name;if(!title){toast("予定の内容を入力してください");return}
+    const date=fd.date;const time=joinTime(fd.time_h,fd.time_m);const kd=fd.kind||"see";
+    if(kd!=="move"){const w=conflict(date,time,id);if(w){toast(w);return}}
+    const arrive=kd==="move"?joinTime(fd.arr_h,fd.arr_m):"";
+    const order=old&&old.date===date&&(old.time||"")===time?old.order:orderFor(date,time,id);
+    Undo.label=old?"予定を保存しました":"予定を追加しました";
+    Store.set(base()+"/items/"+(id||uid()),{date,time,arrive,kind:fd.kind||(sp?CAT2KIND[sp.cat]||"see":"see"),title,note:fd.note.trim(),spotId:fd.spotId||"",order});
+    S.ui=null;draw();return}
+  if(kind==="spot"){
+    const old=id?S.spots.find(s=>s.id===id):null;Undo.label=old?"場所を保存しました":"場所を追加しました";
+    Store.set(base()+"/spots/"+(id||uid()),{name:fd.name.trim(),city:fd.city.trim(),cat:fd.cat,stars:+fd.stars||2,fee:fd.fee.trim(),book:!!fd.book,note:fd.note.trim(),url:/^https?:\/\//.test(fd.url||"")?fd.url.trim():"",created:old?.created||Date.now()});
+    S.ui=null;draw();return}
+});
+/* 日ごとの都市・メモは入力をやめたら保存 */
+document.addEventListener("change",e=>{
+  const el=e.target;if(/^(as|if|ia)_[hm]$/.test(el.id)){const p=el.id.slice(0,2);const m=$(p+"_m"),h=$(p+"_h");if(m&&h)m.disabled=!/^\d+$/.test(h.value);if(p==="as"){S.assignTime=readTime("as");refreshPicker()}else itemWarn();return}
+  if(el.id==="if_kind"||el.id==="if_date"){const b=$("if_arrbox");if(b)b.hidden=$("if_kind").value!=="move";itemWarn()}
+  if(el.id==="tripSel"){el.value?openTrip(el.value,"days"):openTrip(null);return}if(el.dataset&&el.dataset.day&&S.tripId){const d=el.dataset.day;const cur={...(S.days[d]||{})};delete cur.id;cur[el.dataset.field]=el.value.trim();if((S.days[d]||{})[el.dataset.field]===cur[el.dataset.field]||(!(S.days[d]||{})[el.dataset.field]&&!cur[el.dataset.field]))return;Undo.label=el.dataset.field==="city"?`${md(d)}の都市名を変えました`:`${md(d)}のメモを書き換えました`;Store.set(base()+"/days/"+d,cur)}
+  if(el.id==="if_all"){const sel=$("if_spot");if(sel){const d=sel.dataset.d,cur=sel.value;
+    const free=S.spots.filter(s=>!S.items.some(i=>i.spotId===s.id)).sort((a,b)=>(b.stars||0)-(a.stars||0));
+    sel.innerHTML=spotOptions(el.checked?free:free.filter(s=>cityMatch(s,d)));sel.value=cur}}
+  if(el.id==="if_spot"&&el.value){const sp=S.spots.find(s=>s.id===el.value);const t=$("if_title"),k=$("if_kind");if(sp&&t&&!t.value)t.value=sp.name;if(sp&&k)k.value=CAT2KIND[sp.cat]||"see"}
+});
+document.addEventListener("input",e=>{if(e.target.id==="q"){S.q=e.target.value;const pos=e.target.selectionStart;draw();const q=$("q");if(q){q.focus();try{q.setSelectionRange(pos,pos)}catch(_){}}}});
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==="z"&&!busy()){e.preventDefault();Undo.undo();return}
+  if(e.key==="Escape"&&(S.ui||S.confirm||S.assign)){S.ui=null;S.confirm=null;S.assign=null;draw()}
+  if(e.key==="Enter"&&e.target.dataset&&e.target.dataset.field==="city"){e.target.blur()}});
+
+/* ---------------- 起動 ---------------- */
+draw();
+(async()=>{
+  await Store.init();
+  setSync(Store.mode==="cloud"?"クラウドに保存":"この端末に保存");
+  Store.watch("trips",d=>{S.trips=d;S.loaded.trips=true;
+    if(!S.tripId&&!S.booted){S.booted=true;let last="";try{last=localStorage.getItem("planner-last")||""}catch(e){}
+      const h=(location.hash||"").slice(1);const pick=[h,last].find(x=>x&&d.some(t=>t.id===x));if(pick){openTrip(pick,"days");return}}
+    render()});
+})();
+</script>
+
+</body>
+</html>
