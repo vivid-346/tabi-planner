@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;padding:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>旅の割り勘</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Figtree:wght@500;700;800&display=swap">
+<style>
+/* 旅のプランナーと同じ色・文字。上に「精算」、下に「立て替えの記録」 */
+:root{
+  --ground:#EEF1F5; --paper:#FFFFFF; --ink:#14213D; --muted:#5C6880; --line:#D9DFE8;
+  --azul:#1F4E9E; --azul-soft:#E1E9F6; --ochre:#C0822A; --ochre-soft:#F6EBDA;
+  --it:#2E7D4F; --it-soft:#E0F0E6; --warn:#B8322A; --warn-soft:#F7E4E2;
+  --shadow:0 1px 2px rgba(20,33,61,.06),0 8px 24px rgba(20,33,61,.08);
+  --serif:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --num:"Figtree",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --ground:#0D1320;--paper:#151E2D;--ink:#E8EDF5;--muted:#99A6BB;--line:#283448;--azul:#7FA9EE;--azul-soft:#1A2B45;--ochre:#E0AE5E;--ochre-soft:#3A2C17;--it:#6CC593;--it-soft:#16301F;--warn:#EE7B72;--warn-soft:#3A1F1D;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --ground:#0D1320;--paper:#151E2D;--ink:#E8EDF5;--muted:#99A6BB;--line:#283448;--azul:#7FA9EE;--azul-soft:#1A2B45;--ochre:#E0AE5E;--ochre-soft:#3A2C17;--it:#6CC593;--it-soft:#16301F;--warn:#EE7B72;--warn-soft:#3A1F1D;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35)}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--azul)}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:880px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;min-height:56px;flex-wrap:wrap}
+.brand{font-family:var(--serif);font-weight:800;font-size:18px;letter-spacing:.06em;white-space:nowrap}
+.topbar select{max-width:100%;min-width:0;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-weight:700;font-size:13.5px}
+.back{margin-left:auto;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap}
+
+.page{max-width:880px;margin:0 auto;padding:24px 16px 80px;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--num);font-weight:700;font-size:12px;letter-spacing:.22em;color:var(--ochre);text-transform:uppercase}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(26px,4.4vw,36px);line-height:1.2;letter-spacing:.03em}
+h2{font-family:var(--serif);font-weight:800;font-size:20px;letter-spacing:.03em}
+.muted{color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.danger{color:var(--warn);border-color:var(--warn)}
+.btn.danger.fill{background:var(--warn);color:var(--paper)}
+.btn.ghost{background:none;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);border-color:var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card.hero{border:0;box-shadow:var(--shadow)}
+.head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--ground);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700}
+
+/* 精算 */
+.total{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:baseline}
+.total b{font-family:var(--num);font-size:28px;font-weight:800}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+.plus{color:var(--it);font-weight:700}.minus{color:var(--warn);font-weight:700}
+.pays{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pays li{display:flex;align-items:center;gap:10px;background:var(--azul-soft);border-radius:10px;padding:10px 12px;flex-wrap:wrap}
+.pays .who{font-weight:700}
+.pays .arrow{color:var(--muted)}
+.pays .amt{margin-left:auto;font-family:var(--num);font-weight:800;font-size:18px}
+.done{background:var(--it-soft);color:var(--it);border-radius:10px;padding:10px 12px;font-weight:700}
+
+/* 記録 */
+.list{list-style:none;margin:0;padding:0}
+.ex{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ex:last-child{border-bottom:0}
+.ex .t{font-weight:700;overflow-wrap:anywhere}
+.ex .a{font-family:var(--num);font-weight:800;text-align:right}
+.ex .s{grid-column:1/-1;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.ex .acts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--warn)}
+
+/* フォーム */
+.form{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:14px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0;grid-column:span 6}
+.f.s3{grid-column:span 3}.f.s2{grid-column:span 2}
+@media (max-width:560px){.f.s3,.f.s2{grid-column:span 6}}
+.form label,.lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.form input[type=text],.form input[type=number],.form input[type=date],.form select,.form textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;min-width:0}
+.checks{display:flex;gap:6px 14px;flex-wrap:wrap}
+.checks label{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink);font-weight:500;cursor:pointer}
+.checks input{width:18px;height:18px}
+.acts{grid-column:span 6;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.warn{margin:0;padding:8px 12px;border-radius:8px;background:var(--warn-soft);color:var(--warn);font-size:13px;font-weight:700;grid-column:span 6}
+.share textarea{width:100%;min-height:90px;font-family:var(--num);font-size:12px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--paper);resize:vertical;word-break:break-all}
+.banner{background:var(--ochre-soft);border:1px solid var(--ochre);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:24px 18px;text-align:center;color:var(--muted)}
+#toast{position:fixed;width:max-content;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 16px;font-size:13.5px;font-weight:700;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+</style>
+
+<header class="topbar"><div class="in">
+  <span class="brand">旅の割り勘</span>
+  <span id="gsel"></span>
+  <a class="back" href="index.html">← 旅のプランナー</a>
+</div></header>
+<main class="page" id="app"></main>
+<div id="toast" hidden></div>
+
+<script>
+/* ---------------- 保存（この端末のブラウザ） ---------------- */
+const KEY="warikan-local";
+/* 公開ページのURL（ファイルで開いたときの共有リンクに使う。空ならファイルで渡すよう案内） */
+const SHARE_BASE="";
+let DB={groups:{},expenses:{},current:null,me:""};
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY)||"null");if(v&&v.groups)DB={...DB,...v}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));return true}catch(e){toast("この端末に保存できませんでした。ブラウザの保存容量がいっぱいか、保存が止められている可能性があります");return false}}
+/* 保存に失敗したら変更前に戻す */
+function commit(fn){const before=JSON.stringify(DB);fn();const ok=save();if(!ok)DB=JSON.parse(before);return ok}
+
+/* ---------------- 共通 ---------------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const yen=n=>(n<0?"-":"")+Math.abs(Math.round(n)).toLocaleString("ja-JP")+"円";
+const today=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+const md=s=>{if(!s)return"";const[,m,d]=s.split("-");return `${+m}/${+d}`};
+let toastT=0;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,4000)}
+const group=()=>DB.current&&DB.groups[DB.current]&&!DB.groups[DB.current].deleted?DB.groups[DB.current]:null;
+const alive=g=>g.members.filter(m=>!m.deleted);
+const nameOf=(g,id)=>(g.members.find(m=>m.id===id)||{}).name||"（削除された人）";
+const expensesOf=gid=>Object.values(DB.expenses).filter(e=>e.gid===gid&&!e.deleted).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.created-a.created);
+
+/* ---------------- 精算の計算 ---------------- */
+/* 1件ごとに「1人分」を割る人全員が負担。割り切れない端数は払った人が持つ */
+function settle(g,list){
+  const st={};g.members.forEach(m=>st[m.id]={paid:0,owe:0});
+  for(const e of list){const sp=e.split.filter(id=>st[id]);if(!sp.length||!st[e.payer])continue;
+    const base=Math.floor(e.amount/sp.length),rest=e.amount-base*sp.length;
+    st[e.payer].paid+=e.amount;st[e.payer].owe+=rest;sp.forEach(id=>st[id].owe+=base)}
+  const net=Object.entries(st).map(([id,v])=>({id,net:v.paid-v.owe}));
+  /* いちばん多く受け取る人と、いちばん多く払う人を順に組み合わせる */
+  const cr=net.filter(x=>x.net>0).map(x=>({...x})).sort((a,b)=>b.net-a.net),db=net.filter(x=>x.net<0).map(x=>({...x,net:-x.net})).sort((a,b)=>b.net-a.net);
+  const pays=[];let i=0,j=0;
+  while(i<cr.length&&j<db.length){const a=Math.min(cr[i].net,db[j].net);if(a>0)pays.push({from:db[j].id,to:cr[i].id,amount:a});cr[i].net-=a;db[j].net-=a;if(!cr[i].net)i++;if(!db[j].net)j++}
+  return {st,pays}}
+
+/* ---------------- 共有リンク（合体＝マージ） ---------------- */
+const b64=u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
+const unb64=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");const b=atob(s);return Uint8Array.from(b,c=>c.charCodeAt(0))};
+async function pipe(u8,stream){const r=new Response(new Blob([u8]).stream().pipeThrough(stream));return new Uint8Array(await r.arrayBuffer())}
+async function encodePack(obj){const raw=new TextEncoder().encode(JSON.stringify(obj));
+  if(window.CompressionStream){try{return "wz"+b64(await pipe(raw,new CompressionStream("deflate-raw")))}catch(e){}}
+  return "wj"+b64(raw)}
+async function decodePack(tok){const kind=tok.slice(0,2),u8=unb64(tok.slice(2));
+  const raw=kind==="wz"?await pipe(u8,new DecompressionStream("deflate-raw")):u8;return JSON.parse(new TextDecoder().decode(raw))}
+function packOf(g){return {v:1,by:DB.me||"",at:Date.now(),group:g,expenses:Object.values(DB.expenses).filter(e=>e.gid===g.id)}}
+/* 同じIDなら新しい方を残す。消した印（deleted）も新しければ反映 */
+function mergePack(p){const r={added:0,updated:0,removed:0};
+  const g0=DB.groups[p.group.id];
+  if(!g0){DB.groups[p.group.id]=p.group}else{
+    const g={...g0};if((p.group.updated||0)>(g0.updated||0)){g.name=p.group.name;g.updated=p.group.updated;g.deleted=p.group.deleted}
+    const ms={};[...g0.members,...p.group.members].forEach(m=>{const o=ms[m.id];if(!o||(m.updated||0)>(o.updated||0))ms[m.id]=m});
+    g.members=Object.values(ms).sort((a,b)=>(a.order||0)-(b.order||0));DB.groups[g.id]=g}
+  for(const e of p.expenses){const o=DB.expenses[e.id];
+    if(!o){DB.expenses[e.id]=e;if(!e.deleted)r.added++}
+    else if((e.updated||0)>(o.updated||0)){DB.expenses[e.id]=e;if(e.deleted&&!o.deleted)r.removed++;else if(!e.deleted)r.updated++}}
+  return r}
+
+/* ---------------- 状態と描画 ---------------- */
+const UI={edit:null,confirm:null,share:null,incoming:null,newGroup:false,editGroup:false};
+function draw(){
+  const gs=Object.values(DB.groups).filter(g=>!g.deleted).sort((a,b)=>b.created-a.created);
+  $("gsel").innerHTML=gs.length?`<select id="groupSel" aria-label="グループを切り替える">${gs.map(g=>`<option value="${esc(g.id)}" ${g.id===DB.current?"selected":""}>${esc(g.name)}</option>`).join("")}<option value="__new">＋ 新しいグループ</option></select>`:"";
+  const g=group();
+  let h=incomingView();
+  if(UI.incoming&&UI.incoming.preview){$("app").innerHTML=h+previewView(UI.incoming.pack);return}
+  if(!g||UI.newGroup)h+=groupForm(null);
+  else if(UI.editGroup)h+=groupForm(g);
+  else h+=groupView(g);
+  $("app").innerHTML=h;
+}
+function incomingView(){const inc=UI.incoming;if(!inc)return"";const p=inc.pack;const d=new Date(p.at);
+  const when=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  return `<section class="banner" aria-label="共有されたデータ"><b>${esc(p.by||"だれか")}さんが ${when} に共有した「${esc(p.group.name)}」です（記録 ${p.expenses.filter(e=>!e.deleted).length}件）</b>
+    <span class="muted" style="font-size:13px">「合体して保存」を押すと、手元の記録は消さずに、足りない記録だけ追加・更新されます。</span>
+    <div class="row"><button class="btn primary" data-act="merge">合体して保存</button>${inc.preview?`<button class="btn" data-act="previewOff">見るのをやめる</button>`:`<button class="btn" data-act="preview">保存せずに見る</button>`}<button class="btn ghost" data-act="dismiss">やめる</button></div></section>`}
+function previewView(p){const g=p.group,list=p.expenses.filter(e=>!e.deleted);return `<p class="muted" style="margin:0">見るだけの表示です。保存はされていません。</p>`+settleCard(g,list,true)+listCard(g,list,true)}
+
+function groupForm(g){
+  const ms=g?alive(g):[{name:""},{name:""},{name:""}];
+  return `<form class="card hero form" data-form="group" style="background:var(--paper)">
+    <h2 style="grid-column:span 6">${g?"グループの編集":"新しいグループ"}</h2>
+    <div class="f"><label for="g_name">グループの名前</label><input type="text" id="g_name" name="name" maxlength="40" required value="${esc(g?g.name:"")}" placeholder="例：スペイン旅行"></div>
+    <div class="f"><span class="lbl">メンバー（2〜10人）</span><div id="g_members" style="display:flex;flex-direction:column;gap:6px">
+      ${ms.map((m,i)=>`<input type="text" name="m" maxlength="20" value="${esc(m.name)}" data-mid="${esc(m.id||"")}" placeholder="名前 ${i+1}" aria-label="メンバー ${i+1}">`).join("")}</div>
+      <div><button class="btn ghost" type="button" data-act="addMember">＋ メンバーを足す</button></div></div>
+    <div class="acts"><button class="btn primary" type="submit">${g?"保存":"作る"}</button>${(g||Object.values(DB.groups).some(x=>!x.deleted))?`<button class="btn ghost" type="button" data-act="cancelGroup">やめる</button>`:""}
+      <span style="flex:1"></span>${g?(UI.confirm==="group"?`<span class="confirm">グループと記録をすべて削除します<button class="btn danger fill" type="button" data-act="delGroupYes">削除する</button><button class="btn ghost" type="button" data-act="noConfirm">やめる</button></span>`:`<button class="btn danger" type="button" data-act="delGroup">グループを削除</button>`):""}</div>
+  </form>${g?"":`<p class="muted" style="margin:0;font-size:13px">友達から共有リンクをもらった場合は、そのリンクを開くだけで読み込めます。</p>`}`}
+
+function groupView(g){
+  const list=expensesOf(g.id);
+  return `<div class="head"><div><div class="eyebrow">Warikan</div><h1>${esc(g.name)}</h1>
+      <div class="chips" style="margin-top:6px">${alive(g).map(m=>`<span class="chip">${esc(m.name)}</span>`).join("")}</div></div>
+    <div class="row"><button class="btn" data-act="share">共有</button><button class="btn ghost" data-act="editGroup">編集</button></div></div>
+  ${UI.share?shareCard():""}
+  ${settleCard(g,list,false)}
+  ${listCard(g,list,false)}`}
+
+function settleCard(g,list,ro){
+  const total=list.reduce((s,e)=>s+e.amount,0);const {st,pays}=settle(g,list);
+  const rows=g.members.filter(m=>!m.deleted||st[m.id].paid||st[m.id].owe).map(m=>{const v=st[m.id],n=v.paid-v.owe;
+    return `<tr><td>${esc(m.name)}</td><td class="r num">${yen(v.paid)}</td><td class="r num">${yen(v.owe)}</td><td class="r num ${n>0?"plus":n<0?"minus":""}">${n>0?"+":""}${yen(n)}</td></tr>`}).join("");
+  return `<section class="card hero" aria-label="精算"><h2>精算</h2>
+    <div class="total"><span class="muted">合計</span><b>${yen(total)}</b><span class="muted">${list.length}件</span></div>
+    ${list.length?(pays.length?`<ul class="pays">${pays.map(p=>`<li><span class="who">${esc(nameOf(g,p.from))}</span><span class="arrow">→</span><span class="who">${esc(nameOf(g,p.to))}</span><span class="amt">${yen(p.amount)}</span></li>`).join("")}</ul>`:`<div class="done">精算は必要ありません</div>`):""}
+    ${list.length?`<div class="tbl"><table><thead><tr><th>名前</th><th class="r">払った</th><th class="r">負担</th><th class="r">差額</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="muted" style="margin:0;font-size:12px">割り切れない端数は、払った人が負担しています。</p>`:`<p class="muted" style="margin:0">立て替えを記録すると、だれが誰にいくら払えばいいかがここに出ます。</p>`}
+  </section>`}
+
+function listCard(g,list,ro){
+  const adding=!ro&&UI.edit==="new";
+  return `<section class="card" aria-label="立て替えの記録"><div class="head"><h2>立て替えの記録</h2>${ro||adding?"":`<button class="btn primary" data-act="add">＋ 立て替えを記録</button>`}</div>
+    ${adding?expenseForm(g,null):""}
+    ${list.length?`<ul class="list">${list.map(e=>!ro&&UI.edit===e.id?`<li>${expenseForm(g,e)}</li>`:expenseRow(g,e,ro)).join("")}</ul>`:(adding?"":`<div class="empty">まだ記録がありません。「＋ 立て替えを記録」から追加してください。</div>`)}
+  </section>`}
+function expenseRow(g,e,ro){
+  const all=e.split.length===alive(g).length&&alive(g).every(m=>e.split.includes(m.id));
+  return `<li class="ex"><span class="t">${esc(e.title)}</span><span class="a">${yen(e.amount)}</span>
+    <span class="s">${esc(md(e.date))} ・ ${esc(nameOf(g,e.payer))}が払った ・ ${all?"全員":e.split.map(id=>esc(nameOf(g,id))).join("・")}で割る（1人${yen(Math.floor(e.amount/Math.max(1,e.split.length)))}）${e.memo?" ・ "+esc(e.memo):""}</span>
+    ${ro?"":`<span class="acts">${UI.confirm===e.id?`<span class="confirm">この記録を削除しますか？<button class="btn danger fill" data-act="delYes" data-id="${esc(e.id)}">削除</button><button class="btn ghost" data-act="noConfirm">やめる</button></span>`:`<button class="btn ghost" data-act="edit" data-id="${esc(e.id)}">編集</button><button class="btn ghost" data-act="del" data-id="${esc(e.id)}">削除</button>`}</span>`}</li>`}
+function expenseForm(g,e){
+  const ms=alive(g);const v=e||{title:"",amount:"",payer:ms[0]&&ms[0].id,split:ms.map(m=>m.id),date:today(),memo:""};
+  return `<form class="form" data-form="expense" data-id="${esc(e?e.id:"")}">
+    <div class="f s3"><label for="e_title">内容</label><input type="text" id="e_title" name="title" maxlength="60" required value="${esc(v.title)}" placeholder="例：夕食（バル）"></div>
+    <div class="f s3"><label for="e_amount">金額（円）</label><input type="number" id="e_amount" name="amount" min="1" max="100000000" step="1" inputmode="numeric" required value="${esc(v.amount)}" placeholder="9000"></div>
+    <div class="f s3"><label for="e_payer">払った人</label><select id="e_payer" name="payer">${g.members.filter(m=>!m.deleted||m.id===v.payer).map(m=>`<option value="${esc(m.id)}" ${m.id===v.payer?"selected":""}>${esc(m.name)}</option>`).join("")}</select></div>
+    <div class="f s3"><label for="e_date">日付</label><input type="date" id="e_date" name="date" value="${esc(v.date)}"></div>
+    <div class="f"><span class="lbl">割る人</span><div class="checks">${ms.map(m=>`<label><input type="checkbox" name="split" value="${esc(m.id)}" ${v.split.includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div>
+      <div class="row"><button class="btn ghost" type="button" data-act="splitAll">全員</button><button class="btn ghost" type="button" data-act="splitNone">クリア</button></div></div>
+    <div class="f"><label for="e_memo">メモ（任意）</label><input type="text" id="e_memo" name="memo" maxlength="100" value="${esc(v.memo)}"></div>
+    <p class="warn" id="e_warn" hidden></p>
+    <div class="acts"><button class="btn primary" type="submit">${e?"保存":"記録する"}</button><button class="btn ghost" type="button" data-act="cancelEdit">やめる</button></div>
+  </form>`}
+function shareCard(){const s=UI.share;
+  return `<section class="card share" aria-label="共有"><h2>共有</h2>
+    <div class="form" style="grid-template-columns:1fr"><div class="f"><label for="s_me">あなたの名前（相手に「だれが共有したか」として表示）</label><input type="text" id="s_me" maxlength="20" value="${esc(DB.me)}" placeholder="例：やまだ"></div></div>
+    <div class="row"><button class="btn primary" data-act="makeLink">共有リンクを作る</button><button class="btn ghost" data-act="closeShare">閉じる</button></div>
+    ${s.link?`<label class="lbl" for="s_link">このリンクを LINE などで送ってください（${s.link.length.toLocaleString()}文字）</label><textarea id="s_link" readonly>${esc(s.link)}</textarea>
+      <div class="row"><button class="btn" data-act="copy">コピー</button></div>
+      ${s.local?`<p class="warn" style="margin:0">このページはパソコンの中のファイルとして開いているので、このリンクは相手に届きません。公開ページ（GitHub Pages など）で開き直すか、「ファイルで保存」で渡してください。</p>`:""}
+      ${s.link.length>6000?`<p class="warn" style="margin:0">リンクが長いので、送れない場合はファイルで渡してください。</p>`:""}`:""}
+    <div class="row"><button class="btn ghost" data-act="saveFile">ファイルで保存</button><label class="btn ghost" for="s_file">ファイルを読み込む</label><input type="file" id="s_file" accept=".json,application/json" hidden></div>
+  </section>`}
+
+/* ---------------- 操作 ---------------- */
+document.addEventListener("click",async ev=>{
+  const b=ev.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id,g=group();
+  switch(a){
+    case"add":UI.edit="new";UI.confirm=null;draw();$("e_title").focus();break;
+    case"edit":UI.edit=id;UI.confirm=null;draw();break;
+    case"cancelEdit":UI.edit=null;draw();break;
+    case"del":UI.confirm=id;draw();break;
+    case"noConfirm":UI.confirm=null;draw();break;
+    case"delYes":if(commit(()=>{const e=DB.expenses[id];DB.expenses[id]={id,gid:e.gid,deleted:true,updated:Date.now()}})){UI.confirm=null;toast("記録を削除しました")}draw();break;
+    case"splitAll":case"splitNone":document.querySelectorAll('[name=split]').forEach(c=>c.checked=a==="splitAll");break;
+    case"addMember":{const box=$("g_members");if(box.children.length>=10){toast("メンバーは10人までです");break}const i=document.createElement("input");i.type="text";i.name="m";i.maxLength=20;i.placeholder="名前 "+(box.children.length+1);i.setAttribute("aria-label","メンバー "+(box.children.length+1));box.append(i);i.focus();break}
+    case"cancelGroup":UI.newGroup=false;UI.editGroup=false;UI.confirm=null;draw();break;
+    case"editGroup":UI.editGroup=true;UI.share=null;draw();break;
+    case"delGroup":UI.confirm="group";draw();break;
+    case"delGroupYes":if(commit(()=>{const now=Date.now();DB.groups[g.id]={...g,deleted:true,updated:now};expensesOf(g.id).forEach(e=>DB.expenses[e.id]={id:e.id,gid:g.id,deleted:true,updated:now});
+      DB.current=(Object.values(DB.groups).find(x=>!x.deleted)||{}).id||null})){UI.editGroup=false;UI.confirm=null;toast("グループを削除しました")}draw();break;
+    case"share":UI.share=UI.share?null:{};UI.edit=null;draw();break;
+    case"closeShare":UI.share=null;draw();break;
+    case"makeLink":{const me=($("s_me").value||"").trim();if(me!==DB.me)commit(()=>{DB.me=me});
+      const tok=await encodePack(packOf(g));const base=location.protocol==="file:"&&SHARE_BASE?SHARE_BASE:location.href.split("#")[0];UI.share={link:base+"#"+tok,local:location.protocol==="file:"&&!SHARE_BASE};draw();break}
+    case"copy":{const t=$("s_link");try{await navigator.clipboard.writeText(t.value);toast("コピーしました")}catch(e){t.focus();t.select();toast("選択しました。コピーしてください")}break}
+    case"saveFile":{try{const blob=new Blob([JSON.stringify(packOf(g))],{type:"application/json"});const u=URL.createObjectURL(blob);const x=document.createElement("a");x.href=u;x.download=`warikan-${g.name}.json`;document.body.append(x);x.click();x.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}catch(e){toast("この画面ではファイルを保存できません。共有リンクを使ってください")}break}
+    case"preview":UI.incoming.preview=true;draw();break;
+    case"previewOff":UI.incoming.preview=false;draw();break;
+    case"dismiss":UI.incoming=null;clearHash();draw();break;
+    case"merge":{const p=UI.incoming.pack;let r;
+      if(!commit(()=>{r=mergePack(p);DB.current=p.group.id})){draw();break}  /* 失敗したら受け取ったデータとリンクは残す */
+      UI.incoming=null;clearHash();toast(`合体しました：${r.added}件追加・${r.updated}件更新・${r.removed}件削除`);draw();break}
+  }
+});
+document.addEventListener("change",async ev=>{const el=ev.target;
+  if(el.id==="groupSel"){if(el.value==="__new"){UI.newGroup=true;UI.editGroup=false}else{commit(()=>{DB.current=el.value});UI.newGroup=false;UI.editGroup=false}UI.edit=null;UI.share=null;UI.confirm=null;draw();return}
+  if(el.id==="s_file"&&el.files[0]){try{const p=cleanPack(JSON.parse(await el.files[0].text()));if(!p)throw 0;UI.incoming={pack:p,preview:false};UI.share=null;draw();window.scrollTo(0,0)}catch(e){toast("このファイルは読み込めませんでした")}}
+});
+document.addEventListener("submit",ev=>{
+  const f=ev.target.closest("[data-form]");if(!f)return;ev.preventDefault();const kind=f.dataset.form,now=Date.now();
+  if(kind==="group"){
+    const name=f.elements.name.value.trim();const ins=[...f.querySelectorAll('[name=m]')];const names=ins.map(i=>({id:i.dataset.mid||"",name:i.value.trim()})).filter(x=>x.name);
+    if(names.length<2){toast("メンバーは2人以上入れてください");return}
+    if(new Set(names.map(x=>x.name)).size!==names.length){toast("同じ名前のメンバーがいます");return}
+    const g=UI.editGroup?group():null;
+    if(g){const keep=new Set(names.map(x=>x.id).filter(Boolean));
+      const used=new Set(expensesOf(g.id).flatMap(e=>[e.payer,...e.split]));
+      const gone=alive(g).filter(m=>!keep.has(m.id));const blocked=gone.filter(m=>used.has(m.id));
+      if(blocked.length){toast(`「${blocked.map(m=>m.name).join("」「")}」は記録に使われているので外せません`);return}
+      if(!commit(()=>{const ms=g.members.map(m=>{const n=names.find(x=>x.id===m.id);if(n)return n.name!==m.name?{...m,name:n.name,updated:now}:m;return gone.includes(m)?{...m,deleted:true,updated:now}:m});
+        names.filter(x=>!x.id).forEach((x,i)=>ms.push({id:uid(),name:x.name,order:ms.length+i,updated:now}));
+        DB.groups[g.id]={...g,name:name||g.name,members:ms,updated:now}}))return;
+      UI.editGroup=false;toast("保存しました")}
+    else{const gid=uid();if(!commit(()=>{DB.groups[gid]={id:gid,name:name||"旅行",members:names.map((x,i)=>({id:uid(),name:x.name,order:i,updated:now})),created:now,updated:now};DB.current=gid}))return;UI.newGroup=false;toast("グループを作りました")}
+    draw();return}
+  if(kind==="expense"){const g=group();const id=f.dataset.id;
+    const amount=Math.round(Number(f.elements.amount.value));const split=[...f.querySelectorAll('[name=split]:checked')].map(c=>c.value);
+    const w=$("e_warn");const err=!f.elements.title.value.trim()?"内容を入れてください":!(amount>0)?"金額は1円以上で入れてください":!split.length?"割る人を1人以上選んでください":"";
+    if(err){w.textContent=err;w.hidden=false;return}
+    if(!commit(()=>{const old=id&&DB.expenses[id];const eid=id||uid();
+      DB.expenses[eid]={id:eid,gid:g.id,title:f.elements.title.value.trim(),amount,payer:f.elements.payer.value,split,date:f.elements.date.value||today(),memo:f.elements.memo.value.trim(),created:old?old.created:now,updated:now}}))return;
+    UI.edit=null;toast(id?"保存しました":"記録しました");draw()}
+});
+
+/* ---------------- 起動 ---------------- */
+function clearHash(){try{history.replaceState(null,"",location.pathname+location.search)}catch(e){location.hash=""}}
+function validPack(p){return p&&p.v===1&&p.group&&typeof p.group.id==="string"&&Array.isArray(p.group.members)&&Array.isArray(p.expenses)}
+/* 受け取ったデータは、型と形を確かめてから使う（変な値は捨てる・直す） */
+const str=(v,n)=>typeof v==="string"?v.slice(0,n):"";
+const okId=v=>typeof v==="string"&&/^[A-Za-z0-9_-]{1,40}$/.test(v)?v:"";
+const okNum=v=>Number.isFinite(+v)?+v:0;
+const okDate=v=>typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)?v:"";
+function cleanPack(p){if(!validPack(p))return null;const gid=okId(p.group.id);if(!gid)return null;
+  const members=p.group.members.map((m,i)=>({id:okId(m&&m.id),name:str(m&&m.name,20),order:okNum(m&&m.order)||i,updated:okNum(m&&m.updated),...(m&&m.deleted?{deleted:true}:{})})).filter(m=>m.id&&(m.name||m.deleted)).slice(0,30);
+  const ids=new Set(members.map(m=>m.id));
+  const group={id:gid,name:str(p.group.name,40)||"旅行",members,created:okNum(p.group.created),updated:okNum(p.group.updated),...(p.group.deleted?{deleted:true}:{})};
+  const expenses=p.expenses.map(e=>{const id=okId(e&&e.id);if(!id)return null;
+    if(e.deleted)return {id,gid,deleted:true,updated:okNum(e.updated)};
+    const amount=Math.round(okNum(e.amount));const split=Array.isArray(e.split)?e.split.filter(x=>ids.has(x)):[];
+    if(!(amount>0&&amount<=1e9)||!ids.has(e.payer)||!split.length)return null;
+    return {id,gid,title:str(e.title,60)||"（内容なし）",amount,payer:e.payer,split,date:okDate(e.date),memo:str(e.memo,100),created:okNum(e.created),updated:okNum(e.updated)}}).filter(Boolean).slice(0,2000);
+  return {v:1,by:str(p.by,20),at:okNum(p.at)||Date.now(),group,expenses}}
+async function readHash(){const h=(location.hash||"").slice(1);if(!/^w[zj][A-Za-z0-9_-]+$/.test(h))return;
+  try{const p=cleanPack(await decodePack(h));if(!p)throw 0;UI.incoming={pack:p,preview:false};draw()}catch(e){toast("共有リンクを読み込めませんでした。リンクが途中で切れていないか確かめてください")}}
+load();
+if(!group()){const g=Object.values(DB.groups).find(x=>!x.deleted);DB.current=g?g.id:null}
+draw();readHash();
+window.addEventListener("hashchange",readHash);
+</script>
+
+</body>
+</html>
