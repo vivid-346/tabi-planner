@@ -256,21 +256,21 @@ const Store={mode:"loading",db:null,ls:{},subs:[],
   _emit(s){const out=[];for(const k in this.ls){const i=k.lastIndexOf("/");if(k.slice(0,i)===s.col)out.push({id:k.slice(i+1),...this.ls[k]})}s.cb(out)},
   /* 保存できたら true。失敗したら画面は更新せず false を返す */
   _save(){try{localStorage.setItem("planner-local",JSON.stringify(this.ls))}catch(e){return false}this.subs.forEach(s=>this._emit(s));return true},
-  _local(path,next){const had=path in this.ls,before=this.ls[path];
+  _local(path,next,u){const had=path in this.ls,before=this.ls[path];
     if(next===undefined)delete this.ls[path];else this.ls[path]=JSON.parse(JSON.stringify(next));
     if(this._save())return true;
     if(had)this.ls[path]=before;else delete this.ls[path];
-    Undo.drop(path);fail({code:"storage"});
+    Undo.drop(path,u);fail({code:"storage"});
     /* フォーム入力中でなければ、画面も保存前の中身に描き直す（フォームは入力を残したまま） */
     if(!S.ui){dirty=true;this.subs.forEach(s=>this._emit(s))}
     return false},
   /* 保存できたら true、失敗したら false を返す */
-  async set(path,data){Undo.rec(path);
-    if(this.mode==="cloud"){try{await this.db.doc(path).set(data);return true}catch(e){Undo.drop(path);fail(e);return false}}
-    return this._local(path,data)},
-  async del(path){Undo.rec(path);
-    if(this.mode==="cloud"){try{await this.db.doc(path).delete();return true}catch(e){Undo.drop(path);fail(e);return false}}
-    return this._local(path,undefined)}
+  async set(path,data){const u=Undo.rec(path);
+    if(this.mode==="cloud"){try{await this.db.doc(path).set(data);return true}catch(e){Undo.drop(path,u);fail(e);return false}}
+    return this._local(path,data,u)},
+  async del(path){const u=Undo.rec(path);
+    if(this.mode==="cloud"){try{await this.db.doc(path).delete();return true}catch(e){Undo.drop(path,u);fail(e);return false}}
+    return this._local(path,undefined,u)}
 };
 function fail(e){const c=e&&e.code;toast(c==="storage"?"この端末に保存できませんでした。ブラウザの保存容量がいっぱいか、保存が止められている可能性があります":c==="invalid_argument"?"編集する権限がないため保存できませんでした":c==="quota_exceeded"?"保存できる件数の上限に達しました":"保存できませんでした。通信を確認してもう一度試してください")}
 
@@ -281,10 +281,11 @@ function snapshot(path){const g=path.split("/");let o=null;
   else if(g.length===4&&g[1]===S.tripId){const L=g[2]==="items"?S.items:g[2]==="spots"?S.spots:g[2]==="days"?Object.values(S.days):[];o=L.find(x=>x.id===g[3])}
   if(!o)return null;const r=JSON.parse(JSON.stringify(o));delete r.id;return r}
 const Undo={stack:[],cur:null,label:"",replaying:false,
-  rec(path){if(this.replaying)return;
+  /* 記録した履歴（エントリ）を返す。保存に失敗したら drop にそのエントリを渡して、そこから外す */
+  rec(path){if(this.replaying)return null;
     if(!this.cur){this.cur={label:this.label||"変更しました",ops:[]};this.stack.push(this.cur);if(this.stack.length>30)this.stack.shift();setTimeout(()=>this.done(),0)}
-    if(!this.cur.ops.some(o=>o.path===path))this.cur.ops.push({path,prev:snapshot(path)})},
-  drop(path){if(this.replaying)return;const c=this.cur||this.stack[this.stack.length-1];if(!c)return;c.ops=c.ops.filter(o=>o.path!==path);if(!c.ops.length){this.stack=this.stack.filter(x=>x!==c);if(this.cur===c)this.cur=null}},
+    if(!this.cur.ops.some(o=>o.path===path))this.cur.ops.push({path,prev:snapshot(path)});return this.cur},
+  drop(path,c){if(this.replaying||!c)return;c.ops=c.ops.filter(o=>o.path!==path);if(!c.ops.length){this.stack=this.stack.filter(x=>x!==c);if(this.cur===c)this.cur=null}renderUndo()},
   done(){const c=this.cur;this.cur=null;this.label="";renderUndo();if(c&&c.ops.length)toast(c.label,true)},
   async undo(){const c=this.stack.pop();if(!c){toast("戻せる操作はありません");return}
     let ok=true;this.replaying=true;
@@ -626,8 +627,13 @@ function itemWarn(){const f=document.querySelector('form[data-form="item"]');if(
   const msg=$("if_kind").value==="move"?moveBlock(d,{id:fid||"__new",kind:"move",title:($("if_title").value||"").trim()||"移動",time:tm,arrive:readTime("ia"),order:orderFor(d,tm,fid)},fid):conflict(d,tm,fid);w.textContent=msg;w.hidden=!msg;sub.disabled=!!msg}
 function strip(o){const r={...o};delete r.id;return r}
 
+/* 保存が終わるまで同じフォームの送信を受け付けない（二重に作られるのを防ぐ） */
 document.addEventListener("submit",async e=>{
   const f=e.target.closest("[data-form]");if(!f)return;e.preventDefault();
+  if(f.dataset.busy)return;f.dataset.busy="1";const sb=f.querySelector("[type=submit]");if(sb)sb.disabled=true;
+  try{await submitForm(f)}finally{delete f.dataset.busy;if(sb&&f.isConnected){sb.disabled=false;if(f.dataset.form==="item")itemWarn()}}
+});
+async function submitForm(f){
   const fd=Object.fromEntries(new FormData(f).entries());const kind=f.dataset.form,id=f.dataset.id;
   if(kind==="trip"){
     if(fd.end<fd.start){toast("帰る日は出発日より後にしてください");return}
@@ -651,7 +657,7 @@ document.addEventListener("submit",async e=>{
     const old=id?S.spots.find(s=>s.id===id):null;Undo.label=old?"場所を保存しました":"場所を追加しました";
     if(!await Store.set(base()+"/spots/"+(id||uid()),{...(old?strip(old):{}),name:fd.name.trim(),city:fd.city.trim(),cat:fd.cat,stars:+fd.stars||2,fee:fd.fee.trim(),book:!!fd.book,note:fd.note.trim(),url:/^https?:\/\//.test(fd.url||"")?fd.url.trim():"",created:old?.created||Date.now()}))return;
     S.ui=null;draw();return}
-});
+}
 /* 日ごとの都市・メモは入力をやめたら保存 */
 document.addEventListener("change",e=>{
   const el=e.target;if(/^(as|if|ia)_[hm]$/.test(el.id)){const p=el.id.slice(0,2);const m=$(p+"_m"),h=$(p+"_h");if(m&&h)m.disabled=!/^\d+$/.test(h.value);if(p==="as"){S.assignTime=readTime("as");refreshPicker()}else itemWarn();return}
