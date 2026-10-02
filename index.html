@@ -164,6 +164,9 @@ h2{font-family:var(--serif);font-weight:800;font-size:22px;letter-spacing:.03em}
 .spot{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .spot.done{background:color-mix(in srgb,var(--paper) 70%,var(--ground))}
 .spot .top{display:flex;gap:8px;align-items:flex-start}
+.sph{margin:-14px -16px 2px;position:relative}
+.sph img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:13px 13px 0 0;background:var(--line)}
+.sph figcaption{position:absolute;right:6px;bottom:6px;max-width:calc(100% - 12px);font-size:10px;line-height:1.4;color:#fff;background:rgba(0,0,0,.45);border-radius:4px;padding:1px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .spot .nm{font-family:var(--serif);font-weight:800;font-size:18px;line-height:1.35;flex:1;min-width:0;overflow-wrap:anywhere}
 .spot .sub{display:flex;gap:6px 10px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
 .spot .note{font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -251,15 +254,25 @@ const Store={mode:"loading",db:null,ls:{},subs:[],
     if(this.mode==="cloud"){return this.db.collection(col).onSnapshot(q=>cb(q.docs.map(x=>({id:x.id,...x.data()}))),e=>{if(e&&e.code==="revoked")setSync("保存できない状態です")})}
     const s={col,cb};this.subs.push(s);this._emit(s);return()=>{this.subs=this.subs.filter(x=>x!==s)}},
   _emit(s){const out=[];for(const k in this.ls){const i=k.lastIndexOf("/");if(k.slice(0,i)===s.col)out.push({id:k.slice(i+1),...this.ls[k]})}s.cb(out)},
-  _save(){try{localStorage.setItem("planner-local",JSON.stringify(this.ls))}catch(e){}this.subs.forEach(s=>this._emit(s))},
-  async set(path,data){Undo.rec(path);
-    if(this.mode==="cloud"){try{await this.db.doc(path).set(data)}catch(e){fail(e)}return}
-    this.ls[path]=JSON.parse(JSON.stringify(data));this._save()},
-  async del(path){Undo.rec(path);
-    if(this.mode==="cloud"){try{await this.db.doc(path).delete()}catch(e){fail(e)}return}
-    delete this.ls[path];this._save()}
+  /* 保存できたら true。失敗したら画面は更新せず false を返す */
+  _save(){try{localStorage.setItem("planner-local",JSON.stringify(this.ls))}catch(e){return false}this.subs.forEach(s=>this._emit(s));return true},
+  _local(path,next,u){const had=path in this.ls,before=this.ls[path];
+    if(next===undefined)delete this.ls[path];else this.ls[path]=JSON.parse(JSON.stringify(next));
+    if(this._save())return true;
+    if(had)this.ls[path]=before;else delete this.ls[path];
+    Undo.drop(path,u);fail({code:"storage"});
+    /* フォーム入力中でなければ、画面も保存前の中身に描き直す（フォームは入力を残したまま） */
+    if(!S.ui){dirty=true;this.subs.forEach(s=>this._emit(s))}
+    return false},
+  /* 保存できたら true、失敗したら false を返す */
+  async set(path,data){const u=Undo.rec(path);
+    if(this.mode==="cloud"){try{await this.db.doc(path).set(data);return true}catch(e){Undo.drop(path,u);fail(e);return false}}
+    return this._local(path,data,u)},
+  async del(path){const u=Undo.rec(path);
+    if(this.mode==="cloud"){try{await this.db.doc(path).delete();return true}catch(e){Undo.drop(path,u);fail(e);return false}}
+    return this._local(path,undefined,u)}
 };
-function fail(e){const c=e&&e.code;toast(c==="invalid_argument"?"編集する権限がないため保存できませんでした":c==="quota_exceeded"?"保存できる件数の上限に達しました":"保存できませんでした。通信を確認してもう一度試してください")}
+function fail(e){const c=e&&e.code;toast(c==="storage"?"この端末に保存できませんでした。ブラウザの保存容量がいっぱいか、保存が止められている可能性があります":c==="invalid_argument"?"編集する権限がないため保存できませんでした":c==="quota_exceeded"?"保存できる件数の上限に達しました":"保存できませんでした。通信を確認してもう一度試してください")}
 
 /* ---------------- 元に戻す ---------------- */
 /* 保存・削除の直前に「変わる前の中身」を控える。同じタイミングの変更は1回分にまとめる */
@@ -268,12 +281,16 @@ function snapshot(path){const g=path.split("/");let o=null;
   else if(g.length===4&&g[1]===S.tripId){const L=g[2]==="items"?S.items:g[2]==="spots"?S.spots:g[2]==="days"?Object.values(S.days):[];o=L.find(x=>x.id===g[3])}
   if(!o)return null;const r=JSON.parse(JSON.stringify(o));delete r.id;return r}
 const Undo={stack:[],cur:null,label:"",replaying:false,
-  rec(path){if(this.replaying)return;
+  /* 記録した履歴（エントリ）を返す。保存に失敗したら drop にそのエントリを渡して、そこから外す */
+  rec(path){if(this.replaying)return null;
     if(!this.cur){this.cur={label:this.label||"変更しました",ops:[]};this.stack.push(this.cur);if(this.stack.length>30)this.stack.shift();setTimeout(()=>this.done(),0)}
-    if(!this.cur.ops.some(o=>o.path===path))this.cur.ops.push({path,prev:snapshot(path)})},
-  done(){const c=this.cur;this.cur=null;this.label="";renderUndo();if(c)toast(c.label,true)},
+    if(!this.cur.ops.some(o=>o.path===path))this.cur.ops.push({path,prev:snapshot(path)});return this.cur},
+  drop(path,c){if(this.replaying||!c)return;c.ops=c.ops.filter(o=>o.path!==path);if(!c.ops.length){this.stack=this.stack.filter(x=>x!==c);if(this.cur===c)this.cur=null}renderUndo()},
+  done(){const c=this.cur;this.cur=null;this.label="";renderUndo();if(c&&c.ops.length)toast(c.label,true)},
   async undo(){const c=this.stack.pop();if(!c){toast("戻せる操作はありません");return}
-    this.replaying=true;try{for(const o of [...c.ops].reverse()){o.prev?await Store.set(o.path,o.prev):await Store.del(o.path)}}finally{this.replaying=false}
+    let ok=true;this.replaying=true;
+    try{for(const o of [...c.ops].reverse()){if(!(o.prev?await Store.set(o.path,o.prev):await Store.del(o.path))){ok=false;break}}}finally{this.replaying=false}
+    if(!ok){this.stack.push(c);renderUndo();return}  /* 失敗したら、この履歴を残して後でやり直せるようにする */
     renderUndo();toast("元に戻しました（"+c.label.replace(/しました$|ました$/,"")+"）")}
 };
 function renderUndo(){const b=$("undoBtn");if(!b)return;const c=Undo.stack[Undo.stack.length-1];b.hidden=!c;if(c){b.title="元に戻す："+c.label;b.setAttribute("aria-label","元に戻す："+c.label)}}
@@ -333,7 +350,11 @@ function tripSwitch(){
 }
 function draw(){
   const t=trip();
-  if(S.tripId&&!t&&S.loaded.trips){S.tripId=null}
+  if(S.tripId&&!t&&S.loaded.trips){
+    /* 作った直後はデータが届くまで待つ（一覧に戻さない） */
+    if(S.pendingOpen===S.tripId&&Date.now()-(S.pendingAt||0)<15000){$("crumb").innerHTML=S.trips.length?tripSwitch():"";$("app").innerHTML=`<div class="empty">旅行を作っています…</div>`;setTimeout(render,800);return}
+    S.tripId=null;S.pendingOpen=null}
+  if(t&&S.pendingOpen===t.id)S.pendingOpen=null;
   $("crumb").innerHTML=S.trips.length?tripSwitch():"";
   $("app").innerHTML=t?tripView(t):homeView();
   if(S.focus){const f=document.querySelector(S.focus);S.focus=null;if(f){f.focus();f.scrollIntoView({block:"center"})}}
@@ -410,18 +431,25 @@ function readTime(p){const h=$(p+"_h"),m=$(p+"_m");return h?joinTime(h.value,m&&
 function dest(mv){const t=(mv.title||"").replace(/（.*?）|\(.*?\)/g,"");const a=t.split("→");
   if(a.length>1)return a[a.length-1].replace(/(駅|空港)?へ?$/,"").trim()||"目的地";
   const m=t.match(/(?:で)?([^\sで]+?)へ/);return m?m[1]:"目的地"}
-function conflict(d,time,skipId){
+function conflict(d,time,skipId,list){
   const t=timeKey(time);if(t==null)return "";const tr=trip();if(!tr)return "";
-  const moves=itemsOf(d).filter(i=>i.kind==="move"&&i.id!==skipId&&timeKey(i.time)!=null);
+  const moves=(list||itemsOf(d)).filter(i=>i.kind==="move"&&i.id!==skipId&&timeKey(i.time)!=null);
   for(const mv of moves){const dep=timeKey(mv.time),arr=timeKey(mv.arrive);
     if(arr!=null&&arr>dep&&t>=dep&&t<arr)return `この時間は移動中です（${mv.title} ${mv.time}〜${mv.arrive}）`}
   const dates=dateRange(tr.start,tr.end);
   if(d===dates[0]){const first=moves.find(m=>timeKey(m.arrive)!=null&&timeKey(m.arrive)>timeKey(m.time));
     if(first&&t<timeKey(first.arrive))return `${dest(first)}到着前です（${first.arrive}着）`}
-  if(d===dates[dates.length-1]&&dates.length>1&&moves.length){const last=moves[moves.length-1];
+  /* 日帰りでも、移動が2つ以上あれば最後の移動を「帰り」とみなす */
+  if(d===dates[dates.length-1]&&moves.length&&(dates.length>1||moves.length>1)){const last=moves[moves.length-1];
     if(t>=timeKey(last.time))return `帰りの出発（${last.time}）より後です`}
   return "";
 }
+/* 移動を保存すると、その日のほかの予定が移動中・到着前になってしまわないか */
+function moveBlock(d,draft,skipId){
+  const list=[...itemsOf(d).filter(i=>i.id!==skipId),draft].sort((a,b)=>(a.order||0)-(b.order||0));
+  const bad=list.filter(i=>i.kind!=="move"&&conflict(d,i.time,null,list));
+  if(!bad.length)return "";
+  return `この移動の時間だと「${bad.slice(0,2).map(b=>b.title).join("」「")}」${bad.length>2?`など${bad.length}件`:""}が移動中・到着前・出発後になります。先にそちらの時間を直してください`}
 function spotOptions(list){return `<option value="">選ばない</option>`+list.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}${s.city?"（"+esc(s.city)+"）":""}</option>`).join("")}
 function itemsOf(d){return S.items.filter(i=>i.date===d).sort((a,b)=>(a.order||0)-(b.order||0))}
 
@@ -498,14 +526,16 @@ function spotsView(t,dates){
 }
 function starBtns(s){return `<span class="stars" role="group" aria-label="行きたい度">${[1,2,3].map(n=>`<button class="${(s.stars||0)>=n?"on":""}" data-act="star" data-id="${esc(s.id)}" data-n="${n}" aria-label="行きたい度${n}">★</button>`).join("")}</span>`}
 function spotCard(s,dates){
+  const photo=/^img\/[\w\/.-]+\.jpg$/.test(s.photo||"")?s.photo:"";
   const ds=spotDates(s);
   return `<article class="spot ${ds.length?"done":""}">
+    ${photo?`<figure class="sph"><img src="${esc(photo)}" alt="${esc(s.name)}" loading="lazy"><figcaption>${esc(s.credit||"")}</figcaption></figure>`:""}
     <div class="top"><span class="nm">${esc(s.name)}</span>${starBtns(s)}</div>
     <div class="sub">${s.city?`<span>${esc(s.city)}</span>`:""}<span class="kind k-${s.cat==="food"?"food":"see"}">${CATS[s.cat]||"観光"}</span>${s.book?`<span class="book">要予約</span>`:""}${s.fee?`<span class="fee">${esc(s.fee)}</span>`:""}</div>
     ${s.note?`<div class="note">${esc(s.note)}</div>`:""}
     <div class="bot">${ds.map(d=>`<button class="planned" data-act="goDay" data-d="${d}">${md(d)}の予定に入っています</button>`).join("")}
       ${ds.length?"":`<button class="btn" data-act="assign" data-id="${esc(s.id)}">日程に入れる</button>`}
-      <a class="btn ghost" href="${esc(mapUrl(s))}" target="_blank" rel="noopener">地図</a>${s.url?`<a class="btn ghost" href="${esc(s.url)}" target="_blank" rel="noopener">リンク</a>`:""}
+      <a class="btn ghost" href="${esc(mapUrl(s))}" target="_blank" rel="noopener">地図</a>${/^https:\/\//.test(s.wiki||"")?`<a class="btn ghost" href="${esc(s.wiki)}" target="_blank" rel="noopener">${/commons\.wikimedia/.test(s.wiki)?"写真集":"Wikipedia"}</a>`:""}${s.url?`<a class="btn ghost" href="${esc(s.url)}" target="_blank" rel="noopener">リンク</a>`:""}
       <span style="flex:1"></span><button class="ib" data-act="editSpot" data-id="${esc(s.id)}" aria-label="編集">${icon("edit")}</button><button class="ib" data-act="delSpot" data-id="${esc(s.id)}" aria-label="削除">${icon("del")}</button></div>
     ${S.assign===s.id?assignPicker(s,dates):""}
     ${S.confirm===s.id?`<span class="confirm">この場所を削除しますか？${ds.length?"（日程の予定は残ります）":""}<button class="btn danger fill" data-act="delSpotYes" data-id="${esc(s.id)}">削除</button><button class="btn ghost" data-act="noConfirm">やめる</button></span>`:""}
@@ -593,17 +623,24 @@ const shortNg=w=>w.startsWith("この時間は移動中")?"移動中のため不
 function refreshPicker(){document.querySelectorAll(".pdays button").forEach(b=>{const w=conflict(b.dataset.d,S.assignTime);b.disabled=!!w;b.title=w;let n=b.querySelector(".ng");
   if(w){if(!n){n=document.createElement("small");n.className="ng";b.append(n)}n.textContent=shortNg(w)}else if(n)n.remove()})}
 function itemWarn(){const f=document.querySelector('form[data-form="item"]');if(!f)return;const w=$("if_warn"),sub=f.querySelector("[type=submit]");
-  const msg=$("if_kind").value==="move"?"":conflict($("if_date").value,readTime("if"),f.dataset.id||null);w.textContent=msg;w.hidden=!msg;sub.disabled=!!msg}
+  const d=$("if_date").value,tm=readTime("if"),fid=f.dataset.id||null;
+  const msg=$("if_kind").value==="move"?moveBlock(d,{id:fid||"__new",kind:"move",title:($("if_title").value||"").trim()||"移動",time:tm,arrive:readTime("ia"),order:orderFor(d,tm,fid)},fid):conflict(d,tm,fid);w.textContent=msg;w.hidden=!msg;sub.disabled=!!msg}
 function strip(o){const r={...o};delete r.id;return r}
 
-document.addEventListener("submit",e=>{
+/* 保存が終わるまで同じフォームの送信を受け付けない（二重に作られるのを防ぐ） */
+document.addEventListener("submit",async e=>{
   const f=e.target.closest("[data-form]");if(!f)return;e.preventDefault();
+  if(f.dataset.busy)return;f.dataset.busy="1";const sb=f.querySelector("[type=submit]");if(sb)sb.disabled=true;
+  try{await submitForm(f)}finally{delete f.dataset.busy;if(sb&&f.isConnected){sb.disabled=false;if(f.dataset.form==="item")itemWarn()}}
+});
+async function submitForm(f){
   const fd=Object.fromEntries(new FormData(f).entries());const kind=f.dataset.form,id=f.dataset.id;
   if(kind==="trip"){
     if(fd.end<fd.start){toast("帰る日は出発日より後にしてください");return}
     const old=id?S.trips.find(t=>t.id===id):null;const nid=id||uid();Undo.label=id?"旅行の設定を保存しました":"旅行を作りました";
-    Store.set("trips/"+nid,clean({title:fd.title.trim(),start:fd.start,end:fd.end,people:fd.people?+fd.people:"",route:fd.route.trim(),color:fd.color||"azul",created:old?.created||Date.now()}));
-    S.ui=null;if(!id){S.pendingOpen=nid;openTrip(nid,"days")}else{draw()}return}
+    const ok=await Store.set("trips/"+nid,clean({title:fd.title.trim(),start:fd.start,end:fd.end,people:fd.people?+fd.people:"",route:fd.route.trim(),color:fd.color||"azul",created:old?.created||Date.now()}));
+    if(!ok)return;  /* 保存できなかったらフォームを開いたままにする */
+    S.ui=null;if(!id){S.pendingOpen=nid;S.pendingAt=Date.now();openTrip(nid,"days")}else{draw()}return}
   if(kind==="item"){
     const old=id?S.items.find(i=>i.id===id):null;
     let title=fd.title.trim();const sp=fd.spotId&&S.spots.find(s=>s.id===fd.spotId);
@@ -611,15 +648,16 @@ document.addEventListener("submit",e=>{
     const date=fd.date;const time=joinTime(fd.time_h,fd.time_m);const kd=fd.kind||"see";
     if(kd!=="move"){const w=conflict(date,time,id);if(w){toast(w);return}}
     const arrive=kd==="move"?joinTime(fd.arr_h,fd.arr_m):"";
+    if(kd==="move"){const w=moveBlock(date,{id:id||"__new",kind:"move",title,time,arrive,order:orderFor(date,time,id)},id);if(w){toast(w);return}}
     const order=old&&old.date===date&&(old.time||"")===time?old.order:orderFor(date,time,id);
     Undo.label=old?"予定を保存しました":"予定を追加しました";
-    Store.set(base()+"/items/"+(id||uid()),{date,time,arrive,kind:fd.kind||(sp?CAT2KIND[sp.cat]||"see":"see"),title,note:fd.note.trim(),spotId:fd.spotId||"",order});
+    if(!await Store.set(base()+"/items/"+(id||uid()),{date,time,arrive,kind:fd.kind||(sp?CAT2KIND[sp.cat]||"see":"see"),title,note:fd.note.trim(),spotId:fd.spotId||"",order}))return;
     S.ui=null;draw();return}
   if(kind==="spot"){
     const old=id?S.spots.find(s=>s.id===id):null;Undo.label=old?"場所を保存しました":"場所を追加しました";
-    Store.set(base()+"/spots/"+(id||uid()),{name:fd.name.trim(),city:fd.city.trim(),cat:fd.cat,stars:+fd.stars||2,fee:fd.fee.trim(),book:!!fd.book,note:fd.note.trim(),url:/^https?:\/\//.test(fd.url||"")?fd.url.trim():"",created:old?.created||Date.now()});
+    if(!await Store.set(base()+"/spots/"+(id||uid()),{...(old?strip(old):{}),name:fd.name.trim(),city:fd.city.trim(),cat:fd.cat,stars:+fd.stars||2,fee:fd.fee.trim(),book:!!fd.book,note:fd.note.trim(),url:/^https?:\/\//.test(fd.url||"")?fd.url.trim():"",created:old?.created||Date.now()}))return;
     S.ui=null;draw();return}
-});
+}
 /* 日ごとの都市・メモは入力をやめたら保存 */
 document.addEventListener("change",e=>{
   const el=e.target;if(/^(as|if|ia)_[hm]$/.test(el.id)){const p=el.id.slice(0,2);const m=$(p+"_m"),h=$(p+"_h");if(m&&h)m.disabled=!/^\d+$/.test(h.value);if(p==="as"){S.assignTime=readTime("as");refreshPicker()}else itemWarn();return}
