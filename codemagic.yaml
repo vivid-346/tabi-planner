@@ -1,0 +1,43 @@
+# 旅のノート（iPhoneアプリ）を Codemagic でビルドして TestFlight に上げる設定
+# 使う前に：Codemagic の「Teams → Integrations → Developer Portal」で App Store Connect の APIキーを
+#           「tabinote-asc」という名前で登録しておく（手順は app/README.md）
+workflows:
+  ios-testflight:
+    name: 旅のノート iOS（TestFlight）
+    working_directory: app
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: tabinote-asc
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: io.github.vivid346.tabinote
+      vars:
+        APP_STORE_APPLE_ID: "0000000000"   # ← App Store Connect の「アプリ情報」にある Apple ID（数字10桁）に書き換える
+      node: 22
+      xcode: latest
+    triggering:
+      events: []        # 自動では動かさない（Codemagic の画面の「Start new build」で手動実行）
+    scripts:
+      - name: パッケージを入れる
+        script: npm ci
+      - name: 画面のファイルを作る
+        script: npm run build
+      - name: iPhone用プロジェクトを作る（アイコン・iPhone専用の設定込み）
+        script: npm run ios:create
+      - name: 署名の設定
+        script: xcode-project use-profiles
+      - name: ビルド番号を上げる
+        script: |
+          LATEST=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" || echo 0)
+          cd ios/App && agvtool new-version -all $(($LATEST + 1))
+      - name: アプリのファイル（ipa）を作る
+        script: xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
