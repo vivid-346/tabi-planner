@@ -1,0 +1,10 @@
+:root{--bg:#EBF1F0;--paper:#fff;--ink:#13302E;--muted:#58706D;--line:#D3E0DD;--accent:#0E6C74}
+@media (prefers-color-scheme:dark){:root{--bg:#0B1817;--paper:#132322;--ink:#E2EEEC;--muted:#93ABA8;--line:#253E3B;--accent:#5FC3C9}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 "Hiragino Sans","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif}
+main{max-width:720px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:32px 0 6px;padding-top:16px;border-top:1px solid var(--line)}
+.sub{color:var(--muted);font-size:14px;margin:0}
+a{color:var(--accent)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin:16px 0}
+ul{padding-left:1.3em}li{margin:4px 0}
+nav{display:flex;gap:16px;font-size:14px;margin-bottom:24px}
