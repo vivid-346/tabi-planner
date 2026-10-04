@@ -1,0 +1,22 @@
+{
+  "name": "tabinote-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "旅のノート（iPhoneアプリ版）",
+  "scripts": {
+    "build": "node scripts/build-www.js",
+    "ios:create": "npx cap add ios && node scripts/ios-setup.js && npx @capacitor/assets generate --ios --iconBackgroundColor \"#0E6C74\" --splashBackgroundColor \"#EBF1F0\" --splashBackgroundColorDark \"#0B1817\"",
+    "sync": "npm run build && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/share": "^8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.2"
+  }
+}

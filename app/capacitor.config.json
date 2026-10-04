@@ -1,0 +1,14 @@
+{
+  "appId": "io.github.vivid346.tabinote",
+  "appName": "旅のノート",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#EBF1F0"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "presentationOptions": ["banner", "sound", "list"]
+    }
+  }
+}
