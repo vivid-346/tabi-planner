@@ -353,6 +353,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);background:va
 .nlist .when{color:var(--accent-ink)}
 .banner .ic{background:var(--accent)}
 .toast button{background:var(--accent);color:var(--on-accent);border-radius:10px}
+
+/* ===== 案10 D改：パステル × すりガラス ===== */
+:root{--ground:#F4F2FB;--paper:rgba(255,255,255,.72);--solid:#FFFFFF;--ink:#1F1D2B;--ink2:#423F55;--muted:#66637A;--line:rgba(90,63,208,.12);--soft:rgba(90,63,208,.07);
+ --accent:#5A3FD0;--accent-ink:#5A3FD0;--accent-soft:#ECE8FF;--on-accent:#FFFFFF;
+ --c1:#5A3FD0;--c2:#2563A8;--c3:#B0457A;--c4:#1F7A5A;--c5:#B07A0A;--c6:#C2410C;--c7:#0E7490;
+ --sea:#E3ECFA;--land:#FBFAFE;--land-line:#CFC8E8;--shadow:0 4px 12px rgba(60,40,140,.06)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#14131C;--paper:rgba(38,35,54,.72);--solid:#211F2E;--ink:#F1EFFA;--ink2:#D4D0E6;--muted:#A7A3BC;--line:rgba(169,150,255,.16);--soft:rgba(169,150,255,.10);
+ --accent:#A996FF;--accent-ink:#B9AAFF;--accent-soft:#2C2645;--on-accent:#16141F;--c1:#A996FF;--c2:#7FB2EE;--c3:#F29AC4;--c4:#6FD3AE;--c5:#E8B64C;--c6:#F59E62;--c7:#5CC8DD;
+ --sea:#1A2233;--land:#262338;--land-line:#3D3858;--shadow:0 4px 12px rgba(0,0,0,.3)}}
+body{background:linear-gradient(170deg,#FCEFF6 0%,#EFEBFF 38%,#E6F1FC 70%,#E7F7F2 100%) fixed var(--ground)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body{background:linear-gradient(170deg,#1D1626 0%,#16152A 45%,#121B26 100%) fixed var(--ground)}}
+.card,.empty,.spot,.trip,.nowcard,.day li:not(.mv):not(.full),.day li.full:has(form),.dayjump button:first-child,.chip,.day .foot .btn,.seg .on{background:var(--paper);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:var(--shadow),inset 0 0 0 1px rgba(255,255,255,.6)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .spot,:root:not([data-theme="light"]) .trip,:root:not([data-theme="light"]) .day li:not(.mv):not(.full){box-shadow:var(--shadow),inset 0 0 0 1px rgba(255,255,255,.06)}}
+.tabbar{background:rgba(255,255,255,.62)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabbar{background:rgba(38,35,54,.66)}}
+.bar{background:transparent}
+.btn.fill,.btn.big.fill{background:linear-gradient(135deg,#6B4FE0,#4C68E0)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.fill{background:linear-gradient(135deg,#B3A2FF,#93A8FF)}}
+.hero{background-color:#8E7BE8}
+.day .k-food .kind{background:#FDE7F0;color:#9B2453}.day .k-see .kind{background:#E5EEFC;color:#2563A8}
+input[type=text],input[type=date],input[type=number],select,textarea{background:rgba(255,255,255,.6)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input[type=text],:root:not([data-theme="light"]) input[type=date],:root:not([data-theme="light"]) input[type=number],:root:not([data-theme="light"]) select,:root:not([data-theme="light"]) textarea{background:rgba(255,255,255,.06)}}
+.nph{background:var(--sea)}
+.toast{background:#2B2640}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -853,11 +877,13 @@ function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[]
 function aiApply(c,mode){return change(`AIの${c.nItems?"プラン":"候補"}を取り込みました`,t=>{t.spots=t.spots||{};t.items=t.items||{};t.dayInfo=t.dayInfo||{};
   const ids=new Map(spots(t).map(s=>[normName(s.name),s.id]));
   c.spots.forEach((s,i)=>{if(s.dup)return;const id=uid()+i;t.spots[id]={name:s.name,wiki:s.wiki||"",en:s.en||"",area:s.area,cat:s.cat,note:s.note+(s.rain?"（雨の日もOK）":""),fee:s.fee,url:"",lat:s.lat,lon:s.lon,book:s.book,minutes:s.minutes,ai:true,created:Date.now()+i};ids.set(normName(s.name),id)});
+  /* 日程に出てくるのに候補の一覧にない場所は、候補として足す（写真を付けるため） */
+  if(c.nItems)Object.values(c.days).flat().forEach((x,i)=>{if(x.spotName&&!ids.has(normName(x.spotName))&&x.kind!=="move"&&x.kind!=="stay"){const id=uid()+"x"+i;t.spots[id]={name:x.spotName,wiki:"",en:"",area:"",cat:x.kind==="food"?"food":"see",note:x.note||"",fee:"",url:"",lat:null,lon:null,book:false,minutes:null,ai:true,created:Date.now()+100+i};ids.set(normName(x.spotName),id)}});
   if(c.nItems){if(mode==="replace")t.items={};
     Object.entries(c.days).forEach(([date,its])=>{const base=nextOrder(t,date);its.forEach((x,i)=>{t.items[uid()+date+i]={date,time:x.time,arrive:x.kind==="move"?x.arrive:"",kind:x.kind,title:x.title,note:(x.flag?"【要確認：時間がかぶっています】":"")+x.note,spot:x.spotName?ids.get(normName(x.spotName))||"":"",order:base+i}});
       if(c.areas[date])t.dayInfo[date]={...(t.dayInfo[date]||{}),area:c.areas[date]}})}})}
 function aiView(t){const A=S.ai,o=A.o;const more=A.kind==="more",txt=A.kind==="text";
-  const head=`<div class="row" style="justify-content:space-between"><h2 style="font-size:20px">${A.first?"まず、行きたい場所の候補をそろえましょう":txt?"文章から行きたい場所を拾う":more?"AIで候補を増やす":"AIで日程と候補を作る"}</h2><button class="btn" data-a="aiClose">${A.first?"あとで":"閉じる"}</button></div>${A.first&&A.step!=="preview"?`<p class="sub">「${esc(o.dest)}」で行けそうな場所を、AIが説明文付きで10か所以上考えます。取り込むと、写真も自動で探して付けます。</p>`:""}`;
+  const head=`<div class="row" style="justify-content:space-between"><h2 style="font-size:20px">${A.first?"まず、AIに日程と候補を考えてもらいましょう":txt?"文章から行きたい場所を拾う":more?"AIで候補を増やす":"AIで日程と候補を作る"}</h2><button class="btn" data-a="aiClose">${A.first?"あとで":"閉じる"}</button></div>${A.first&&A.step!=="preview"?`<p class="sub">「${esc(o.dest)}」の日程と、行けそうな場所の候補（説明文付きで10か所以上）をAIが考えます。取り込むと、日程に出てくる場所と候補に写真を自動で付けます。</p>`:""}`;
   if(A.step==="preview"){const c=A.c;return `<section class="card form">${head}
      <p class="note">取り込む内容：予定 <b>${c.nItems}件</b> ・ 行きたい場所 <b>${c.spots.filter(s=>!s.dup).length}か所</b></p>
      ${c.warn.map(w=>`<p class="warn" style="font-weight:500">${esc(w)}</p>`).join("")}
@@ -1010,7 +1036,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
      S.ai.paste=tx;aiParse(tx);break}
    case"aiCopy":{aiReadForm();if(S.ai.kind==="text"&&!(S.ai.o.src||"").trim()){toast("先に文章を貼ってください");$("ai_src")?.focus();break}const p=aiPrompt(t,S.ai.o,S.ai.kind);try{await navigator.clipboard.writeText(p);toast("指示文をコピーしました。AIのチャットに貼ってください")}catch(e){S.ai.paste="";const ta=$("ai_paste");ta.value=p;ta.select();toast("指示文を下の欄に出しました。コピーしてから、AIの答えに貼り替えてください")}break}
    case"aiRead":aiReadForm();aiParse(S.ai.paste);break;
-   case"aiApply":{aiReadForm();const c=S.ai.c,k=S.ai.kind;if(aiApply(c,S.ai.o.mode)){S.ai=null;S.tab=k==="plan"?"plan":"spots";draw();window.scrollTo(0,0);fillPhotos(S.tid)}break}
+   case"aiApply":{aiReadForm();const c=S.ai.c,k=S.ai.kind;if(aiApply(c,S.ai.o.mode)){S.ai=null;S.tab=k==="plan"&&c.nItems?"plan":"spots";draw();window.scrollTo(0,0);fillPhotos(S.tid)}break}
    case"aiClaude":{if(!SAMPLE||S.ai.busy)break;aiReadForm();if(S.ai.kind==="text"&&!(S.ai.o.src||"").trim()){toast("先に文章を貼ってください");break}const A=S.ai;A.busy=true;A.live="";draw();
      try{const r=await SAMPLE(aiPrompt(t,A.o,A.kind),{modelTier:"complex",onText:({text})=>{A.live=`${text.length}文字…`;const el=$("ai_live");if(el)el.textContent=A.live}});A.busy=false;if(S.ai!==A)break;aiParse(r.text)}
      catch(e){A.busy=false;draw();toast(e&&e.code==="not_granted"?"Claudeを使う許可がありません。ほかのAIで作る方法を使ってください":e&&e.code==="rate_limited"?"混み合っています。少し待ってからもう一度":"Claudeで作れませんでした。ほかのAIで作る方法も使えます")}break}
@@ -1086,7 +1112,7 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
       if(change("旅行の設定を保存しました",t=>{Object.assign(t,{title,start,end,people,move,dest})})){S.tripForm=null;if(out)toast(`日付の外になった予定が${out}件あります（消してはいません）`);draw()}}
     else{const id=uid();DB.trips[id]={title,start,end,people,move,dest,created:Date.now(),sid:uid(),items:{},spots:{},members:{},expenses:{},notif:{...NDEF}};
       if(!save()){delete DB.trips[id];toast("この端末に保存できませんでした");return}S.tripForm=null;S.tid=id;S.tab="plan";UNDO=null;toast("旅行を作りました");
-      if(dest){S.tab="spots";S.ai={kind:"more",first:true,step:"form",o:{...aiDefaults(DB.trips[id]),count:12}}}draw();window.scrollTo(0,0)}
+      if(dest){S.tab="plan";S.ai={kind:"plan",first:true,step:"form",o:{...aiDefaults(DB.trips[id]),count:12}}}draw();window.scrollTo(0,0)}
     return}
   if(!t)return;
   if(f.id==="itemForm"){const date=$("f_date").value,id=f.dataset.id||null;const kind=$("f_kind").value,spot=$("f_spot")?.value||"";let title=$("f_title").value.trim();if(!title&&spot)title=t.spots[spot].name;if(!title){toast("内容を入力してください");return}
