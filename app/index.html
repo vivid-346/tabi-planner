@@ -400,6 +400,37 @@ input[type=text],input[type=date],input[type=number],select,textarea{background:
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input[type=text],:root:not([data-theme="light"]) input[type=date],:root:not([data-theme="light"]) input[type=number],:root:not([data-theme="light"]) select,:root:not([data-theme="light"]) textarea{background:rgba(255,255,255,.06)}}
 .nph{background:var(--sea)}
 .toast{background:#2B2640}
+/* 日程を見ながら候補を入れるパネル */
+.cpanel{position:fixed;left:10px;right:10px;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0px));z-index:24;max-width:640px;margin:0 auto;border-radius:20px;padding:12px 0 12px;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3);box-shadow:0 12px 40px rgba(60,40,140,.22),inset 0 0 0 1px rgba(255,255,255,.7)}
+.cpanel .ch{display:flex;align-items:center;gap:8px;padding:0 12px 10px}
+.cpanel .ch>b{font-size:15px;white-space:nowrap}
+.cpanel .cd{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
+.cpanel .cd button{border:0;border-radius:999px;padding:6px 11px;min-height:34px;font-size:13px;font-weight:700;background:var(--soft);color:var(--ink2);cursor:pointer;white-space:nowrap}
+.cpanel .cd button[aria-pressed="true"]{background:var(--dc);color:#fff}
+.cpanel .ct{display:none;padding:4px 12px 8px;margin:0;font-size:12px}
+.cpanel .cl{display:flex;gap:10px;overflow-x:auto;padding:0 12px 2px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.cc{flex:0 0 78%;max-width:300px;scroll-snap-align:start;display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:14px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--line)}
+.cc>img,.cc .ccn{flex:0 0 60px;width:60px;height:60px;border-radius:10px;object-fit:cover;overflow:hidden;background:var(--sea);display:block}
+.cc .ccn svg{width:100%;height:100%}
+.cc .cb{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cc .cb b{font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cc .cb .sub{font-size:11.5px;line-height:1.35}
+.cc .btn{min-height:34px;padding:4px 10px;font-size:13px;align-self:flex-start;margin-top:2px}
+.cc.in{opacity:.55}
+.page:has(.cpanel){padding-bottom:calc(64px + 230px + env(safe-area-inset-bottom,0px))}
+@media (max-width:899px){body:has(.cpanel) .toast{width:max-content;bottom:calc(64px + 215px + env(safe-area-inset-bottom,0px))}}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--accent),var(--shadow)}100%{box-shadow:var(--shadow)}}
+.day li.flash{animation:flash 2.4s ease-out}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cpanel{background:rgba(33,31,46,.93);box-shadow:0 12px 40px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.08)}:root:not([data-theme="light"]) .cc{background:rgba(255,255,255,.05)}}
+@media (min-width:900px){
+ .pw{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+ .cpanel{position:sticky;top:76px;left:auto;right:auto;bottom:auto;max-width:none;margin:0;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+ .cpanel .ch{flex-wrap:wrap;padding-bottom:0}.cpanel .cd{order:3;flex:1 0 100%}.cpanel .ct{display:block}
+ .cpanel .cl{flex-direction:column;overflow-x:hidden;overflow-y:auto;scroll-snap-type:none;padding-bottom:4px}
+ .cc{flex:0 0 auto;max-width:none}
+ .page:has(.cpanel){padding-bottom:56px}
+}
+@media (prefers-reduced-motion:reduce){.day li.flash{animation:none;box-shadow:0 0 0 3px var(--accent)}}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -506,7 +537,7 @@ const addMin=(tm,n)=>{const k=timeKey(tm);if(k==null)return"";const x=Math.min(k
 const fuelYen=km=>Math.round(km/FUEL.kmpl*FUEL.yen/10)*10;
 
 /* 画面の状態（保存しない） */
-const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null};
+const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null,side:false,sday:0,flash:null};
 try{const u=JSON.parse(localStorage.getItem(KEY+"-ui")||"{}");if(u.tid&&DB.trips[u.tid]){S.tid=u.tid;S.tab=u.tab||"plan"}}catch(e){}
 function saveUI(){try{localStorage.setItem(KEY+"-ui",JSON.stringify({tid:S.tid,tab:S.tab}))}catch(e){}}
 const T=()=>DB.trips[S.tid];
@@ -597,11 +628,32 @@ function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
    <div class="m">${md(ds[0])}（${wd(ds[0])}）〜 ${md(ds[ds.length-1])}（${wd(ds[ds.length-1])}） ・ ${ds.length>1?`${ds.length-1}泊${ds.length}日`:"日帰り"}${t.people?` ・ ${esc(t.people)}人`:""}</div></section>
   ${ds.length>1?`<nav class="dayjump" aria-label="日にち">${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}"><b>${+d.slice(8)}</b>${wd(d)}</button>`).join("")}</nav>`:""}`}
 function planView(t){const ds=dates(t);
-  return `${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}<div class="row"><button class="btn" data-a="aiOpen" data-k="plan">AIで作り直す</button><button class="btn" data-a="copyPlan">LINEで送る</button>${Native.isApp?"":`<button class="btn" data-a="print">印刷</button>`}</div>${nowCard(t)}
+  return `${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}<div class="row">${spots(t).length?`<button class="btn${S.side?" fill":""}" data-a="candOpen" aria-pressed="${!!S.side}">${S.side?"候補を閉じる":`候補から入れる${spots(t).filter(x=>!spotDay(t,x.id)).length?`（${spots(t).filter(x=>!spotDay(t,x.id)).length}）`:""}`}</button>`:""}<button class="btn" data-a="aiOpen" data-k="plan">AIで作り直す</button><button class="btn" data-a="copyPlan">LINEで送る</button>${Native.isApp?"":`<button class="btn" data-a="print">印刷</button>`}</div>${nowCard(t)}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
-  <div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${dayStat(t,date)}</header>
+  ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${dayStat(t,date)}</header>
    <ul>${its.map((x,j)=>(j?gapRow(t,its[j-1],x):"")+(S.edit===x.id?`<li class="full">${itemForm(t,date,x)}</li>`:itemRow(t,x))).join("")}${S.edit==="new:"+date?`<li class="full">${itemForm(t,date,null)}</li>`:""}${!its.length&&S.edit!=="new:"+date?`<li class="full"><span class="sub">まだ予定がありません</span></li>`:""}</ul>
-   ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を追加</button></div>`}</section>`}).join("")}</div>`}
+   ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を追加</button></div>`}</section>`}).join("")}</div>${S.side?candPanel(t)+"</div>":""}`}
+/* 日程を見ながら、行きたい場所の候補を入れる（スマホは下に出るパネル、広い画面は右の列） */
+function itemEnd(t,x){const k=timeKey(x.time);if(k==null)return null;if(x.kind==="move"){const a=timeKey(x.arrive);return a!=null&&a>=k?a:k+30}const sp=x.spot&&t.spots?.[x.spot];return k+(x.dur||sp?.minutes||60)}
+function legTo(t,a,b){if(!a||!b||a.lat==null||b.lat==null)return 30;const km=distKm(a,b)*1.3;return km<0.05?0:Math.round(legMin(km,mainMove(t,km)))}
+/* 前の予定の終わり＋移動のあと、次の予定までに滞在できるいちばん早いすき間。なければ最後の予定のあと */
+function suggestSlot(t,date,s){const its=items(t,date).filter(x=>timeKey(x.time)!=null);const stay=s.minutes||60;const r15=m=>Math.ceil(m/15)*15;const loc=x=>x&&x.spot&&t.spots?.[x.spot]||null;
+  if(!its.length)return {k:600,fit:true};
+  for(let i=0;i<its.length-1;i++){const a=its[i],b=its[i+1];if(a.kind==="stay"&&timeKey(a.time)>=17*60)continue;
+    const st=r15(itemEnd(t,a)+legTo(t,loc(a),s));if(st>=8*60&&st+stay+legTo(t,s,loc(b))<=timeKey(b.time)&&!conflict(t,date,pad(Math.floor(st/60))+":"+pad(st%60)))return {k:st,fit:true}}
+  const last=its[its.length-1];const st=Math.min(r15(itemEnd(t,last)+legTo(t,loc(last),s)),23*60+45);const close=s.cat==="food"||s.cat==="cafe"||s.cat==="shop"?22*60:18*60;return {k:st,fit:st+stay<=close}}
+const hm=k=>pad(Math.floor(k/60))+":"+pad(k%60);
+function candPanel(t){const ds=dates(t);const di=Math.min(S.sday||0,ds.length-1),date=ds[di];
+  const pts=items(t,date).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
+  const near=s=>s.lat==null||!pts.length?null:Math.min(...pts.map(p=>distKm(p,s)*1.3));
+  const list=spots(t).map(s=>{const d=spotDay(t,s.id);return {s,d,km:near(s),sl:d?null:suggestSlot(t,date,s)}}).sort((a,b)=>(!!a.d-!!b.d)||((a.sl&&!a.sl.fit)-(b.sl&&!b.sl.fit))||((a.km??1e9)-(b.km??1e9)));
+  const card=({s,d,km,sl})=>{const ph=s.photo&&s.photo.u?s.photo:null;
+    return `<div class="cc${d?" in":""}">${ph?`<img src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="ccn">${inJapan(s)?miniMap(s,16,16):""}</span>`}
+     <div class="cb"><b>${esc(s.name)}</b><span class="sub">${s.cat&&CATS[s.cat]?CATS[s.cat]+" ・ ":""}${s.minutes?"約"+fmtMin(s.minutes):""}${km!=null&&!d?` ・ この日の予定から約${km.toFixed(km<10?1:0)}km`:""}</span>
+     ${d?`<span class="sub">${d}日目に入っています</span>`:`<button class="btn fill" data-a="candAdd" data-id="${s.id}">＋ ${hm(sl.k)}に入れる</button>${sl.fit?"":`<span class="sub" style="color:var(--warn)">この日は空きがありません</span>`}`}</div></div>`};
+  return `<aside class="cpanel" aria-label="行きたい場所の候補"><div class="ch"><b>候補から入れる</b><div class="cd">${ds.map((d,k)=>`<button data-a="candDay" data-k="${k}" aria-pressed="${k===di}" style="--dc:${dayColor(k+1)}">${k+1}日目</button>`).join("")}</div><button class="ib icon" data-a="candOpen" aria-label="閉じる" title="閉じる">✕</button></div>
+   <p class="sub ct">押すと${di+1}日目のあいている時間に入ります。時間はあとで直せます。</p>
+   <div class="cl">${list.map(card).join("")}</div></aside>`}
 /* 予定と予定の間の移動の目安（直線距離×1.3を道のりとみなす。徒歩4.5km/h、車・電車は平均30km/h＋10分） */
 function distKm(a,b){const R=6371,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;const h=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 const fmtMin=m=>m>=60?`${Math.floor(m/60)}時間${m%60?Math.round(m%60)+"分":""}`:`${Math.max(1,Math.round(m))}分`;
@@ -634,7 +686,7 @@ function nowCard(t){const now=new Date(),today=ymd(now);if(!dates(t).includes(to
 function itemRow(t,x){const s=x.spot&&t.spots?.[x.spot];
   const td=ymd(new Date());const canDone=td>=t.start&&td<=t.end&&x.date<=td;
   const ph=s&&s.photo&&s.photo.u?s.photo:null;
-  return `<li class="k-${x.kind}${x.kind==="move"?" mv":""}${x.done?" done":""}"><span class="t">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:x.dur&&x.time?`<small>〜${addMin(x.time,x.dur)}</small>`:""}</span>
+  return `<li id="it_${x.id}" class="k-${x.kind}${x.kind==="move"?" mv":""}${x.done?" done":""}${S.flash===x.id?" flash":""}"><span class="t">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:x.dur&&x.time?`<small>〜${addMin(x.time,x.dur)}</small>`:""}</span>
    <span>${x.kind==="move"?"":`<span class="kind">${KINDS[x.kind]||""}</span>`}<span class="ti">${esc(x.title)}</span>${x.note?`<span class="no">${esc(x.note)}</span>`:""}${s&&s.lat!=null?`<span class="no"><button class="ib" style="padding:0" data-a="showSpot" data-id="${x.spot}">地図で見る</button></span>`:""}
    ${S.confirm===x.id?`<span class="row" style="margin-top:6px"><span class="sub" style="color:var(--warn)">削除しますか？</span><button class="btn danger" data-a="delItemYes" data-id="${x.id}">削除</button><button class="btn" data-a="noConfirm">やめる</button></span>`:""}</span>
    <span class="acts">${S.confirm===x.id?"":`${canDone?`<button class="ib${x.done?" ok":""}" data-a="doneItem" data-id="${x.id}" aria-pressed="${!!x.done}">${x.done?"✓ 行った":"行った"}</button>`:""}${ph?`<img class="thumb" src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.remove()">`:s&&inJapan(s)&&x.kind!=="move"?`<span class="thumb">${miniMap(s,16,16)}</span>`:""}<span class="row1"><button class="ib icon" data-a="editItem" data-id="${x.id}" aria-label="編集" title="編集">${ico("edit")}</button><button class="ib icon" data-a="delItem" data-id="${x.id}" aria-label="削除" title="削除">${ico("del")}</button></span>`}</span></li>`}
@@ -1137,6 +1189,11 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"cancel":if(S.tripForm){S.tripForm=null;S.confirm=null}else{S.edit=null;S.assign=null;S.wform=null;S.draft=null}draw();break;
    case"noConfirm":S.confirm=null;draw();break;
    case"tab":go(b.dataset.t);break;
+   case"candOpen":{if(!S.side){const secs=[...document.querySelectorAll(".day")];let k=0;secs.forEach((el,i)=>{if(el.getBoundingClientRect().top<innerHeight*0.4)k=i});S.sday=k}S.side=!S.side;S.flash=null;draw();break}
+   case"candDay":{S.sday=+b.dataset.k;draw();const el=$("day"+S.sday);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});break}
+   case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
+     const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
+     if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
    case"jumpDay":{const el=$("day"+b.dataset.k);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".dayjump button").forEach((x,i)=>{x.style.background=i==+b.dataset.k?"var(--paper)":"none";x.style.color=i==+b.dataset.k?"var(--ink)":"";x.style.boxShadow=i==+b.dataset.k?"var(--shadow)":"none"});break}
    case"findPhotos":Object.values(t.spots||{}).forEach(s=>{if(s.photo&&s.photo.none)delete s.photo});fillPhotos(S.tid);break;
    case"noPhoto":if(change("写真を外しました",t=>{t.spots[id].photo={none:1}}))draw();break;
