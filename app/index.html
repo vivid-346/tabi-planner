@@ -441,11 +441,6 @@ async function findPhoto(s){
   for(const nm of [s.name,s.en].filter(Boolean)){const key=squash(nm);if(key.length<3||(s.cat==="food"&&key.length<5))continue;
     const r=await wapi("commons.wikimedia.org",{action:"query",list:"search",srsearch:nm+" filetype:bitmap",srnamespace:"6",srlimit:"8"});
     const x=await pickFile((r.query?.search||[]).map(x=>x.title).filter(t=>okFile(t)&&squash(t).includes(key)));if(x)return x}
-  /* 3. 位置の近くで撮られた写真（お店は取り違えやすいので使わない）。「周辺の写真」と表示する */
-  if(s.lat!=null&&s.cat!=="food"&&s.cat!=="cafe"){const rad=s.cat==="shop"?"200":"500";
-    const r=await wapi("commons.wikimedia.org",{action:"query",list:"geosearch",gscoord:s.lat+"|"+s.lon,gsradius:rad,gsnamespace:"6",gslimit:"20"});
-    const fs=(r.query?.geosearch||[]).map(x=>x.title).filter(t=>okFile(t)&&!/manhole|マンホール|sign|標識|bus.?stop|バス停|plate|碑文|板|toilet|トイレ|parking|駐車/i.test(t));
-    const x=await pickFile(fs);if(x)return {...x,near:true}}
   return null}
 /* 写真のない場所の写真をまとめて探す（3件ずつ並行）。通信できないときは何もしない */
 async function fillPhotos(tid,ids){const t=DB.trips[tid];if(!t||!photoOn()||navigator.onLine===false)return;
@@ -562,7 +557,7 @@ function tripForm(){const t=S.tripForm==="edit"?T():{title:"",start:"",end:"",pe
 function timeSel(id,val){const m=/^(\d{1,2}):(\d{2})/.exec(val||"");const h=m?String(+m[1]):"",mi=m?m[2]:"00";
   return `<span class="tsel"><select id="${id}_h" aria-label="時">${["",...Array.from({length:24},(_,k)=>String(k))].map(v=>`<option value="${v}" ${v===h?"selected":""}>${v===""?"時間なし":v+"時"}</option>`).join("")}</select><select id="${id}_m" aria-label="分">${["00","15","30","45"].map(v=>`<option ${v===mi?"selected":""}>${v}</option>`).join("")}</select></span>`}
 const readTime=id=>{const h=$(id+"_h")?.value;return !h?"":pad(h)+":"+$(id+"_m").value};
-function tripPhoto(t){const rank={view:0,nature:1,activity:2,see:3};const ss=spots(t).filter(s=>s.photo&&s.photo.u).sort((a,b)=>(rank[a.cat]??9)-(rank[b.cat]??9)||(a.created||0)-(b.created||0));return ss[0]||null}
+function tripPhoto(t){const rank={view:0,nature:1,activity:2,see:3};const ss=spots(t).filter(s=>s.photo&&s.photo.u&&!s.photo.near).sort((a,b)=>(rank[a.cat]??9)-(rank[b.cat]??9)||(a.created||0)-(b.created||0));return ss[0]||null}
 function daysLeft(t){const today=ymd(new Date());return t.start&&today<t.start?Math.round((toD(t.start)-toD(today))/864e5):null}
 function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
   return `<section class="hero${p?"":" nophoto"}"${p?` style="background-image:url('${esc(p.photo.u).replace(/'/g,"%27")}')"`:""}>${p?`<span class="cr">写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</span>`:""}
