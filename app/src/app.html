@@ -131,6 +131,23 @@ textarea{min-height:64px;resize:vertical}
 .sph{margin:-14px -16px 4px}.sph img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;border-radius:16px 16px 0 0;background:var(--line)}
 .sph figcaption{font-size:11px;color:var(--muted);padding:4px 16px 0;overflow-wrap:anywhere;line-height:1.5}.sph figcaption a{color:inherit}
 .aigo{display:flex;flex-wrap:wrap;gap:8px}
+.mapbox.rich{background:#E9E6F2}
+.mapbox.rich #mlmap{position:absolute;inset:0}
+.mapbox .mapmode{position:absolute;left:10px;top:10px;z-index:3;border:0;border-radius:14px;background:var(--solid,#fff);color:var(--ink);box-shadow:var(--shadow);font-size:12px;font-weight:700;padding:0 12px;min-height:36px;cursor:pointer}
+.mlload{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;pointer-events:none}
+#mapOv{position:absolute;left:0;right:0;top:0;z-index:4}
+#mapOv:empty{display:none}
+.mk{border:0;background:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:4px}
+.mk .dot{position:relative;width:40px;height:40px;border-radius:50%;border:3px solid var(--c);background:var(--c);overflow:hidden;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.25);flex:none}
+.mk .dot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mk .dot b{position:relative;color:#fff;font:800 13px var(--num);text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.mk .dot img+b{position:absolute;right:-1px;bottom:-1px;width:17px;height:17px;border-radius:50%;background:var(--c);font-size:10px;display:grid;place-items:center;text-shadow:none}
+.mk.cand .dot{border-style:dashed;background:#fff}.mk.cand .dot b{color:var(--muted);text-shadow:none}.mk.cand .dot img+b{background:#fff;color:var(--muted)}
+.mk .nm{font:700 11.5px var(--sans);color:#1D1F24;background:rgba(255,255,255,.88);padding:1px 7px;border-radius:9px;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.mk.dim{opacity:.25}.mk.on .dot{width:48px;height:48px;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 4px 14px rgba(0,0,0,.35)}
+.mkx{width:22px;height:22px;border-radius:50%;border:3px solid var(--warn);background:rgba(255,255,255,.6)}
+.selph{width:calc(100% + 40px);margin:-20px -20px 8px;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r) var(--r) 0 0;display:block}
+.maplibregl-ctrl-attrib{font-size:10px}
 .nph{position:relative;aspect-ratio:16/10;background:var(--sea);overflow:hidden;border-radius:var(--r) var(--r) 0 0}
 .nph .mm{position:absolute;inset:0;width:100%;height:100%;display:block}
 .nph .nic{position:absolute;left:12px;top:12px;width:40px;height:40px;border-radius:50%;background:var(--paper);display:grid;place-items:center;box-shadow:var(--shadow)}
@@ -689,22 +706,81 @@ function readSpotForm(){return {name:$("sf_name").value.trim(),area:$("sf_area")
 /* ================= 画面：地図 ================= */
 const proj=(lat,lon)=>[(lon-GEO.W0)*GEO.C*GEO.K,(GEO.N0-lat)*GEO.K];
 const unproj=(x,y)=>({lat:GEO.N0-y/GEO.K,lon:x/(GEO.C*GEO.K)+GEO.W0});
-function mapView(t){const ds=dates(t);const nos=spots(t).filter(s=>s.lat==null);
-  const sel=S.sel&&t.spots[S.sel]?{id:S.sel,...t.spots[S.sel]}:null;
-  return `${S.pick?"":`${spots(t).length?"":`<p class="note">地図の行きたい所を押すと、そのまま「行きたい場所」に追加できます。</p>`}<div class="chips"><button class="chip" data-a="mapDay" data-d="0" aria-pressed="${!S.mapDay}">全部</button>${ds.map((d,k)=>`<button class="chip" data-a="mapDay" data-d="${k+1}" aria-pressed="${S.mapDay===k+1}"><i style="background:${dayColor(k+1)}"></i>${k+1}日目</button>`).join("")}</div>`}
+function mapTopHtml(t){const ds=dates(t);return S.pick?"":`${spots(t).length?"":`<p class="note">地図の行きたい所やお店を押すと、そのまま「行きたい場所」に追加できます。</p>`}<div class="chips"><button class="chip" data-a="mapDay" data-d="0" aria-pressed="${!S.mapDay}">全部</button>${ds.map((d,k)=>`<button class="chip" data-a="mapDay" data-d="${k+1}" aria-pressed="${S.mapDay===k+1}"><i style="background:${dayColor(k+1)}"></i>${k+1}日目</button>`).join("")}</div>`}
+function mapOvHtml(t){const tl=S.tapLL;
+  return `${S.pick?`<div class="pickbar"><b>${S.pick.ll?"この位置でよければ「決定」":`地図を押して「${esc(S.pick.name||"場所")}」の位置を決めてください`}</b>${S.pick.ll?`<button class="btn fill" data-a="pickOk">決定</button>`:""}<button class="btn" data-a="pickCancel">やめる</button></div>`:""}
+   ${!S.pick&&tl?`<div class="pickbar"><b>${tl.name?`「${esc(tl.name)}」を行きたい場所に追加しますか？`:"この位置を行きたい場所に追加しますか？"}</b><button class="btn fill" data-a="tapAdd">追加する</button><button class="btn" data-a="tapCancel">やめる</button></div>`:""}`}
+function mapBottomHtml(t){const nos=spots(t).filter(s=>s.lat==null);const sel=S.sel&&t.spots[S.sel]?{id:S.sel,...t.spots[S.sel]}:null;
+  return S.pick?"":(sel?`<div class="card selcard">${sel.photo&&sel.photo.u?`<img class="selph" src="${esc(sel.photo.u)}" alt="" onerror="this.remove()">`:""}<div class="row">${dayTag(t,sel.id)}${sel.area?`<span class="sub">${esc(sel.area)}</span>`:""}</div><h3 style="font-size:19px">${esc(sel.name)}</h3>${sel.note?`<p class="sub" style="color:var(--ink)">${esc(sel.note)}</p>`:""}${planBtns(t,sel)}<div class="row"><a class="btn fill" href="${Native.dirUrl(sel)}" target="_blank" rel="noopener">ここへ行く</a><a class="btn" href="${Native.mapUrl(sel)}" target="_blank" rel="noopener">Googleマップ</a></div></div>`
+   :(spots(t).some(s=>s.lat!=null)?`<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。${richMap()?"地図のお店や観光地を押すと、候補に追加できます。":""}</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
+   +(nos.length?`<div class="card form"><span class="lbl">位置が決まっていない場所</span><div class="row">${nos.map(s=>`<button class="btn" data-a="pickFor" data-id="${s.id}">${esc(s.name)}を置く</button>`).join("")}</div></div>`:"")}
+function mapView(t){
+  if(richMap())return `<div id="mapTop">${mapTopHtml(t)}</div>
+  <div class="mapbox rich${S.pick?" pick":""}" id="mapbox"><div id="mlmap"></div><div id="mapOv">${mapOvHtml(t)}</div><button class="mapmode" data-a="mapSimple">簡易地図</button><div class="mlload" id="mlload">地図を読み込んでいます…</div></div>
+  <div id="mapBottom" class="form" style="gap:12px">${mapBottomHtml(t)}</div>`;
+  return `<div id="mapTop">${mapTopHtml(t)}</div>
   <div class="mapbox${S.pick?" pick":""}" id="mapbox"><svg id="svg" role="img" aria-label="地図"><rect x="-99999" y="-99999" width="199999" height="199999" fill="var(--sea)"/><path class="land" d="${GEO.d}" vector-effect="non-scaling-stroke"/><g id="ov"></g></svg>
-   ${S.pick?`<div class="pickbar"><b>${S.pick.ll?"この位置でよければ「決定」":`地図を押して「${esc(S.pick.name||"場所")}」の位置を決めてください`}</b>${S.pick.ll?`<button class="btn fill" data-a="pickOk">決定</button>`:""}<button class="btn" data-a="pickCancel">やめる</button></div>`:""}
-   ${!S.pick&&S.tapLL?`<div class="pickbar"><b>この位置を行きたい場所に追加しますか？</b><button class="btn fill" data-a="tapAdd">追加する</button><button class="btn" data-a="tapCancel">やめる</button></div>`:""}
-   <div class="zoom"><button data-a="zin" aria-label="拡大">＋</button><button data-a="zout" aria-label="縮小">－</button><button data-a="zfit" aria-label="全体" style="font-size:12px">全体</button></div><span class="attr">地図：地球地図日本（国土地理院）をもとに作成</span></div>
-  ${S.pick?"":(sel?`<div class="card selcard"><div class="row">${dayTag(t,sel.id)}${sel.area?`<span class="sub">${esc(sel.area)}</span>`:""}</div><h3 style="font-size:19px">${esc(sel.name)}</h3>${sel.note?`<p class="sub" style="color:var(--ink)">${esc(sel.note)}</p>`:""}${planBtns(t,sel)}<div class="row"><a class="btn fill" href="${Native.dirUrl(sel)}" target="_blank" rel="noopener">ここへ行く</a><a class="btn" href="${Native.mapUrl(sel)}" target="_blank" rel="noopener">Googleマップ</a></div></div>`
-   :(spots(t).some(s=>s.lat!=null)?`<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
-   +(nos.length?`<div class="card form"><span class="lbl">位置が決まっていない場所</span><div class="row">${nos.map(s=>`<button class="btn" data-a="pickFor" data-id="${s.id}">${esc(s.name)}を置く</button>`).join("")}</div></div>`:"")}`}
+   <div id="mapOv">${mapOvHtml(t)}</div>
+   <div class="zoom"><button data-a="zin" aria-label="拡大">＋</button><button data-a="zout" aria-label="縮小">－</button><button data-a="zfit" aria-label="全体" style="font-size:12px">全体</button></div><span class="attr">地図：地球地図日本（国土地理院）をもとに作成</span>${navigator.onLine!==false?`<button class="mapmode" data-a="mapRich">詳しい地図</button>`:""}</div>
+  <div id="mapBottom" class="form" style="gap:12px">${mapBottomHtml(t)}</div>`}
+/* ===== 詳しい地図（MapLibre ＋ OpenFreeMap。無料・キー不要）。電波がないとき・読み込めないときは簡易地図 ===== */
+const ML={map:null,el:null,tid:null,ok:false,failed:false,markers:[],loading:null};
+const ML_STYLE="https://tiles.openfreemap.org/styles/liberty";
+const POI_LAYERS=["poi_r1","poi_r7","poi_r20","poi_transit","airport"];
+function richMap(){return S.mapMode!=="simple"&&!ML.failed&&navigator.onLine!==false}
+function loadML(){if(window.maplibregl)return Promise.resolve();if(ML.loading)return ML.loading;
+  ML.loading=new Promise((ok,ng)=>{const l=document.createElement("link");l.rel="stylesheet";l.href="vendor/maplibre-gl.css";document.head.appendChild(l);
+    const sc=document.createElement("script");sc.src="vendor/maplibre-gl.js";sc.onload=()=>window.maplibregl?ok():ng(new Error("ml"));sc.onerror=()=>ng(new Error("ml"));document.head.appendChild(sc);setTimeout(()=>ng(new Error("timeout")),15000)});
+  ML.loading.catch(()=>{ML.loading=null});return ML.loading}
+function mlFail(){if(ML.failed)return;ML.failed=true;try{ML.map&&ML.map.remove()}catch(e){}ML.map=null;ML.el=null;if(S.tab==="map"&&!S.ai){draw();toast("詳しい地図を読み込めなかったので、簡易地図にしました")}}
+const cssVar=v=>{const m=/var\((--[\w-]+)\)/.exec(v);return m?getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim()||"#888":v};
+async function initML(t){const ph=$("mlmap");if(!ph)return;
+  if(ML.map&&ML.tid===S.tid&&ML.el){ph.replaceWith(ML.el);ML.map.resize();if(ML.ok){$("mlload")?.remove();mlData(t);mlFocus(t)}return}
+  if(ML.map){try{ML.map.remove()}catch(e){}ML.map=null}
+  try{await loadML()}catch(e){mlFail();return}
+  if(!$("mlmap")||S.tab!=="map")return;
+  ML.ok=false;ML.tid=S.tid;ML.el=$("mlmap");
+  let map;try{map=new maplibregl.Map({container:ML.el,style:ML_STYLE,center:[137.5,37.5],zoom:4.3,attributionControl:{compact:false},dragRotate:false,pitchWithRotate:false,cooperativeGestures:false})}catch(e){mlFail();return}
+  ML.map=map;map.touchZoomRotate.disableRotation();map.addControl(new maplibregl.NavigationControl({showCompass:false}),"bottom-right");
+  const to=setTimeout(()=>{if(!ML.ok)mlFail()},15000);
+  map.on("error",e=>{if(!ML.ok&&!e.sourceId)mlFail()});
+  map.once("style.load",()=>{ML.ok=true;clearTimeout(to);$("mlload")?.remove();
+    /* 地名は日本語で */
+    map.getStyle().layers.forEach(l=>{if(l.type==="symbol"&&JSON.stringify(l.layout?.["text-field"]||"").includes("name"))map.setLayoutProperty(l.id,"text-field",["coalesce",["get","name:ja"],["get","name:nonlatin"],["get","name"]])});
+    map.addSource("routes",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
+    map.addLayer({id:"routes",type:"line",source:"routes",layout:{"line-cap":"round","line-join":"round"},paint:{"line-color":["get","color"],"line-width":4,"line-opacity":["get","op"]}});
+    POI_LAYERS.forEach(id=>{if(map.getLayer(id)){map.on("mouseenter",id,()=>map.getCanvas().style.cursor="pointer");map.on("mouseleave",id,()=>map.getCanvas().style.cursor="")}});
+    mlData(T());mlFit(T(),true);mlFocus(T())});
+  map.on("click",e=>{const t=T();if(!t)return;
+    if(S.pick){S.pick.ll={lat:e.lngLat.lat,lon:e.lngLat.lng};redrawMap();return}
+    const f=map.queryRenderedFeatures(e.point,{layers:POI_LAYERS.filter(id=>map.getLayer(id))})[0];
+    if(f){const p=f.properties||{};const c=f.geometry.coordinates;S.tapLL={lat:c[1],lon:c[0],name:p["name:ja"]||p["name:nonlatin"]||p.name||"",cls:p.class||"",sub:p.subclass||""};S.sel=null;redrawMap();return}
+    if(S.sel||S.tapLL){S.sel=null;S.tapLL=null;redrawMap();return}
+    S.tapLL={lat:e.lngLat.lat,lon:e.lngLat.lng};redrawMap()})}
+/* ピン・線を描き直す（地図そのものは作り直さない） */
+function mlData(t){const map=ML.map;if(!map||!ML.ok||!t)return;
+  ML.markers.forEach(m=>m.remove());ML.markers=[];
+  const ds=dates(t);
+  spots(t).forEach((s,i)=>{if(s.lat==null)return;const d=spotDay(t,s.id),on=S.sel===s.id,dim=S.mapDay&&d!==S.mapDay;
+    const el=document.createElement("button");el.type="button";el.className="mk"+(d?"":" cand")+(dim?" dim":"")+(on?" on":"");el.style.setProperty("--c",d?dayColor(d):"var(--muted)");el.setAttribute("aria-label",s.name);
+    el.innerHTML=`<span class="dot">${s.photo&&s.photo.u?`<img src="${esc(s.photo.u)}" alt="" onerror="this.remove()">`:""}<b>${i+1}</b></span><span class="nm">${esc(s.name)}</span>`;
+    el.addEventListener("click",ev=>{ev.stopPropagation();S.sel=s.id;S.assign=null;S.tapLL=null;redrawMap()});
+    ML.markers.push(new maplibregl.Marker({element:el,anchor:"top-left",offset:[-20,-20]}).setLngLat([s.lon,s.lat]).addTo(map))});
+  const mark=S.pick&&S.pick.ll||(!S.pick&&S.tapLL);
+  if(mark){const el=document.createElement("div");el.className="mkx";ML.markers.push(new maplibregl.Marker({element:el}).setLngLat([mark.lon,mark.lat]).addTo(map))}
+  const feats=ds.map((d,k)=>{const pts=items(t,d).filter(x=>x.spot&&t.spots[x.spot]&&t.spots[x.spot].lat!=null).map(x=>[t.spots[x.spot].lon,t.spots[x.spot].lat]);
+    return pts.length>1?{type:"Feature",properties:{color:cssVar(dayColor(k+1)),op:S.mapDay&&S.mapDay!==k+1?.15:.85},geometry:{type:"LineString",coordinates:pts}}:null}).filter(Boolean);
+  map.getSource("routes")?.setData({type:"FeatureCollection",features:feats})}
+function mlFit(t,instant){const map=ML.map;if(!map)return;const pts=spots(t).filter(s=>s.lat!=null&&(!S.mapDay||spotDay(t,s.id)===S.mapDay));
+  if(!pts.length)return;if(pts.length===1){map.jumpTo({center:[pts[0].lon,pts[0].lat],zoom:14});return}
+  const b=new maplibregl.LngLatBounds();pts.forEach(s=>b.extend([s.lon,s.lat]));map.fitBounds(b,{padding:{top:70,bottom:50,left:40,right:110},maxZoom:15,duration:instant?0:600})}
+function mlFocus(t){if(!S.focus||!ML.map||!ML.ok)return;const f=S.focus;S.focus=null;ML.map.jumpTo({center:[f.lon,f.lat],zoom:15})}
 function fitVB(t){const pts=spots(t).filter(s=>s.lat!=null).map(s=>proj(s.lat,s.lon));
   if(!pts.length)return [0,0,GEO.vw,GEO.vh];
   let x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));
   const w=Math.max(x1-x0,14)*1.35,h=Math.max(y1-y0,14)*1.35;return [(x0+x1)/2-w/2,(y0+y1)/2-h/2,w,h]}
 /* 表示範囲を枠の縦横比に合わせる */
-function setVB(vb){const box=$("mapbox");if(!box)return;const r=box.getBoundingClientRect();const asp=r.height/r.width||1;
+function setVB(vb){const box=$("mapbox");if(!box||!$("svg"))return;const r=box.getBoundingClientRect();const asp=r.height/r.width||1;
   let [x,y,w,h]=vb;const cx=x+w/2,cy=y+h/2;if(h/w>asp)w=h/asp;else h=w*asp;
   w=Math.min(Math.max(w,3),GEO.vw*1.6);h=w*asp;S.vb=[cx-w/2,cy-h/2,w,h];$("svg").setAttribute("viewBox",S.vb.map(v=>v.toFixed(2)).join(" "));drawOverlay()}
 function drawOverlay(){const t=T(),svg=$("svg");if(!svg||!t)return;const r=svg.getBoundingClientRect();const u=S.vb[2]/r.width; /* 画面1pxあたりの地図の長さ */
@@ -740,7 +816,9 @@ function bindMap(){const svg=$("svg");if(!svg)return;const pts=new Map();let st=
   svg.addEventListener("wheel",e=>{e.preventDefault();const [x,y]=toSvg(e.clientX,e.clientY);zoomAt(e.deltaY<0?1.25:1/1.25,x,y)},{passive:false});
   svg.addEventListener("keydown",e=>{const g=e.target.closest("[data-pin]");if(g&&(e.key==="Enter"||e.key===" ")){e.preventDefault();S.sel=g.dataset.pin;redrawMap()}});
 }
-function redrawMap(){const keep=S.vb;draw();if(keep)setVB(keep)}
+function redrawMap(){const t=T();
+  if(richMap()&&ML.map&&ML.ok&&$("mapbox")&&$("mapbox").contains(ML.el)){$("mapTop").innerHTML=mapTopHtml(t);$("mapOv").innerHTML=mapOvHtml(t);$("mapBottom").innerHTML=mapBottomHtml(t);$("mapbox").classList.toggle("pick",!!S.pick);mlData(t);return}
+  const keep=S.vb;draw();if(keep&&$("svg"))setVB(keep)}
 
 /* ================= 画面：割り勘 ================= */
 const yen=n=>(n<0?"-":"")+Math.abs(Math.round(n)).toLocaleString("ja-JP")+"円";
@@ -994,7 +1072,7 @@ function draw(){const t=T();
   if(S.print){$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${printView(t)}</div>`;saveUI();return}
   const v=S.ai?aiView(t):S.tab==="plan"?planView(t):S.tab==="spots"?spotsView(t):S.tab==="map"?mapView(t):S.tab==="split"?splitView(t):prepView(t);
   $("app").innerHTML=`<div class="page">${v}</div>`;
-  if(S.tab==="map"&&!S.ai){bindMap();setVB(S.vb||fitVB(t))}
+  if(S.tab==="map"&&!S.ai){if(richMap())initML(t);else{bindMap();setVB(S.vb||fitVB(t))}}
   saveUI();
 }
 function go(tab){S.print=false;S.ai=null;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
@@ -1071,13 +1149,18 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"assignDay":{const s=t.spots[id],date=b.dataset.date,tm=readTime("as_t");const w=conflict(t,date,tm);if(w){toast(w);break}
      const di=dates(t).indexOf(date)+1;if(change(`${s.name}を${di}日目に入れました`,t=>{t.items=t.items||{};t.items[uid()]={date,time:tm,arrive:"",kind:"see",title:s.name,note:"",spot:id,order:nextOrder(t,date)}})){S.assign=null;S.tab==="map"?redrawMap():draw()}break}
    case"unassign":if(change(`${t.spots[id].name}を日程から外しました`,t=>{Object.keys(t.items||{}).forEach(k=>{if(t.items[k].spot===id)delete t.items[k]})}))S.tab==="map"?redrawMap():draw();break;
-   case"showSpot":S.sel=id;S.mapDay=0;S.tab="map";S.edit=null;S.vb=null;draw();{const s=t.spots[id];const [x,y]=proj(s.lat,s.lon);setVB([x-8,y-8,16,16])}window.scrollTo(0,0);break;
-   case"pickDraft":S.draft=readSpotForm();S.pick={name:S.draft.name,back:true,ll:S.draft.lat!=null?{lat:S.draft.lat,lon:S.draft.lon}:null};S.tab="map";S.vb=null;draw();if(S.pick.ll){const [x,y]=proj(S.pick.ll.lat,S.pick.ll.lon);setVB([x-8,y-8,16,16])}window.scrollTo(0,0);break;
+   case"showSpot":S.sel=id;S.mapDay=0;S.tab="map";S.edit=null;S.vb=null;{const s0=t.spots[id];S.focus={lat:s0.lat,lon:s0.lon}}draw();{const s=t.spots[id];const [x,y]=proj(s.lat,s.lon);setVB([x-8,y-8,16,16])}window.scrollTo(0,0);break;
+   case"pickDraft":S.draft=readSpotForm();S.pick={name:S.draft.name,back:true,ll:S.draft.lat!=null?{lat:S.draft.lat,lon:S.draft.lon}:null};S.tab="map";S.vb=null;if(S.pick.ll)S.focus={...S.pick.ll};draw();if(S.pick.ll){const [x,y]=proj(S.pick.ll.lat,S.pick.ll.lon);setVB([x-8,y-8,16,16])}window.scrollTo(0,0);break;
    case"pickFor":S.pick={name:t.spots[id].name,id,ll:null};S.tab="map";S.edit=null;S.vb=null;draw();window.scrollTo(0,0);break;
    case"pickOk":{const p=S.pick;S.pick=null;if(p.back){S.draft.lat=p.ll.lat;S.draft.lon=p.ll.lon;S.tab="spots";draw();window.scrollTo(0,0)}
      else if(change(`${p.name}の位置を決めました`,t=>{t.spots[p.id].lat=p.ll.lat;t.spots[p.id].lon=p.ll.lon})){S.sel=p.id;redrawMap()}break}
    case"pickCancel":{const p=S.pick;S.pick=null;if(p.back){S.tab="spots";draw()}else redrawMap();break}
-   case"tapAdd":{const ll=S.tapLL;S.tapLL=null;S.draft={name:"",area:"",note:"",fee:"",url:"",lat:ll.lat,lon:ll.lon};S.edit="spot:";S.tab="spots";draw();window.scrollTo(0,0);$("sf_name")?.focus();break}
+   case"tapAdd":{const ll=S.tapLL;S.tapLL=null;
+     if(ll.name){const cat=/restaurant|fast_food|food|bar|pub|ice_cream|bakery/.test(ll.cls+ll.sub)?"food":/cafe/.test(ll.cls+ll.sub)?"cafe":/shop|grocery|mall|market/.test(ll.cls+ll.sub)?"shop":/park|garden|beach|nature|viewpoint/.test(ll.cls+ll.sub)?"nature":"see";const nid=uid();
+       if(change(`「${ll.name}」を行きたい場所に追加しました`,t=>{t.spots=t.spots||{};t.spots[nid]={name:ll.name.slice(0,60),area:"",cat,note:"",fee:"",url:"",lat:+ll.lat.toFixed(6),lon:+ll.lon.toFixed(6),created:Date.now()}})){S.sel=nid;redrawMap();fillPhotos(S.tid,[nid]).then(()=>{if(S.tab==="map")redrawMap()})}break}
+     S.draft={name:"",area:"",note:"",fee:"",url:"",lat:ll.lat,lon:ll.lon};S.edit="spot:";S.tab="spots";draw();window.scrollTo(0,0);$("sf_name")?.focus();break}
+   case"mapSimple":S.mapMode="simple";S.vb=null;draw();break;
+   case"mapRich":S.mapMode="rich";ML.failed=false;draw();break;
    case"tapCancel":S.tapLL=null;redrawMap();break;
    case"mapDay":S.mapDay=+b.dataset.d;redrawMap();break;
    case"zin":zoomAt(1.6);break;case"zout":zoomAt(1/1.6);break;case"zfit":S.vb=null;setVB(fitVB(t));break;
