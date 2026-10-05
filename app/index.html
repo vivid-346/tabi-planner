@@ -1,13 +1,4 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8">
-<title>旅のノート</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="旅のノート">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="icon-192.png">
-<link rel="manifest" href="manifest.webmanifest">
-
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#F4F2FB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14131C" media="(prefers-color-scheme: dark)">
@@ -945,7 +936,11 @@ ${o.budget?`- 予算の目安：${o.budget}\n`:""}${o.extra?`- その他の希�
 ${rules}
 
 ${shape}`}
-function pickJSON(s){s=String(s||"");const m=/```(?:json)?\s*([\s\S]*?)```/.exec(s);if(m)s=m[1];const a=s.indexOf("{"),b=s.lastIndexOf("}");if(a<0||b<a)throw new Error("nojson");return JSON.parse(s.slice(a,b+1))}
+function pickJSON(s){s=String(s||"");const m=/```(?:json)?\s*([\s\S]*?)```/.exec(s);if(m)s=m[1];const a=s.indexOf("{"),b=s.lastIndexOf("}");if(a<0||b<a)throw new Error("nojson");s=s.slice(a,b+1);
+  try{return JSON.parse(s)}catch(e){
+    /* スマホのコピーや一部のAIで " が “ ” に変わることがある。直してから読み直す */
+    const t=s.replace(/[“”„‟″＂]/g,'"').replace(/[ 　]/g," ").replace(/,\s*([}\]])/g,"$1");
+    return JSON.parse(t)}}
 const normName=s=>String(s||"").replace(/[\s　・（）()「」]/g,"").toLowerCase();
 const okTime=s=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(s||"").trim());return m&&+m[1]<24&&+m[2]<60?pad(+m[1])+":"+m[2]:""};
 const str=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
@@ -1237,7 +1232,7 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
     if(change(old?"記録を保存しました":"記録しました",t=>{t.expenses=t.expenses||{};t.expenses[old?S.wform:uid()]={title,amount,payer:$("ex_payer").value,split,date:$("ex_date").value,created:old?.created||Date.now()}})){S.wform=null;draw()}return}
 });
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.ai&&S.ai.sent&&S.ai.step!=="preview"&&$("aiClip")){$("aiClip").scrollIntoView({block:"center"});toast("答えをコピーしたら「コピーした答えを読み込む」を押してください")}});
-window.addEventListener("resize",()=>{if(S.tab==="map"&&S.vb&&$("svg"))setVB(S.vb)});
+window.addEventListener("resize",()=>{if(S.tab==="map"&&S.vb&&$("svg"))setVB(S.vb);if(ML.map)try{ML.map.resize()}catch(e){}});
 /* 戻るボタン（Android・ブラウザ）で旅行一覧へ */
 draw();schedNotif();
 Native.perm(false).then(p=>{S.perm=p;if(S.tab==="notif")draw()});
