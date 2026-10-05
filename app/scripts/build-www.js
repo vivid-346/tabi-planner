@@ -14,4 +14,7 @@ const head=`<!doctype html><html lang="ja"><head><meta charset="utf-8">
 </head><body>`;
 fs.mkdirSync(path.join(root,"www"),{recursive:true});
 fs.writeFileSync(path.join(root,"www/index.html"),head+app.replace("__GEO__",geo)+"</body></html>");
+/* 詳しい地図の部品（MapLibre）をアプリの中に入れる。地図の画像だけネットから読む */
+fs.mkdirSync(path.join(root,"www/vendor"),{recursive:true});
+for(const f of ["maplibre-gl.js","maplibre-gl.css"])fs.copyFileSync(path.join(root,"node_modules/maplibre-gl/dist",f),path.join(root,"www/vendor",f));
 console.log("www/index.html を作りました",Math.round(fs.statSync(path.join(root,"www/index.html")).size/1024),"KB");
