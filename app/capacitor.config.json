@@ -4,11 +4,15 @@
   "webDir": "www",
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#EBF1F0"
+    "backgroundColor": "#F6F5F2"
   },
   "plugins": {
     "LocalNotifications": {
-      "presentationOptions": ["banner", "sound", "list"]
+      "presentationOptions": [
+        "banner",
+        "sound",
+        "list"
+      ]
     }
   }
 }
