@@ -759,7 +759,7 @@ async function initML(t){const ph=$("mlmap");if(!ph)return;
   ML.map=map;map.touchZoomRotate.disableRotation();map.addControl(new maplibregl.NavigationControl({showCompass:false}),"bottom-right");
   const to=setTimeout(()=>{if(!ML.ok)mlFail()},15000);
   map.on("error",e=>{if(!ML.ok&&!e.sourceId)mlFail()});
-  map.on("load",()=>{ML.ok=true;clearTimeout(to);$("mlload")?.remove();
+  map.once("style.load",()=>{ML.ok=true;clearTimeout(to);$("mlload")?.remove();
     /* 地名は日本語で */
     map.getStyle().layers.forEach(l=>{if(l.type==="symbol"&&JSON.stringify(l.layout?.["text-field"]||"").includes("name"))map.setLayoutProperty(l.id,"text-field",["coalesce",["get","name:ja"],["get","name:nonlatin"],["get","name"]])});
     map.addSource("routes",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
