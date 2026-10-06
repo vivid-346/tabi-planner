@@ -486,6 +486,123 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 #app.enter{animation:enter .22s cubic-bezier(.2,.8,.2,1)}
 @keyframes enter{from{opacity:0;transform:translateY(6px)}}
 @media (prefers-reduced-motion:reduce){#app.enter,.menu{animation:none}}
+
+/* 写真が主役の予定カード */
+.day li.pc{display:block;padding:0;overflow:hidden;border-radius:20px}
+.pcf{position:relative;margin:0;aspect-ratio:16/9;background:var(--accent-soft);overflow:hidden}
+.pcf img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+.day li.pc:hover .pcf img{transform:scale(1.02)}
+.pcf::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(10,8,30,.62) 100%);pointer-events:none}
+.pct{position:absolute;left:16px;right:16px;bottom:12px;z-index:1;color:#fff;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.pct b{font-size:21px;font-weight:800;line-height:1.3;letter-spacing:-.01em}
+.pctm{font-family:var(--num);font-size:13px;font-weight:700;opacity:.92}
+.pcc{position:absolute;top:8px;right:8px;z-index:1;max-width:60%;padding:1px 8px;border-radius:999px;font-size:9.5px;line-height:1.7;color:rgba(255,255,255,.85);background:rgba(0,0,0,.25);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcm{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:10px 14px 12px}
+.pcm .no{flex-basis:100%;order:5;font-size:13px;color:var(--muted);line-height:1.55}
+.day li.pc.done .pcf{filter:saturate(.4) brightness(1.05)}
+.day li.pc.noimg .pcf{aspect-ratio:auto;height:96px;background:linear-gradient(135deg,#7B66E8,#5B78E6)}
+
+/* ===== ChatGPT案に寄せたレイアウト ===== */
+.hero2{position:relative;overflow:hidden;border-radius:28px;min-height:clamp(460px,72svh,640px);display:flex;flex-direction:column;justify-content:space-between;padding:18px 20px 22px;color:#fff;background:#2B2350 center/cover no-repeat;box-shadow:0 18px 50px rgba(30,20,80,.22)}
+.hero2::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,10,30,.38) 0%,rgba(12,10,30,0) 28%,rgba(12,10,30,.05) 45%,rgba(12,10,30,.78) 100%);pointer-events:none}
+.hero2.nophoto{background:linear-gradient(160deg,#7A63E6 0%,#4E5FD8 55%,#2E3A8C 100%)}
+.hero2>*{position:relative;z-index:1}
+.h2top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.h2chip{border:0;font:inherit;display:inline-flex;align-items:baseline;gap:4px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-size:12.5px;font-weight:700;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);cursor:pointer}
+.h2chip b{font-family:var(--num);font-size:15px}
+.h2body{display:flex;flex-direction:column;gap:10px}
+.hero2 h2{margin:0;font-size:38px;line-height:1.15;font-weight:900;letter-spacing:-.02em;text-shadow:0 2px 18px rgba(0,0,0,.25)}
+.h2m{font-size:14px;font-weight:600;opacity:.95}
+.h2prog{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
+.h2prog i{display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden}
+.h2prog i b{display:block;height:100%;background:#fff;border-radius:2px;min-width:4px}
+.h2lead{margin:6px 0 4px;font-size:16px;font-weight:700;line-height:1.6;opacity:.96}
+.h2go{border:0;font:inherit;align-self:stretch;min-height:52px;border-radius:999px;background:#fff;color:#4B3BC8;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.h2cr{position:absolute!important;right:14px;bottom:4px;font-size:9.5px;opacity:.7;max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.daypills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.daypills button{flex:1 0 auto;min-width:120px;border:1.5px solid rgba(90,70,220,.25);background:rgba(255,255,255,.8);border-radius:999px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;line-height:1.25;color:#4B3BC8;cursor:pointer;font:inherit}
+.daypills button b{font-size:15px;font-weight:800}.daypills button small{font-size:11.5px;font-weight:600;opacity:.85}
+.daypills button[aria-current="true"]{background:linear-gradient(135deg,#6A55E3,#5868E3);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(90,70,220,.28)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .daypills button{background:rgba(255,255,255,.06);color:#C9BEFF}}
+.dayjump{display:none}
+.dprow{display:flex;align-items:center;gap:6px}.dprow .daypills{flex:1;min-width:0}
+/* タイムライン */
+.day ul.tl{position:relative;padding-left:44px;display:flex;flex-direction:column;gap:0}
+.day ul.tl::before{content:"";position:absolute;left:17px;top:8px;bottom:8px;width:2px;border-radius:1px;background:linear-gradient(180deg,rgba(106,85,227,.35),rgba(106,85,227,.12))}
+.day li.tlh{position:relative;display:flex;align-items:center;gap:10px;padding:16px 2px 8px;border:0;background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;min-height:0;grid-template-columns:none}
+.day li.tlh:not(:has(.tod))::before{content:"";position:absolute;left:-31px;top:50%;margin-top:2px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid rgba(106,85,227,.55)}
+.tod{position:absolute;left:-44px;top:50%;margin-top:-13px;width:36px;height:30px;border-radius:15px;display:grid;place-items:center;background:var(--tc);color:#fff;font-size:11.5px;font-weight:800;box-shadow:0 0 0 4px var(--ground)}
+.tlt{font-family:var(--num);font-size:18px;font-weight:800;letter-spacing:-.01em}
+.tll{font-size:12.5px;color:var(--muted);font-weight:600;margin-left:auto}
+.tll::before{content:"→ ";opacity:.6}
+.day ul.tl>li.mv{margin:6px 0}
+.day ul.tl>li:not(.tlh):not(.full){margin-bottom:2px}
+.pcf{aspect-ratio:16/10}
+.pct{bottom:14px;gap:4px}
+.pct b{font-size:23px}
+.pcx{font-size:12.5px;font-weight:700;opacity:.92}
+.pcgo{position:absolute;right:12px;bottom:14px;z-index:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.25);color:#fff;font-size:20px;line-height:1;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.pct{right:52px}
+.pcm .no{order:0}
+.fab{position:sticky;bottom:calc(64px + 26px + env(safe-area-inset-bottom,0px));z-index:15;align-self:center;display:inline-flex;align-items:center;gap:8px;border:0;font:inherit;min-height:48px;padding:0 22px;border-radius:999px;color:#fff;font-size:15px;font-weight:800;background:linear-gradient(135deg,#6A55E3,#5868E3);box-shadow:0 10px 28px rgba(80,60,210,.35);cursor:pointer}
+.fab span{font-size:18px}.fab i{font-style:normal;font-size:11.5px;background:rgba(255,255,255,.25);border-radius:999px;padding:1px 8px}
+@media (min-width:900px){.fab{bottom:24px}}
+/* 探索（行きたい場所） */
+.exh{display:flex;align-items:center;justify-content:space-between}
+.exh h2{font-size:28px;font-weight:900;letter-spacing:-.02em;margin:0}
+.btn.icon-only.add{width:44px;background:linear-gradient(135deg,#6A55E3,#5868E3);color:#fff;font-size:22px;border-radius:50%}
+.search{display:flex;align-items:center;gap:8px;padding:0 14px;min-height:48px;border-radius:16px;background:var(--paper);box-shadow:var(--shadow),0 0 0 1px rgba(20,20,43,.05)}
+.search svg{width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;flex:none}
+.search input{flex:1;border:0!important;background:transparent!important;box-shadow:none!important;font-size:15px;padding:12px 0;outline:none;min-width:0}
+.catchips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.catchips button{flex:none;border:0;font:inherit;min-height:38px;padding:0 16px;border-radius:999px;background:var(--paper);box-shadow:0 0 0 1px rgba(20,20,43,.08);font-size:13.5px;font-weight:700;color:var(--ink2);cursor:pointer}
+.catchips button[aria-pressed="true"]{background:linear-gradient(135deg,#6A55E3,#5868E3);color:#fff;box-shadow:0 4px 12px rgba(90,70,220,.25)}
+.excards{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:700px){.excards{grid-template-columns:1fr 1fr}}
+.exc{position:relative;border-radius:24px;overflow:hidden;cursor:pointer;background:var(--accent-soft);box-shadow:0 10px 30px rgba(20,20,43,.12);transition:transform .15s}
+.exc:active{transform:scale(.985)}
+.exc figure{margin:0;aspect-ratio:16/10;display:grid;place-items:center;background:linear-gradient(135deg,#8A76EA,#5B78E6)}
+.exc figure img{width:100%;height:100%;object-fit:cover;display:block}
+.exc::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(10,8,30,.68) 100%);pointer-events:none}
+.exni{display:grid;place-items:center;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2)}
+.exni svg{width:32px;height:32px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.exo{position:absolute;left:18px;right:72px;bottom:16px;z-index:1;color:#fff;display:flex;flex-direction:column;gap:2px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.exo b{font-size:22px;font-weight:900;line-height:1.3;letter-spacing:-.01em}
+.exo span{font-size:12.5px;font-weight:700;opacity:.92}
+.exadd{position:absolute;right:16px;bottom:16px;z-index:2;width:46px;height:46px;border-radius:50%;border:0;background:#fff;color:#5A45D6;font-size:26px;font-weight:700;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.exday,.exbk{position:absolute;top:12px;z-index:2;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:800;color:#fff}
+.exday{left:12px;background:var(--dc)}.exbk{right:12px;background:rgba(0,0,0,.4)}
+/* 場所の詳細 */
+.sd{display:flex;flex-direction:column;gap:16px}
+.sdh{position:relative;margin:0;border-radius:26px;overflow:hidden;aspect-ratio:4/3.4;display:grid;place-items:center;background:linear-gradient(135deg,#8A76EA,#5B78E6);box-shadow:0 14px 40px rgba(20,20,43,.16)}
+.sdh img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sdh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,30,.35) 0%,rgba(0,0,0,0) 25%,rgba(0,0,0,0) 50%,rgba(10,8,30,.75) 100%);pointer-events:none}
+.sdb{position:absolute;left:14px;top:14px;z-index:2;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#2A2140;font-size:26px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.sdmenu{position:absolute;right:14px;top:14px;z-index:3}
+.sdmenu .btn.icon-only{background:rgba(255,255,255,.92);border-radius:50%;width:42px;min-height:42px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.sdcr{position:absolute;right:12px;bottom:6px;z-index:2;font-size:9.5px;color:rgba(255,255,255,.75);max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sdcr a{color:inherit;text-decoration:none}
+.sdt{position:absolute;left:20px;right:20px;bottom:24px;z-index:2;color:#fff;display:flex;flex-direction:column;gap:4px;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+.sdt h2{margin:0;font-size:30px;font-weight:900;line-height:1.2;letter-spacing:-.02em}.sdt span{font-size:13.5px;font-weight:700;opacity:.92}
+.seg3{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--soft)}
+.seg3 button{flex:1;border:0;font:inherit;min-height:40px;border-radius:999px;background:none;font-size:14px;font-weight:700;color:var(--ink2);cursor:pointer}
+.seg3 button[aria-selected="true"]{background:linear-gradient(135deg,#6A55E3,#5868E3);color:#fff;box-shadow:0 4px 12px rgba(90,70,220,.25)}
+.sdbody{display:flex;flex-direction:column;gap:14px}
+.sdnote{margin:0;font-size:15.5px;line-height:1.8}
+.sdrows{display:flex;flex-direction:column;border-radius:18px;background:var(--paper);box-shadow:var(--shadow),0 0 0 1px rgba(20,20,43,.05);padding:4px 16px}
+.sdr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.sdr:last-child{border-bottom:0}
+.sdi{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);font-size:14px;font-weight:800;flex:none}
+.sdl{color:var(--muted);font-size:14px;flex:none;min-width:5em}.sdv{margin-left:auto;font-weight:700;font-size:14.5px;text-align:right}
+.nearl{display:flex;flex-direction:column;gap:8px}
+.nearr{display:flex;align-items:center;gap:12px;border:0;font:inherit;text-align:left;padding:8px;border-radius:16px;background:var(--paper);box-shadow:var(--shadow),0 0 0 1px rgba(20,20,43,.05);cursor:pointer;color:var(--ink)}
+.nearr img,.nearni{width:64px;height:64px;border-radius:12px;object-fit:cover;flex:none;display:grid;place-items:center;background:var(--accent-soft)}
+.nearni svg{width:26px;height:26px;fill:none;stroke:var(--accent-ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nearr>span:nth-of-type(1),.nearr>span:not([aria-hidden]){flex:1;display:flex;flex-direction:column}.nearr b{font-size:15px}.nearr small{font-size:12.5px;color:var(--muted)}
+.nearr>[aria-hidden]{font-size:22px;color:var(--muted);flex:none}
+.sdcta{display:flex;flex-direction:column;gap:10px}
+.sdcta .btn{align-self:stretch!important}
+/* 地図：次のルート */
+.nroute{display:flex;align-items:center;gap:12px;padding:16px 18px}
+.nroute>div{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.nroute b{font-size:16px;font-weight:800}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -595,7 +712,7 @@ const addMin=(tm,n)=>{const k=timeKey(tm);if(k==null)return"";const x=Math.min(k
 const fuelYen=km=>Math.round(km/FUEL.kmpl*FUEL.yen/10)*10;
 
 /* 画面の状態（保存しない） */
-const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null,menu:null,side:false,sday:0,flash:null,sfPhoto:undefined,sfDay:""};
+const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null,menu:null,detail:null,dtab:"info",q:"",cat:"",side:false,sday:0,flash:null,sfPhoto:undefined,sfDay:""};
 try{const u=JSON.parse(localStorage.getItem(KEY+"-ui")||"{}");if(u.tid&&DB.trips[u.tid]){S.tid=u.tid;S.tab=u.tab||"plan"}}catch(e){}
 function saveUI(){try{localStorage.setItem(KEY+"-ui",JSON.stringify({tid:S.tid,tab:S.tab}))}catch(e){}}
 const T=()=>DB.trips[S.tid];
@@ -706,18 +823,27 @@ const readTime=id=>{const h=$(id+"_h")?.value;return !h?"":pad(h)+":"+$(id+"_m")
 function tripPhoto(t){const rank={view:0,nature:1,activity:2,see:3};const ss=spots(t).filter(s=>s.photo&&s.photo.u&&!s.photo.near).sort((a,b)=>(rank[a.cat]??9)-(rank[b.cat]??9)||(a.created||0)-(b.created||0));return ss[0]||null}
 function daysLeft(t){const today=ymd(new Date());return t.start&&today<t.start?Math.round((toD(t.start)-toD(today))/864e5):null}
 function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
-  return `<section class="hero${p?"":" nophoto"}"${p?` style="background-image:url('${esc(p.photo.u).replace(/'/g,"%27")}')"`:""}>${p&&!p.photo.own?`<span class="cr">写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</span>`:""}
-   <span class="badge">${n!=null?`出発まで あと<b>${n}</b>日`:esc(countdown(t))}</span><h2>${esc(t.dest||t.title)}</h2>
-   <div class="m">${md(ds[0])}（${wd(ds[0])}）〜 ${md(ds[ds.length-1])}（${wd(ds[ds.length-1])}） ・ ${ds.length>1?`${ds.length-1}泊${ds.length}日`:"日帰り"}${t.people?` ・ ${esc(t.people)}人`:""}</div></section>
-  ${ds.length>1?`<nav class="dayjump" aria-label="日にち">${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}"><b>${+d.slice(8)}</b>${wd(d)}</button>`).join("")}</nav>`:""}`}
+  const its=Object.values(t.items||{}).filter(x=>x.kind!=="move");const done=its.filter(x=>x.done).length;
+  const areas=ds.map(d=>t.dayInfo?.[d]?.area).filter(Boolean);const today=ymd(new Date());const ti=Math.max(0,ds.indexOf(today));
+  const ttl=t.dest?(/旅行$/.test(t.dest)?t.dest:`${t.dest}旅行`):t.title;
+  return `<section class="hero2${p?"":" nophoto"}"${p?` style="background-image:url('${esc(p.photo.u).replace(/'/g,"%27")}')"`:""}>
+   <div class="h2top"><span class="h2chip">${n!=null?`出発まで あと <b>${n}</b> 日`:esc(countdown(t))}</span>${Native.isApp?`<button class="h2chip" data-a="copyPlan">しおりを送る</button>`:`<button class="h2chip" data-a="print">旅のしおり</button>`}</div>
+   <div class="h2body"><h2>${esc(ttl)}</h2><div class="h2m">${ds.length>1?`${ds.length-1}泊${ds.length}日`:"日帰り"}　${md(ds[0])}（${wd(ds[0])}）${ds.length>1?` – ${md(ds[ds.length-1])}（${wd(ds[ds.length-1])}）`:""}${t.people?`　${esc(t.people)}人`:""}</div>
+    ${its.length?`<div class="h2prog"><span>行った ${done} / ${its.length}</span><i><b style="width:${Math.round(done/its.length*100)}%"></b></i></div>`:""}
+    <p class="h2lead">${areas.length?esc(areas.join(" → "))+"<br>":""}最高の${ds.length>1?ds.length+"日間":"1日"}にしよう。</p>
+    <button class="h2go" data-a="jumpDay" data-k="${ti}">日程を見る <span aria-hidden="true">→</span></button></div>
+   ${p&&!p.photo.own?`<span class="h2cr">写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</span>`:""}</section>
+  <div class="dprow">${ds.length>1?`<nav class="daypills" aria-label="日にち">${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}" aria-current="${k===ti}"><b>${k+1}日目</b><small>${+d.slice(5,7)}.${+d.slice(8)}（${wd(d)}）</small></button>`).join("")}</nav>`:`<span style="flex:1"></span>`}${planMenu(t)}</div>`}
+function planMenu(t){return moreMenu("plan",[["aiOpen","AIで作り直す",' data-k="plan"'],["copyPlan","LINEで送る"],...(Native.isApp?[]:[["print","印刷・PDF"]])])}
 /* 「…」メニュー。items:[[action,label,extraAttrs?,danger?]] */
 function moreMenu(key,items,extra){return `<span class="mwrap"><button class="btn icon-only" type="button" data-a="more" data-id="${key}" aria-label="その他の操作" aria-expanded="${S.menu===key}">${ico("more")}</button>${S.menu===key?`<div class="menu" role="menu">${items.map(([a,l,x,d])=>`<button type="button" role="menuitem" data-a="${a}"${x||""}${d?' class="danger"':""}>${l}</button>`).join("")}</div>`:""}</span>`}
 function planView(t){const ds=dates(t);
-  return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}<div class="row actrow">${spots(t).length?`<button class="btn${S.side?" fill":""}" data-a="candOpen" aria-pressed="${!!S.side}">${S.side?"候補を閉じる":`候補から入れる${spots(t).filter(x=>!spotDay(t,x.id)).length?`（${spots(t).filter(x=>!spotDay(t,x.id)).length}）`:""}`}</button>`:""}<span style="flex:1"></span>${moreMenu("plan",[["aiOpen","AIで作り直す",' data-k="plan"'],["copyPlan","LINEで送る"],...(Native.isApp?[]:[["print","印刷・PDF"]])])}</div>${nowCard(t)}
+  return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${nowCard(t)}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
   ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${dayStat(t,date)}</header>
-   <ul>${its.map((x,j)=>(j?gapRow(t,its[j-1],x):"")+(S.edit===x.id?`<li class="full">${itemForm(t,date,x)}</li>`:itemRow(t,x))).join("")}${S.edit==="new:"+date?`<li class="full">${itemForm(t,date,null)}</li>`:""}${!its.length&&S.edit!=="new:"+date?`<li class="full"><span class="sub">まだ予定がありません</span></li>`:""}</ul>
-   ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を追加</button></div>`}</section>`}).join("")}</div>${S.side?candPanel(t)+"</div>":""}`}
+   <ul class="tl">${(()=>{let lastTod="";return its.map((x,j)=>{const g=j?gapRow(t,its[j-1],x):"";const tod=x.kind==="move"?"":todOf(x.time);const show=tod&&tod!==lastTod;if(tod)lastTod=tod;
+      return (g.includes('class="w"')?g:"")+(S.edit===x.id?`<li class="full">${itemForm(t,date,x)}</li>`:itemRow(t,x,{leg:j?legOf(t,its[j-1],x):null,tod:show?tod:""}))}).join("")})()}${S.edit==="new:"+date?`<li class="full">${itemForm(t,date,null)}</li>`:""}${!its.length&&S.edit!=="new:"+date?`<li class="full"><span class="sub">まだ予定がありません</span></li>`:""}</ul>
+   ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を追加</button></div>`}</section>`}).join("")}</div>${S.side?candPanel(t)+"</div>":""}${spots(t).length&&!S.side&&!S.edit?`<button class="fab" data-a="candOpen">次のスポットを追加する <span aria-hidden="true">＋</span>${spots(t).filter(x=>!spotDay(t,x.id)).length?`<i>${spots(t).filter(x=>!spotDay(t,x.id)).length}</i>`:""}</button>`:""}`}
 /* 日程を見ながら、行きたい場所の候補を入れる（スマホは下に出るパネル、広い画面は右の列） */
 function itemEnd(t,x){const k=timeKey(x.time);if(k==null)return null;if(x.kind==="move"){const a=timeKey(x.arrive);return a!=null&&a>=k?a:k+30}const sp=x.spot&&t.spots?.[x.spot];return k+(x.dur||sp?.minutes||60)}
 function legTo(t,a,b){if(!a||!b||a.lat==null||b.lat==null)return 30;const km=distKm(a,b)*1.3;return km<0.05?0:Math.round(legMin(km,mainMove(t,km)))}
@@ -768,10 +894,22 @@ function nowCard(t){const now=new Date(),today=ymd(now);if(!dates(t).includes(to
   return `<section class="nowcard">${cur?`<div><div class="l">いま</div><div class="n" style="font-size:15px">${esc(cur.title)}${cur.dur?`<small>〜${addMin(cur.time,cur.dur)}</small>`:""}</div></div>`:""}
    ${next?`<div><div class="l">次の予定</div><div class="n">${esc(next.time)} ${esc(next.title)}<small>あと${fmtMin(timeKey(next.time)-nm)}</small></div></div>
    <div class="row">${s&&s.lat!=null?`<a class="btn fill" href="${esc(Native.dirUrl(s))}" target="_blank" rel="noopener">ここへ行く</a>`:""}${cur&&!cur.done?`<button class="btn" data-a="doneItem" data-id="${cur.id}">「${esc(cur.title.slice(0,12))}」に行った</button>`:""}</div>`:`<div class="sub">今日の予定はこれでおわりです。おつかれさまでした</div>`}</section>`}
-function itemRow(t,x){const s=x.spot&&t.spots?.[x.spot];
+const MODE_L={walk:"徒歩",car:"車",train:"電車・バス"};
+const TOD=[["朝",11*60,"#E89B2C"],["昼",14*60,"#E8642C"],["午後",17*60,"#D9487A"],["夜",24*60,"#5B4FD0"]];
+function todOf(tm){const k=timeKey(tm);if(k==null)return"";return (TOD.find(x=>k<x[1])||TOD[3])[0]}
+function legOf(t,a,b){const sa=a&&a.spot&&t.spots?.[a.spot],sb=b&&b.spot&&t.spots?.[b.spot];if(!sa||!sb||sa.lat==null||sb.lat==null||a.kind==="move"||b.kind==="move")return null;const km=distKm(sa,sb)*1.3;if(km<0.05)return null;const mm=mainMove(t,km);return {km,mm,min:legMin(km,mm)}}
+const legTxt=l=>l?`${MODE_L[l.mm]} 約${fmtMin(l.min)}`:"";
+function todBadge(tod){if(!tod)return"";const c=(TOD.find(x=>x[0]===tod)||TOD[0])[2];return `<span class="tod" style="--tc:${c}">${tod}</span>`}
+function itemRow(t,x,o){o=o||{};const s=x.spot&&t.spots?.[x.spot];
   const td=ymd(new Date());const canDone=td>=t.start&&td<=t.end&&x.date<=td;
   const ph=s&&s.photo&&s.photo.u?s.photo:null;
-  return `<li id="it_${x.id}"${S.confirm===x.id?"":` data-a="editItem" data-id="${x.id}"`} class="k-${x.kind}${x.kind==="move"?" mv":""}${x.done?" done":""}${S.flash===x.id?" flash":""}"><span class="t">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:x.dur&&x.time?`<small>〜${addMin(x.time,x.dur)}</small>`:""}</span>
+  /* 写真がある予定は、写真を主役にした大きなカード */
+  if(ph&&x.kind!=="move"&&S.confirm!==x.id){const tm=`${esc(x.time||"")}${x.dur&&x.time?`〜${addMin(x.time,x.dur)}`:""}`;
+    const mins=x.dur||s.minutes;
+    return `<li id="it_${x.id}" class="tlh">${todBadge(o.tod)}<b class="tlt">${esc(x.time||"")}</b>${o.leg?`<span class="tll">${legTxt(o.leg)}</span>`:""}</li><li data-a="editItem" data-id="${x.id}" class="pc k-${x.kind}${x.done?" done":""}${S.flash===x.id?" flash":""}"><figure class="pcf"><img src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.closest('li').classList.add('noimg');this.remove()">
+     ${ph.own?"":`<span class="pcc">${esc(ph.by)} / ${esc(ph.lic)}</span>`}<span class="pct"><b>${esc(x.title)}</b><span class="pcx">${CATS[s.cat]||KINDS[x.kind]||""}${mins?` ・ 約${fmtMin(mins)}`:""}${tm&&x.dur?` ・ 〜${addMin(x.time,x.dur)}`:""}</span></span><span class="pcgo" aria-hidden="true">›</span></figure>
+     ${x.note||canDone?`<div class="pcm">${x.note?`<span class="no">${esc(x.note)}</span>`:""}${canDone?`<button class="ib${x.done?" ok":""}" data-a="doneItem" data-id="${x.id}" aria-pressed="${!!x.done}">${x.done?"✓ 行った":"行った"}</button>`:""}</div>`:""}</li>`}
+  return `${x.kind!=="move"&&(o.tod||o.leg)?`<li class="tlh">${todBadge(o.tod)}${o.leg?`<span class="tll" style="margin-left:auto">${legTxt(o.leg)}</span>`:""}</li>`:""}<li id="it_${x.id}"${S.confirm===x.id?"":` data-a="editItem" data-id="${x.id}"`} class="k-${x.kind}${x.kind==="move"?" mv":""}${x.done?" done":""}${S.flash===x.id?" flash":""}"><span class="t">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:x.dur&&x.time?`<small>〜${addMin(x.time,x.dur)}</small>`:""}</span>
    <span>${x.kind==="move"?"":`<span class="kind">${KINDS[x.kind]||""}</span>`}<span class="ti">${esc(x.title)}</span>${x.note?`<span class="no">${esc(x.note)}</span>`:""}${s&&s.lat!=null?`<span class="no"><button class="ib" style="padding:0" data-a="showSpot" data-id="${x.spot}">地図で見る</button></span>`:""}
    ${S.confirm===x.id?`<span class="row" style="margin-top:6px"><span class="sub" style="color:var(--warn)">削除しますか？</span><button class="btn danger" data-a="delItemYes" data-id="${x.id}">削除</button><button class="btn" data-a="noConfirm">やめる</button></span>`:""}</span>
    <span class="acts">${S.confirm===x.id?"":`${canDone?`<button class="ib${x.done?" ok":""}" data-a="doneItem" data-id="${x.id}" aria-pressed="${!!x.done}">${x.done?"✓ 行った":"行った"}</button>`:""}${ph?`<img class="thumb" src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.remove()">`:s&&x.kind!=="move"?catThumb(s):""}`}</span></li>`}
@@ -809,9 +947,38 @@ function printView(t){const ds=dates(t);const ss=spots(t);
 /* ================= 画面：行きたい場所 ================= */
 function spotsView(t){const ss=spots(t);
   if(S.edit&&S.edit.startsWith("spot"))return spotForm(t);
-  return `<div class="row" style="justify-content:space-between"><span class="sub">${ss.length}か所 ・ ${ss.filter(s=>!spotDay(t,s.id)).length}か所はまだ日程に入っていません</span><span class="row"><button class="btn" data-a="aiOpen" data-k="more">AIで候補を増やす</button><button class="btn" data-a="aiOpen" data-k="text">文章から拾う</button><button class="btn fill" data-a="addSpot">＋ 場所を追加</button></span></div>
-  ${S.phBusy>0?`<div class="phbar">写真を探しています…（あと<span id="phn">${S.phBusy}</span>件）</div>`:photoOn()&&ss.some(s=>!s.photo)?`<div class="phbar">写真のない場所があります<button class="btn" data-a="findPhotos">写真を探す</button></div>`:""}
-  ${ss.length?`<div class="spots">${ss.map(s=>spotCard(t,s)).join("")}</div>`:`<div class="empty"><b>行きたい場所を集めましょう</b><span>名前と、地図の位置（地図を押す・Googleマップのリンクを貼る）を入れると、地図にピンが立ちます。あとから「日程に入れる」で予定にできます。</span></div>`}`}
+  if(S.detail&&t.spots?.[S.detail])return spotDetail(t,S.detail);
+  const cats=[...new Set(ss.map(s=>s.cat).filter(c=>CATS[c]))];
+  return `<div class="exh"><h2>行きたい場所</h2><span class="row" style="gap:4px"><button class="btn fill icon-only add" data-a="addSpot" aria-label="場所を追加">＋</button>${moreMenu("spots",[["aiOpen","AIで候補を増やす",' data-k="more"'],["aiOpen","文章から拾う",' data-k="text"'],...(photoOn()&&ss.some(s=>!s.photo)?[["findPhotos","写真を探す"]]:[])])}</span></div>
+  ${ss.length?`<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg><input type="search" id="sq" value="${esc(S.q||"")}" placeholder="行きたい場所・グルメ・体験をさがす" autocomplete="off"></label>
+  ${cats.length>1?`<div class="catchips"><button data-a="cat" data-c="" aria-pressed="${!S.cat}">すべて</button>${cats.map(c=>`<button data-a="cat" data-c="${c}" aria-pressed="${S.cat===c}">${CATS[c]}</button>`).join("")}</div>`:""}`:""}
+  ${S.phBusy>0?`<div class="phbar">写真を探しています…（あと<span id="phn">${S.phBusy}</span>件）</div>`:""}
+  ${ss.length?`<div class="excards" id="excards">${exList(t)}</div><p class="sub" style="text-align:center">${ss.length}か所 ・ ＋を押すと、あいている日・時間に入ります</p>`:`<div class="empty"><b>行きたい場所を集めましょう</b><span>右上の「＋」で追加するか、「…」の「AIで候補を増やす」で候補をまとめて出せます。</span></div>`}`}
+function exList(t){const q=normName(S.q||"");const ss=spots(t).filter(s=>(!S.cat||s.cat===S.cat)&&(!q||normName(`${s.name}${s.area||""}${s.note||""}${CATS[s.cat]||""}`).includes(q)));
+  if(!ss.length)return `<p class="sub" style="text-align:center;padding:24px 0">見つかりませんでした</p>`;
+  return ss.map(s=>{const ph=s.photo&&s.photo.u?s.photo:null;const d=spotDay(t,s.id);
+    return `<article class="exc" data-a="detail" data-id="${s.id}"><figure>${ph?`<img src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="exni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}</figure>
+     ${d?`<span class="exday" style="--dc:${dayColor(d)}">${d}日目</span>`:""}${s.book?`<span class="exbk">要予約</span>`:""}
+     <div class="exo"><b>${esc(s.name)}</b><span>${CATS[s.cat]||"観光"}${s.minutes?` ・ 約${fmtMin(s.minutes)}`:""}${s.area?` ・ ${esc(s.area)}`:""}</span></div>
+     ${d?"":`<button class="exadd" data-a="quickAdd" data-id="${s.id}" aria-label="${esc(s.name)}を日程に入れる">＋</button>`}</article>`}).join("")}
+/* ＋：入れやすい日（その日の予定に近くて、あいている時間がある日）を選んで入れる */
+function bestDay(t,s){const ds=dates(t);let best=null;ds.forEach((d,k)=>{const sl=suggestSlot(t,d,s);const pts=items(t,d).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
+  const km=s.lat!=null&&pts.length?Math.min(...pts.map(p=>distKm(p,s))):50;const score=(sl.fit?0:1000)+km;if(!best||score<best.score)best={d,k,sl,score}});return best}
+function spotDetail(t,id){const s=t.spots[id];const ph=s.photo&&s.photo.u?s.photo:null;const d=spotDay(t,id);const tab=S.dtab||"info";
+  const near=s.lat==null?[]:spots(t).filter(x=>x.id!==id&&x.lat!=null).map(x=>({x,km:distKm(s,x)*1.3})).sort((a,b)=>a.km-b.km).slice(0,6);
+  const row=(ic,l,v)=>v?`<div class="sdr"><span class="sdi">${ic}</span><span class="sdl">${l}</span><span class="sdv">${v}</span></div>`:"";
+  return `<article class="sd"><figure class="sdh${ph?"":" nph2"}">${ph?`<img src="${esc(ph.u)}" alt="" onerror="this.remove()">`:`<span class="exni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}
+    <button class="sdb" data-a="detailBack" aria-label="戻る">‹</button><span class="sdmenu">${moreMenu("d"+id,[["editSpot","編集",` data-id="${id}"`],...(ph?[["noPhoto","写真を外す",` data-id="${id}"`]]:[]),["delSpot","削除",` data-id="${id}"`,1]])}</span>
+    ${ph&&!ph.own?`<span class="sdcr">${ph.pg?`<a href="${esc(ph.pg)}" target="_blank" rel="noopener">`:""}${esc(ph.by)} / ${esc(ph.lic)}${ph.pg?"</a>":""}</span>`:""}
+    <div class="sdt"><h2>${esc(s.name)}</h2><span>${CATS[s.cat]||"観光"}${s.area?` ・ ${esc(s.area)}`:""}${d?` ・ ${d}日目に入っています`:""}</span></div></figure>
+   ${S.confirm===id?`<div class="inbox row"><span class="sub" style="color:var(--warn)">削除しますか？（日程の予定は残ります）</span><button class="btn danger" data-a="delSpotYes" data-id="${id}">削除</button><button class="btn" data-a="noConfirm">やめる</button></div>`:""}
+   <div class="seg3" role="tablist">${[["info","概要"],["access","アクセス"],["near","周辺スポット"]].map(([k,l])=>`<button role="tab" data-a="dtab" data-k="${k}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>
+   <div class="sdbody">${tab==="info"?`${s.note?`<p class="sdnote">${esc(s.note)}</p>`:`<p class="sub">メモはまだありません。「…」の「編集」で書けます。</p>`}
+     <div class="sdrows">${row("⏱","所要時間",s.minutes?`約${fmtMin(s.minutes)}`:"")}${row("¥","料金",esc(s.fee||""))}${row("☂","雨の日",/雨の日もOK/.test(s.note||"")||s.rain?"楽しめます":"")}${row("✓","予約",s.book?"必要":"")}${row("◷","日程",d?`${d}日目`:"まだ入っていません")}</div>`
+    :tab==="access"?`<div class="sdrows">${row("⌖","エリア",esc(s.area||""))}${row("◎","位置",s.lat!=null?`${(+s.lat).toFixed(4)}, ${(+s.lon).toFixed(4)}`:"まだ決まっていません")}</div>
+     <div class="row">${s.lat!=null?`<a class="btn" href="${Native.mapUrl(s)}" target="_blank" rel="noopener">Googleマップで開く</a><button class="btn" data-a="showSpot" data-id="${id}">アプリの地図で見る</button>`:`<button class="btn" data-a="pickFor" data-id="${id}">地図で位置を決める</button>`}${s.url?`<a class="btn" href="${esc(s.url)}" target="_blank" rel="noopener">参考リンク</a>`:""}</div>`
+    :near.length?`<div class="nearl">${near.map(({x,km})=>{const p2=x.photo&&x.photo.u?x.photo:null;const mm=mainMove(t,km);return `<button class="nearr" data-a="detail" data-id="${x.id}">${p2?`<img src="${esc(p2.u)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="nearni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[x.cat]||CAT_ICON.see}"/></svg></span>`}<span><b>${esc(x.name)}</b><small>約${km.toFixed(km<10?1:0)}km ・ ${MODE_L[mm]} 約${fmtMin(legMin(km,mm))}</small></span><span aria-hidden="true">›</span></button>`}).join("")}</div>`:`<p class="sub">位置が決まっているほかの場所がありません。</p>`}</div>
+   <div class="sdcta">${s.lat!=null?`<a class="btn fill big" href="${Native.dirUrl(s)}" target="_blank" rel="noopener">ここに行く（ナビ開始）</a>`:""}${planBtns(t,{id,...s})}</div></article>`}
 function dayTag(t,id){const d=spotDay(t,id);return d?`<span class="tag" style="background:color-mix(in srgb,${dayColor(d)} 16%,transparent);color:${dayColor(d)}">${d}日目</span>`:`<span class="tag cand">候補</span>`}
 /* 写真がないときの表紙：アプリの中の地図で、その場所のまわりを描く（電波がなくても出る・間違えない） */
 const inJapan=s=>s&&s.lat!=null&&s.lat>20&&s.lat<46&&s.lon>122&&s.lon<154;
@@ -875,9 +1042,15 @@ function mapTopHtml(t){const ds=dates(t);return S.pick?"":`${spots(t).length?"":
 function mapOvHtml(t){const tl=S.tapLL;
   return `${S.pick?`<div class="pickbar"><b>${S.pick.ll?"この位置でよければ「決定」":`地図を押して「${esc(S.pick.name||"場所")}」の位置を決めてください`}</b>${S.pick.ll?`<button class="btn fill" data-a="pickOk">決定</button>`:""}<button class="btn" data-a="pickCancel">やめる</button></div>`:""}
    ${!S.pick&&tl?`<div class="pickbar"><b>${tl.name?`「${esc(tl.name)}」を行きたい場所に追加しますか？`:"この位置を行きたい場所に追加しますか？"}</b><button class="btn fill" data-a="tapAdd">追加する</button><button class="btn" data-a="tapCancel">やめる</button></div>`:""}`}
+/* 地図の下：次に移動する区間（旅行中は今日のこれから、それ以外は選んだ日の最初） */
+function nextRoute(t){const ds=dates(t),today=ymd(new Date());const d=S.mapDay?ds[S.mapDay-1]:(ds.includes(today)?today:ds[0]);
+  const its=items(t,d).filter(x=>x.kind!=="move"&&x.spot&&t.spots?.[x.spot]?.lat!=null);if(its.length<2)return"";
+  const nm=new Date().getHours()*60+new Date().getMinutes();let k=0;if(d===today){const n=its.findIndex(x=>!x.done&&timeKey(x.time)!=null&&timeKey(x.time)>nm);k=Math.max(0,n-1)}if(k>=its.length-1)return"";
+  const a=its[k],b=its[k+1],sa=t.spots[a.spot],sb=t.spots[b.spot];const km=distKm(sa,sb)*1.3,mm=mainMove(t,km);
+  return `<div class="card nroute"><div><span class="sub">次のルート${d!==today?`（${ds.indexOf(d)+1}日目）`:""}</span><b>${esc(sa.name)} → ${esc(sb.name)}</b><span class="sub">${MODE_L[mm]}で約${fmtMin(legMin(km,mm))}（${km.toFixed(1)}km）</span></div><a class="btn fill" href="${Native.dirUrl(sb)}" target="_blank" rel="noopener">ナビ開始</a></div>`}
 function mapBottomHtml(t){const nos=spots(t).filter(s=>s.lat==null);const sel=S.sel&&t.spots[S.sel]?{id:S.sel,...t.spots[S.sel]}:null;
   return S.pick?"":(sel?`<div class="card selcard">${sel.photo&&sel.photo.u?`<img class="selph" src="${esc(sel.photo.u)}" alt="" onerror="this.remove()">`:""}<div class="row">${dayTag(t,sel.id)}${sel.area?`<span class="sub">${esc(sel.area)}</span>`:""}</div><h3 style="font-size:19px">${esc(sel.name)}</h3>${sel.note?`<p class="sub" style="color:var(--ink)">${esc(sel.note)}</p>`:""}${planBtns(t,sel)}<div class="row"><a class="btn fill" href="${Native.dirUrl(sel)}" target="_blank" rel="noopener">ここへ行く</a><a class="btn" href="${Native.mapUrl(sel)}" target="_blank" rel="noopener">Googleマップ</a></div></div>`
-   :(spots(t).some(s=>s.lat!=null)?`<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。${richMap()?"地図のお店や観光地を押すと、候補に追加できます。":""}</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
+   :(spots(t).some(s=>s.lat!=null)?`${nextRoute(t)}<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。${richMap()?"地図のお店や観光地を押すと、候補に追加できます。":""}</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
    +(nos.length?`<div class="card form"><span class="lbl">位置が決まっていない場所</span><div class="row">${nos.map(s=>`<button class="btn" data-a="pickFor" data-id="${s.id}">${esc(s.name)}を置く</button>`).join("")}</div></div>`:"")}
 function mapView(t){
   if(richMap())return `<div id="mapTop">${mapTopHtml(t)}</div>
@@ -1264,7 +1437,7 @@ function draw(){const t=T();
   if(S.tab==="map"&&!S.ai){if(richMap())initML(t);else{bindMap();setVB(S.vb||fitVB(t))}}
   saveUI();
 }
-function go(tab){const ch=tab!==S.tab;if(ch)Native.haptic("light");setTimeout(()=>{if(!ch)return;const m=$("app");if(!m)return;m.classList.remove("enter");void m.offsetWidth;m.classList.add("enter")},0);S.print=false;S.ai=null;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
+function go(tab){const ch=tab!==S.tab;S.detail=null;if(ch)Native.haptic("light");setTimeout(()=>{if(!ch)return;const m=$("app");if(!m)return;m.classList.remove("enter");void m.offsetWidth;m.classList.add("enter")},0);S.print=false;S.ai=null;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
 
 /* ================= 操作 ================= */
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b){if(S.menu){S.menu=null;draw()}return}const a=b.dataset.a,id=b.dataset.id;const t=T();
@@ -1324,7 +1497,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
      const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
      if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
-   case"jumpDay":{const el=$("day"+b.dataset.k);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".dayjump button").forEach((x,i)=>{x.style.background=i==+b.dataset.k?"var(--paper)":"none";x.style.color=i==+b.dataset.k?"var(--ink)":"";x.style.boxShadow=i==+b.dataset.k?"var(--shadow)":"none"});break}
+   case"jumpDay":{const el=$("day"+b.dataset.k);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".daypills button").forEach((x,i)=>x.setAttribute("aria-current",String(i==+b.dataset.k)));break}
    case"findPhotos":Object.values(t.spots||{}).forEach(s=>{if(s.photo&&s.photo.none)delete s.photo});fillPhotos(S.tid);break;
    case"noPhoto":if(change("写真を外しました",t=>{t.spots[id].photo={none:1}}))draw();break;
    case"print":S.print=true;S.copy=null;draw();window.scrollTo(0,0);break;
@@ -1339,6 +1512,13 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"copyAgain":{const r=await Native.share(t.title,S.copy);if(r)toast("コピーしました");else{$("copybox").select();toast("選択しました。コピーしてください")}break}
    case"closeCopy":S.copy=null;draw();break;
    case"geoFind":geoFind();break;
+   case"detail":S.detail=id;S.dtab="info";S.confirm=null;S.assign=null;if(S.tab!=="spots"){S.tab="spots"}draw();window.scrollTo(0,0);break;
+   case"detailBack":S.detail=null;S.confirm=null;S.assign=null;draw();break;
+   case"dtab":S.dtab=b.dataset.k;draw();break;
+   case"cat":S.cat=b.dataset.c||"";draw();break;
+   case"quickAdd":{const s=t.spots[id];const bd=bestDay(t,s);if(!bd){toast("日程がありません");break}const tm=hm(bd.sl.k);if(conflict(t,bd.d,tm)){toast("あいている時間が見つかりませんでした");break}
+     const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
+     if(change(`${s.name}を${bd.k+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date:bd.d,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,bd.d),...(dur?{dur}:{})}}))draw();break}
    case"geoPick":{const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
    case"sfNoPhoto":S.draft=readSpotForm();S.sfPhoto=null;draw();break;
    case"addSpot":S.edit="spot:";S.draft=null;S.sfPhoto=undefined;S.sfDay="";draw();$("sf_name")?.focus();break;
@@ -1374,6 +1554,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"askPerm":{S.perm=await Native.perm(true);if(S.perm==="granted"){schedNotif();toast("通知をオンにしました")}draw();break}
    case"testNotif":{const f=notifList(t).find(x=>x.at>new Date())||{title:`${t.title}`,body:"通知はこのように届きます"};const r=await Native.testNotify(f);if(r==="app")toast("5秒後に通知が届きます");else if(r==="web")showBanner(f);else{S.perm=await Native.perm(false);draw();toast("通知が許可されていません。iPhoneの設定から許可してください")}break}
   }});
+document.addEventListener("input",e=>{if(e.target.id==="sq"){S.q=e.target.value;const t=T(),el=$("excards");if(t&&el)el.innerHTML=exList(t)}});
 document.addEventListener("change",async e=>{if(e.target.id==="sf_file"){const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await shrinkImg(f);S.draft=readSpotForm();S.sfPhoto={u,own:true,by:"自分の写真",lic:""};draw()}catch(err){toast("この写真は読み込めませんでした")}return}if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
   const t=T();if(!t)return;
   if(e.target.dataset&&e.target.dataset.check){const id=e.target.dataset.check,v=e.target.checked;if(change(v?"チェックしました":"チェックを外しました",t=>{t.checks[id].done=v},true))draw();return}
