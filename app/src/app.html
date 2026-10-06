@@ -929,6 +929,47 @@ body.onhero .hpill{background:rgba(255,255,255,.22)!important;box-shadow:none!im
 .rox{color:#344054!important}
 .bar .ttl small{color:#475467!important}
 .ron small{white-space:normal;overflow:visible;text-overflow:clip}
+/* ===== 並べ替え（2026-10）：長押しで持ち上げて動かす・下に保存バー ===== */
+.sr{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;border:0!important;background:none!important;min-width:0!important}
+.rol li{align-items:center!important;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:pan-y}
+.ul.tl li[data-a=editItem],.tl li[data-a=editItem]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.rom{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.rom .rot{flex-direction:row;align-items:baseline;gap:6px;min-width:0}
+.rom .rot b{font-size:15px;color:#101828}
+.rom .rot s{font-size:12px;color:#98A2B3}
+.ronm{font-size:15px;font-weight:700;color:#101828;line-height:1.35;overflow-wrap:anywhere}
+.rolg{font-size:12.5px!important;color:#475467;font-weight:500;line-height:1.4}
+.rol li.fixed .ronm,.rol li.fixed .rom .rot b{color:#344054}
+.rob .rox{width:36px!important;min-width:36px!important;height:36px!important}
+.rol li{position:relative;background:#fff}
+.rol li.drag{box-shadow:0 18px 40px rgba(16,24,40,.22),0 0 0 2px #5B4BDB!important;z-index:10!important;background:#fff!important;opacity:1!important}
+.rol li:not(.drag){transition:transform .18s ease}
+.day .rol li:not(.zz){background:#fff!important;border:1px solid #E8EBEF!important}
+.day .rol li.fixed:not(.zz){background:#F7F8FA!important}
+.day .rol li.drag:not(.zz){background:#fff!important;border-color:#5B4BDB!important}
+.rol li.lifting{transition:transform .15s ease,box-shadow .15s ease}
+.roask{padding:12px 14px;border-radius:14px;background:#F7F8FA;border:1px solid #E8EBEF}
+.roask b{display:block;font-size:14px;color:#101828}.roask small{display:block;font-size:13px;color:#475467;margin-top:2px}.roask .row{margin-top:10px}
+.robar{position:fixed;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:24;display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;background:#fff;border:1px solid #E8EBEF;border-radius:18px;box-shadow:0 8px 24px rgba(16,24,40,.12)}
+.robar .rost{flex:1;min-width:0;font-size:13px;font-weight:600;color:#475467}
+.robar .btn{min-height:44px;margin:0}
+.page:has(.robar){padding-bottom:calc(230px + env(safe-area-inset-bottom,0px))!important}
+.page:has(.robar) .fab{display:none!important}
+@media (min-width:900px){.robar{left:auto;right:24px;bottom:24px;width:420px}}
+.qaov{position:fixed;inset:0;z-index:60;background:rgba(16,24,40,.42);display:flex;align-items:flex-end;justify-content:center}
+.qac{width:100%;max-width:520px;background:#fff;border-radius:22px 22px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;box-shadow:0 -10px 30px rgba(16,24,40,.18);max-height:88vh;overflow:auto}
+.qah{display:flex;align-items:center;gap:12px;margin-bottom:4px}.qah img{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:none}.qah div{flex:1;min-width:0}.qah small{display:block;font-size:12px;font-weight:600;color:#475467}.qah b{display:block;font-size:18px;color:#101828;line-height:1.3}
+.qac .lbl{font-size:13px;font-weight:700;color:#344054;margin-top:6px}
+.qad{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}.qad button{flex:none;min-width:84px;min-height:52px;border-radius:14px;border:1px solid #E8EBEF;background:#fff;color:#475467;font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.qad button b{font-size:14px}.qad button small{font-size:12px;font-weight:600}.qad button[aria-pressed=true]{background:#F0ECFF;border-color:#D9D0FF;color:#5B4BDB}
+.qac input[type=time]{font:inherit;font-size:20px;font-weight:700;min-height:52px;border-radius:14px;border:1px solid #D0D5DD;padding:0 14px;color:#101828;background:#fff}
+.qahint{font-size:12.5px;color:#475467}
+.qaw{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#FFF7E6;border:1px solid #F5D9A8;color:#8A4B08;font-size:13px;font-weight:600}
+.qaw[hidden],.qae[hidden]{display:none!important}
+.qae{padding:10px 12px;border-radius:12px;background:#FDECEC;color:#B42318;font-size:13px;font-weight:600}
+.qac .qago{min-height:50px;margin-top:6px}.qac .btn.ghost{min-height:44px}
+.cgsteps{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.6;color:#344054}.cgsteps li{margin:2px 0}
+.cgcancel{display:block;margin:6px 0 2px;color:#475467!important;font-weight:600}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -1167,7 +1208,7 @@ function tripForm(){const ed=S.tripForm==="edit";const t=ed?T():{title:"",start:
    <div class="two"><div class="field"><label for="tf_people">人数（任意）</label><input type="number" id="tf_people" min="1" max="50" value="${esc(t.people)}"></div><div class="field"><label for="tf_move">おもな移動</label><select id="tf_move">${Object.entries(MOVES).map(([k,l])=>`<option value="${k}" ${(t.move||"train")===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
    <div class="two"><div class="field"><label for="tf_from">出発地（任意）</label><input type="text" id="tf_from" maxlength="30" value="${esc(t.from||"")}" placeholder="例：名古屋、東京"></div><div class="field"><label for="tf_title">旅行の名前（任意）</label><input type="text" id="tf_title" maxlength="40" value="${esc(t.title)}" placeholder="空なら「行き先＋泊数」"></div></div>
    <div class="row"><button class="btn fill" type="submit">${S.tripForm==="edit"?"保存":"作る"}</button><button class="btn" type="button" data-a="cancel">やめる</button></div>
-   ${S.tripForm==="edit"?`<div class="inbox form"><span class="lbl">友達に渡す・バックアップ</span><span class="sub">この旅行（予定・場所・割り勘・持ち物）をコードにして送れます。相手は「受け取った旅行を取り込む」に貼るだけ。同じ旅行を送り直すと、相手の手元のものを新しい内容に置き換えられます。</span><button class="btn" type="button" data-a="shareTrip" style="align-self:flex-start">この旅行を送る</button>${codeOutBox()}</div>`:""}
+   ${S.tripForm==="edit"?`<div class="inbox form" id="shareBox"><span class="lbl">友達に渡す・バックアップ</span><span class="sub">この旅行（予定・場所・割り勘・持ち物）をコードにして送れます。相手は「受け取った旅行を取り込む」に貼るだけ。同じ旅行を送り直すと、相手の手元のものを新しい内容に置き換えられます。</span><button class="btn" type="button" data-a="shareTrip" style="align-self:flex-start">この旅行を送る</button>${codeOutBox()}</div>`:""}
    ${S.tripForm==="edit"?(S.confirm==="trip"?`<div class="inbox row"><span class="sub" style="color:var(--warn)">この旅行を予定・場所・割り勘ごと削除しますか？</span><button class="btn danger fill" type="button" data-a="delTripYes">削除</button><button class="btn" type="button" data-a="noConfirm">やめる</button></div>`:`<button class="btn danger" type="button" data-a="delTrip" style="align-self:flex-start">この旅行を削除</button>`):""}</form>`}
 
 /* ================= 画面：日程 ================= */
@@ -1198,7 +1239,7 @@ function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
   <div class="dprow">${ds.length>1?`<nav class="daypills" aria-label="日にち">${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}" aria-current="${k===ti}"><b>${k+1}日目</b><small>${+d.slice(5,7)}.${+d.slice(8)}（${wd(d)}）</small></button>`).join("")}</nav>`:`<span style="flex:1"></span>`}${planMenu(t)}</div>`}
 /* 旅の道具（理想の8番）：ルート最適化・持ち物・予算・共有 */
 function tripTools(t){const cs=checks(t),cd=cs.filter(c=>c.done).length;const m=moneyStats(t);const ds=dates(t),today=ymd(new Date());const d0=ds.includes(today)?today:ds[0];
-  const T4=[["roOpen","route","ルート最適化","移動が短い順に並べ替え","#E6F6EE","#1E9E63",` data-date="${d0}"`],["tab","check","持ち物リスト",cs.length?`${cd} / ${cs.length} 準備済み`:"忘れ物を防ぐ","#E6F4F7","#138A9E",' data-t="notif"'],["tab","yen","予算管理",t.budget?`あと ${yen(m.left)}`:m.spent?`${yen(m.spent)} 使用`:"費用を自動で集計","#FCEBEB","#D64545",' data-t="split"'],["editTrip","share","共有する","友達や家族に送る","#EEEBFC","#5B4BDB",""]];
+  const T4=[["roOpen","route","ルート最適化","移動が短い順に並べ替え","#E6F6EE","#1E9E63",` data-date="${d0}"`],["tab","check","持ち物リスト",cs.length?`${cd} / ${cs.length} 準備済み`:"忘れ物を防ぐ","#E6F4F7","#138A9E",' data-t="notif"'],["tab","yen","予算管理",t.budget?`あと ${yen(m.left)}`:m.spent?`${yen(m.spent)} 使用`:"費用を自動で集計","#FCEBEB","#D64545",' data-t="split"'],["editTrip","share","共有する","友達や家族に送る","#EEEBFC","#5B4BDB",' data-share="1"']];
   return `<div class="tools">${T4.map(([a,ic,h,sub,bg,fg,x])=>`<button class="tool" data-a="${a}"${x}><span class="ti" style="background:${bg};color:${fg}">${li(ic)}</span><span class="tt"><b>${h}</b><small>${sub}</small></span></button>`).join("")}</div>`}
 /* 「…」メニュー。items:[[action,label,extraAttrs?,danger?]] */
 function planMenu(t){return moreMenu("plan",[["aiOpen","AIで日程を作る",' data-k="plan"'],["roOpen","並べ替え・削除"],["candOpen","候補から入れる"],["copyPlan","日程を文章でコピー"],["print","しおりを印刷"],["shareTrip","旅行を渡す"],["editTrip","旅行の設定"]])}
@@ -1268,14 +1309,16 @@ function optOrder(t,ids){const pos=[],vals=[];ids.forEach((id,k)=>{const x=t.ite
   if(vals.length<=7){const perm=(a,l=0)=>{if(l===a.length){test(a);return}for(let i=l;i<a.length;i++){[a[l],a[i]]=[a[i],a[l]];perm(a,l+1);[a[l],a[i]]=[a[i],a[l]]}};perm(vals.slice())}
   else{let cur=vals.slice(),imp=true;while(imp){imp=false;for(let i=0;i<cur.length-1;i++)for(let j=i+1;j<cur.length;j++){const n=cur.slice();n.splice(i,j-i+1,...cur.slice(i,j+1).reverse());const c=ids.slice();pos.forEach((p,k)=>c[p]=n[k]);const km=routeKm(t,c);if(km<best.km-0.01){best={km,ids:c};cur=n;imp=true}}}}
   return base-best.km>=0.5?{ids:best.ids,save:base-best.km}:null}
+function roSave(t){const date=S.ro.date,plan=roPlan(t,date,S.ro.ids);const del=S.ro.del||[];if(change(del.length?`順番を変えて、${del.length}件を外しました`:"順番を変えて、時間を入れ直しました",t=>{del.forEach(id=>delete t.items[id]);plan.forEach((p,i)=>{const it=t.items[p.id];if(!it)return;it.order=i+1;if(!p.fixed){it.time=p.time;if(it.kind==="move"&&it.arrive)it.arrive=p.arrive}})})){S.ro=null;return true}return false}
+function roDirty(){const r=S.ro;return !!r&&((r.del||[]).length>0||r.ids.join()!==(r.orig||r.ids).join())}
 function roView(t,date){const ids=S.ro.ids;const plan=roPlan(t,date,ids);const pm=Object.fromEntries(plan.map(p=>[p.id,p]));
-  const opt=optOrder(t,ids);
-  return `<div class="ro"><p class="sub">「≡」をドラッグするか ↑↓ で順番を変えると、移動時間を考えて時間が自動で入り直します。${plan.some(p=>p.fixed)?"行き・帰りの移動は時間を変えません。":""}</p>
+  const opt=optOrder(t,ids);const dirty=roDirty();
+  return `<div class="ro"><p class="sub">予定を長押しするか「≡」をつまんで、上下に動かします。置くと、移動時間を考えて時間が自動で入り直します。${plan.some(p=>p.fixed)?"鍵マークの移動は時間を変えません。":""}</p>
    <ol class="rol" id="rol">${ids.map((id,k)=>{const x=t.items[id];const p=pm[id];const ch=p.time!==x.time;const prv=k?t.items[ids[k-1]]:null;const leg=prv?legOf(t,{id:ids[k-1],...prv},{id,...x}):null;
-     return `<li data-id="${id}" class="${p.fixed?"fixed":""}"><span class="roh" aria-hidden="true">${p.fixed?li("lock"):"≡"}</span>${(()=>{const s=x.spot&&t.spots?.[x.spot];const ph=s&&s.photo&&s.photo.u;return ph?`<img class="roimg" src="${esc(phSrc(ph))}" alt="" loading="lazy" onerror="this.remove()">`:s?`<span class="roimg ticon">${li("pin")}</span>`:""})()}<span class="rot"><b>${p.time}</b>${ch&&x.time?`<s>${esc(x.time)}</s>`:""}</span><span class="ron"><b>${esc(x.title)}</b>${leg?`<small>${legTxt(leg)}</small>`:""}</span><span class="rob"><button type="button" data-a="roMv" data-k="${k}" data-d="-1" aria-label="上へ" ${k===0||p.fixed?"disabled":""}>↑</button><button type="button" data-a="roMv" data-k="${k}" data-d="1" aria-label="下へ" ${k===ids.length-1||p.fixed?"disabled":""}>↓</button>${p.fixed?"":`<button type="button" class="rox" data-a="roDel" data-k="${k}" aria-label="この日から外す">×</button>`}</span></li>`}).join("")}</ol>
-   <button class="roadd" data-a="roAdd">＋ スポットを追加</button>
-   ${opt?`<div class="roopt"><span class="ti">${li("route")}</span><div><b>移動が短い順番があります</b><small>観光の場所を入れ替えると、移動が約${opt.save.toFixed(1)}km短くなります</small></div><button class="btn fill" data-a="roOpt">この順番にする</button></div>`:""}
-   <div class="row"><button class="btn fill" data-a="roDone">この順番にする</button><button class="btn" data-a="roCancel">やめる</button></div></div>`}
+     return `<li data-id="${id}" class="${p.fixed?"fixed":""}"><span class="roh" aria-hidden="true">${p.fixed?li("lock"):"≡"}</span>${(()=>{const s=x.spot&&t.spots?.[x.spot];const ph=s&&s.photo&&s.photo.u;return ph?`<img class="roimg" src="${esc(phSrc(ph))}" alt="" loading="lazy" onerror="this.remove()">`:s?`<span class="roimg ticon">${li("pin")}</span>`:""})()}<span class="rom"><span class="rot"><b>${p.time}</b>${ch&&x.time?`<s>${esc(x.time)}</s>`:""}</span><b class="ronm">${esc(x.title)}</b>${leg?`<small class="rolg">${legTxt(leg)}</small>`:""}</span><span class="rob"><button type="button" class="sr" data-a="roMv" data-k="${k}" data-d="-1" aria-label="上へ" ${k===0||p.fixed?"disabled":""}>↑</button><button type="button" class="sr" data-a="roMv" data-k="${k}" data-d="1" aria-label="下へ" ${k===ids.length-1||p.fixed?"disabled":""}>↓</button>${p.fixed?"":`<button type="button" class="rox" data-a="roDel" data-k="${k}" aria-label="この日から外す">×</button>`}</span></li>`}).join("")}</ol>
+   ${S.ro.ask?`<div class="roask"><b>並べ替えの変更が、まだ保存されていません</b><small>保存してから、スポットを追加しますか？</small><div class="row"><button class="btn fill" data-a="roAddSave">保存して追加</button><button class="btn" data-a="roAskNo">やめる</button></div></div>`:`<button class="roadd" data-a="roAdd">＋ スポットを追加</button>`}
+   ${opt?`<div class="roopt"><span class="ti">${li("route")}</span><div><b>移動が短い順番があります</b><small>観光の場所を入れ替えると、移動が約${opt.save.toFixed(1)}km短くなります</small></div><button class="btn" data-a="roOpt">この案を試す</button></div>`:""}
+   <div class="robar"><span class="rost">${dirty?"未保存の変更":"変更なし"}</span><button class="btn" data-a="roCancel">やめる</button><button class="btn fill" data-a="roDone">この順番で保存</button></div></div>`}
 function roRender(){const t=T();if(!t||!S.ro)return;const sec=document.querySelector(`#day${dates(t).indexOf(S.ro.date)} .ro`);if(sec)sec.outerHTML=roView(t,S.ro.date)}
 /* ===== AI 旅のコンシェルジュ（理想の4番）：会話で頼む → あなたのAIが答える → 「このプランでOK」で反映 ===== */
 const CG_Q=["混雑を避けて、ゆっくり回りたい","雨の日でも楽しめるプランにして","グルメを多めにしたい","移動を少なくしたい","朝はゆっくりスタートしたい"];
@@ -1299,16 +1342,16 @@ ${req}
 {"message":["変えた点を短く（3〜5個）"],"days":[{"date":"YYYY-MM-DD","area":"その日のエリア","items":[{"time":"HH:MM","arrive":"HH:MM（移動のときだけ）","kind":"move | see | food | stay | other","title":"予定の内容","note":"ひとこと（30字くらい）","spot":"場所の名前（行きたい場所の予定のとき）"}]}],"spots":[{"name":"新しく加えた場所の名前","area":"エリア","category":"see | food | shop | nature | activity | view | cafe","note":"おすすめの理由（60字くらい）","wiki":"日本語版ウィキペディアの記事名（なければ空文字）","name_en":"英語の名前","fee":"料金の目安","lat":0.0,"lon":0.0,"booking":false,"minutes":60,"rain_ok":false}]}`}
 function cgView(t){const C=S.cg||{step:"idle"};const hist=t.chat||[];const last=DB.lastAI||"chatgpt";
   const bub=(r,h)=>`<div class="cgb ${r}">${r==="a"?`<span class="cgav sm">${li("spark")}</span>`:""}<div class="cgt">${h}</div></div>`;
-  const msgs=[bub("a",`こんにちは。旅程の相談にのります。<br>どう変えたいですか？`),...hist.map(m=>bub(m.r,m.r==="a"&&Array.isArray(m.x)?`<ul class="cgl">${m.x.map(l=>`<li>${li("check")}${esc(l)}</li>`).join("")}</ul>`:esc(m.x).replace(/\n/g,"<br>")))];
+  const msgs=[bub("a",`こんにちは。旅程の相談にのります。どう変えたいですか？<ol class="cgsteps"><li>変えたいことを書くか、下のボタンを押す</li><li>あなたのAI（ChatGPT など）が開くので、答えを<b>コピー</b>して戻る</li><li>「答えを読み込む」を押すと、日程の案が出ます（OKを押すまで変わりません）</li></ol>`),...hist.map(m=>bub(m.r,m.r==="a"&&Array.isArray(m.x)?`<ul class="cgl">${m.x.map(l=>`<li>${li("check")}${esc(l)}</li>`).join("")}</ul>`:esc(m.x).replace(/\n/g,"<br>")))];
   if(C.step==="wait"){const order=[...AIS].sort((a,b)=>(b[0]===last)-(a[0]===last));msgs.push(bub("a",`<b>${C.ai?`${AI_NAME[C.ai]}の答えをコピーしたら、読み込んでください`:"あなたのAIに聞きます"}</b>
     ${C.ai?`<button class="btn fill big${C.back?" pulse":""}" data-a="cgClip">コピーした答えを読み込む</button><button class="ib" data-a="cgGo" data-ai="${C.ai}">${AI_NAME[C.ai]}をもう一度開く</button>`:`<span class="sub">ふだん使っているAIが、お願いと今の日程が入った状態で開きます。答えが出たら「コピー」して戻ってきてください。</span><button class="btn fill big" data-a="cgGo" data-ai="${order[0][0]}">${order[0][1]}で聞く</button><div class="row">${order.slice(1).map(([k,l])=>`<button class="btn" data-a="cgGo" data-ai="${k}">${l}</button>`).join("")}<button class="btn" data-a="cgCopy">指示文をコピー</button></div>`}
-    <details${C.manual?" open":""}><summary class="sub">うまく読み込めないときは、ここに貼る</summary><div class="form" style="margin-top:8px"><textarea id="cg_paste" placeholder="ここにAIの答えを貼る"></textarea><button class="btn" data-a="cgRead" style="align-self:flex-start">貼った答えを読み込む</button></div></details>`))}
+    <button class="ib cgcancel" data-a="cgNo">やめて、入力に戻る</button><details${C.manual?" open":""}><summary class="sub">うまく読み込めないときは、ここに貼る</summary><div class="form" style="margin-top:8px"><textarea id="cg_paste" placeholder="ここにAIの答えを貼る"></textarea><button class="btn" data-a="cgRead" style="align-self:flex-start">貼った答えを読み込む</button></div></details>`))}
   if(C.step==="preview"){const c=C.c;msgs.push(bub("a",`<b>了解です！こんなプランはどうですか？</b>${C.msg&&C.msg.length?`<ul class="cgl">${C.msg.map(l=>`<li>${li("check")}${esc(l)}</li>`).join("")}</ul>`:""}<span class="sub">予定 ${c.nItems}件${c.spots.filter(x=>!x.dup).length?` ・ 新しい場所 ${c.spots.filter(x=>!x.dup).length}か所`:""}${(()=>{const w=c.warn.find(w=>!/新しい候補/.test(w));return w?` ・ ${esc(w)}`:""})()}</span><span class="sub">このプランで進めますか？</span><button class="btn fill big" data-a="cgOk">このプランでOK！</button><button class="ib" data-a="cgNo">やめる</button>`))}
   if(C.step==="done")msgs.push(bub("a",`日程を更新しました。<button class="btn" data-a="tab" data-t="plan">日程を見る</button>`));
   return `<section class="cg"><div class="cgh"><span class="cgav">${li("spark")}</span><div class="cgn"><b>AI 旅のコンシェルジュ</b><small>あなたの ChatGPT・Claude・Gemini で動きます</small></div>${hist.length?moreMenu("cg",[["cgClear","会話を消す",""]]):""}</div>
    <div class="cgmsgs" id="cgmsgs">${msgs.join("")}</div>
    ${C.step==="idle"||C.step==="done"?`<div class="cgq">${CG_Q.map(q=>`<button data-a="cgAsk" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>`:""}
-   <form id="cgForm" class="cgin"><input type="text" id="cg_in" maxlength="300" placeholder="メッセージを入力…" autocomplete="off" ${C.step==="wait"||C.step==="preview"?"disabled":""}><button type="submit" aria-label="送る" ${C.step==="wait"||C.step==="preview"?"disabled":""}>${li("send")}</button></form></section>`}
+   <form id="cgForm" class="cgin"><input type="text" id="cg_in" maxlength="300" placeholder="${C.step==="wait"?"AIの答えを待っています…":C.step==="preview"?"上の案を選んでください":"例：2日目をゆっくりにしたい"}" autocomplete="off" ${C.step==="wait"||C.step==="preview"?"disabled":""}><button type="submit" aria-label="送る" ${C.step==="wait"||C.step==="preview"?"disabled":""}>${li("send")}</button></form></section>`}
 function cgPush(r,x){const t=T();if(!t)return;t.chat=(t.chat||[]).concat([{r,x}]).slice(-30);save()}
 function cgAsk(q){q=String(q||"").trim();if(!q)return;cgPush("u",q);S.cg={step:"wait",req:q};draw();cgScroll()}
 function cgScroll(){setTimeout(()=>{const m=$("cgmsgs");if(m)m.lastElementChild?.scrollIntoView({block:"end",behavior:"smooth"})},50)}
@@ -1326,6 +1369,26 @@ function planView(t){const ds=dates(t);setTimeout(()=>wxFetch(S.tid),0);
 function itemEnd(t,x){const k=timeKey(x.time);if(k==null)return null;if(x.kind==="move"){const a=timeKey(x.arrive);return a!=null&&a>=k?a:k+30}const sp=x.spot&&t.spots?.[x.spot];return k+(x.dur||sp?.minutes||60)}
 function legTo(t,a,b){if(!a||!b||a.lat==null||b.lat==null)return 30;const km=distKm(a,b)*1.3;return km<0.05?0:Math.round(legMin(km,mainMove(t,km)))}
 /* 前の予定の終わり＋移動のあと、次の予定までに滞在できるいちばん早いすき間。なければ最後の予定のあと */
+/* 探索の「＋」：いきなり入れずに、何日目・何時に入れるかを下から出るシートで確かめてから入れる */
+function qaWarn(s,tm){const k=timeKey(tm);if(k==null)return"時間を入れてください";const food=s.cat==="food"||s.cat==="cafe"||s.cat==="shop";
+  if(!food&&k>=18*60)return"観光の予定が18時以降です。営業時間を確認してください。";if(food&&k>=22*60)return"22時以降です。営業時間を確認してください。";if(k<7*60)return"朝早い時間です。営業時間を確認してください。";return""}
+function qaSheet(sid,date,tm){const t=T(),s=t.spots[sid];if(!s)return;document.querySelector(".qaov")?.remove();const ds=dates(t);let d=date,time=tm;
+  const ov=document.createElement("div");ov.className="qaov";
+  const ph=s.photo&&s.photo.u?s.photo:null;
+  const render=()=>{const w=qaWarn(s,time);ov.innerHTML=`<div class="qac" role="dialog" aria-modal="true" aria-label="日程に入れる">
+   <div class="qah">${ph?`<img src="${esc(phSrc(ph.u))}" alt="" onerror="this.remove()">`:""}<div><small>日程に入れる</small><b>${esc(s.name)}</b></div><button class="ib icon" data-qa="x" aria-label="閉じる">✕</button></div>
+   <span class="lbl">何日目？</span><div class="qad">${ds.map((x,k)=>`<button type="button" data-qa="d" data-d="${x}" aria-pressed="${x===d}"><b>${k+1}日目</b><small>${md(x)}（${wd(x)}）</small></button>`).join("")}</div>
+   <label class="lbl" for="qa_t">何時から？</label><input type="time" id="qa_t" step="300" value="${time}"><small class="qahint">${suggestSlot(T(),d,s).fit?"あいている時間を入れてあります。変えられます。":"この日はあいている時間が少ないので、遅めの時間になっています。ほかの日も選べます。"}</small>
+   <div class="qaw" ${w?"":"hidden"}><span aria-hidden="true">⚠</span><span id="qa_w">${esc(w)}</span></div>
+   <div class="qae" id="qa_e" hidden></div>
+   <button class="btn fill qago" data-qa="go">この時間に入れる</button><button class="btn ghost" data-qa="x">やめる</button></div>`;
+   ov.querySelector("#qa_t").addEventListener("input",e=>{time=e.target.value;const hn=ov.querySelector(".qahint");if(hn)hn.textContent="時間を変えました。ほかの予定と重なっていないかは「この時間に入れる」で確かめます。";const w2=qaWarn(s,time);const box=ov.querySelector(".qaw");box.hidden=!w2;ov.querySelector("#qa_w").textContent=w2;ov.querySelector("#qa_e").hidden=true})};
+  ov.addEventListener("click",e=>{const b=e.target.closest("[data-qa]");if(e.target===ov||b&&b.dataset.qa==="x"){ov.remove();return}if(!b)return;
+    if(b.dataset.qa==="d"){d=b.dataset.d;time=hm(suggestSlot(T(),d,s).k);render();return}
+    if(b.dataset.qa==="go"){const t2=T();const w=timeKey(time)==null?"時間を入れてください":conflict(t2,d,time);if(w){const e2=ov.querySelector("#qa_e");e2.textContent=w;e2.hidden=false;return}
+      const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
+      if(change(`${s.name}を${ds.indexOf(d)+1}日目の${time}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date:d,time,arrive:"",kind,title:s.name,note:"",spot:sid,order:nextOrder(t,d),...(dur?{dur}:{})}})){ov.remove();draw()}}});
+  render();document.body.appendChild(ov);setTimeout(()=>ov.querySelector(".qago")?.focus(),50)}
 function suggestSlot(t,date,s){const its=items(t,date).filter(x=>timeKey(x.time)!=null);const stay=s.minutes||60;const r15=m=>Math.ceil(m/15)*15;const loc=x=>x&&x.spot&&t.spots?.[x.spot]||null;
   if(!its.length)return {k:600,fit:true};
   for(let i=0;i<its.length-1;i++){const a=its[i],b=its[i+1];if(a.kind==="stay"&&timeKey(a.time)>=17*60)continue;
@@ -1445,7 +1508,7 @@ function exList(t){const q=normName(S.q||"");const ss=spots(t).filter(s=>(!S.cat
      ${d?"":`<button class="exadd" data-a="quickAdd" data-id="${s.id}" aria-label="${esc(s.name)}を日程に入れる">＋</button>`}</article>`}).join("")}
 /* ＋：入れやすい日（その日の予定に近くて、あいている時間がある日）を選んで入れる */
 function bestDay(t,s){const ds=dates(t);let best=null;ds.forEach((d,k)=>{const sl=suggestSlot(t,d,s);const pts=items(t,d).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
-  const km=s.lat!=null&&pts.length?Math.min(...pts.map(p=>distKm(p,s))):50;const score=(sl.fit?0:1000)+km;if(!best||score<best.score)best={d,k,sl,score}});return best}
+  const km=s.lat!=null&&pts.length?Math.min(...pts.map(p=>distKm(p,s))):50;const score=(sl.fit?0:1000+sl.k)+km;if(!best||score<best.score)best={d,k,sl,score}});return best}
 function spotDetail(t,id){const s=t.spots[id];const ph=s.photo&&s.photo.u?s.photo:null;const d=spotDay(t,id);const tab=S.dtab||"info";
   const near=s.lat==null?[]:spots(t).filter(x=>x.id!==id&&x.lat!=null).map(x=>({x,km:distKm(s,x)*1.3})).sort((a,b)=>a.km-b.km).slice(0,6);
   const row=(ic,l,v)=>v?`<div class="sdr"><span class="sdi">${ic}</span><span class="sdl">${l}</span><span class="sdv">${v}</span></div>`:"";
@@ -1841,7 +1904,7 @@ function aiApply(c,mode){return change(`AIの${c.nItems?"プラン":"候補"}を
     Object.entries(c.days).forEach(([date,its])=>{const base=nextOrder(t,date);its.forEach((x,i)=>{t.items[uid()+date+i]={date,time:x.time,arrive:x.kind==="move"?x.arrive:"",kind:x.kind,title:x.title,note:(x.flag?"【要確認：時間がかぶっています】":"")+x.note,spot:x.spotName?ids.get(normName(x.spotName))||"":"",order:base+i}});
       if(c.areas[date])t.dayInfo[date]={...(t.dayInfo[date]||{}),area:c.areas[date]}})}})}
 function aiView(t){const A=S.ai,o=A.o;const more=A.kind==="more",txt=A.kind==="text";
-  const head=`<div class="row" style="justify-content:space-between"><h2 style="font-size:20px">${A.first?"まず、AIに日程と候補を考えてもらいましょう":txt?"文章から行きたい場所を拾う":more?"AIで候補を増やす":"AIで日程と候補を作る"}</h2><button class="btn" data-a="aiClose">${A.first?"あとで":"閉じる"}</button></div>${A.first&&A.step!=="preview"?`<p class="sub">「${esc(o.dest)}」の日程と、行きたい場所の候補（10か所以上）をAIが考えます。下の条件のままで大丈夫です。</p>`:""}`;
+  const head=`<div class="row" style="justify-content:space-between"><h2 style="font-size:20px">${A.first?"まず、AIに日程と候補を考えてもらいましょう":txt?"文章から行きたい場所を拾う":more?"AIで候補を増やす":"AIで日程と候補を作る"}</h2><button class="btn" data-a="aiClose">${A.first?"自分で予定を入れる":"閉じる"}</button></div>${A.first&&A.step!=="preview"?`<p class="sub">「${esc(o.dest)}」の日程と、行きたい場所の候補（10か所以上）をAIが考えます。下の条件のままで大丈夫です。</p>`:""}`;
   if(A.step==="preview"){const c=A.c;return `<section class="card form">${head}
      <p class="note">取り込む内容：予定 <b>${c.nItems}件</b> ・ 行きたい場所 <b>${c.spots.filter(s=>!s.dup).length}か所</b></p>
      ${c.warn.map(w=>`<p class="warn" style="font-weight:500">${esc(w)}</p>`).join("")}${c.cut?`<div class="row"><button class="btn" data-a="aiCont">続きを頼む文をコピー</button><span class="sub">同じAIのチャットに貼って送ると、残りの場所だけを出してくれます。取り込んだあと、その答えも読み込めます。</span></div>`:""}
@@ -1995,7 +2058,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
        if(same&&(!r||r.value==="replace")){DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});
      if(!save()){DB.trips=JSON.parse(backup);toast("この端末に保存できませんでした");break}S.imp=null;UNDO=null;toast(`${n}件の旅行を取り込みました`);draw();break}
    case"aiOpen":S.ai={kind:b.dataset.k,step:"form",o:aiDefaults(t)};S.edit=null;draw();window.scrollTo(0,0);break;
-   case"aiClose":S.ai=null;draw();break;
+   case"aiClose":{const first=S.ai&&S.ai.first;S.ai=null;if(first&&S.tab==="plan"){const d0=dates(t)[0];if(d0&&!items(t,d0).length){S.edit="new:"+d0;draw();setTimeout(()=>{$("day0")?.scrollIntoView({block:"start"});scrollBy(0,-140);toast("1日目の予定から入れていきましょう")},50);break}}draw();break}
    case"aiBack":S.ai.step="form";draw();break;
    case"aiGo":{aiReadForm();const A=S.ai;if(A.kind==="text"&&!(A.o.src||"").trim()){toast("先に文章を貼ってください");break}
      const pr=aiPrompt(t,A.o,A.kind),q=encodeURIComponent(pr),ai=b.dataset.ai;const long=q.length>12000;
@@ -2022,7 +2085,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"sample":openSample();break;
    case"open":S.tid=id;S.tab="plan";S.vb=null;S.sel=null;S.mapDay=0;draw();window.scrollTo(0,0);break;
    case"home":S.print=false;S.ai=null;S.codeOut=null;S.imp=null;S.tid=null;S.edit=null;S.pick=null;S.draft=null;draw();window.scrollTo(0,0);break;
-   case"editTrip":S.codeOut=null;S.tripForm="edit";S.confirm=null;draw();break;
+   case"editTrip":S.codeOut=null;S.tripForm="edit";S.confirm=null;draw();if(b.dataset.share){const el=$("shareBox");if(el){el.scrollIntoView({block:"start"});scrollBy(0,-80);el.classList.add("flash")}}else window.scrollTo(0,0);break;
    case"delTrip":S.confirm="trip";draw();break;
    case"delTripYes":{const old=DB.trips[S.tid];delete DB.trips[S.tid];if(!save()){DB.trips[S.tid]=old;toast("削除できませんでした");break}S.tripForm=null;S.confirm=null;S.tid=null;UNDO=null;toast("旅行を削除しました");draw();break}
    case"cancel":if(S.tripForm){S.tripForm=null;S.confirm=null}else{S.edit=null;S.assign=null;S.wform=null;S.draft=null}draw();break;
@@ -2033,7 +2096,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
      const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
      if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
-   case"jumpDay":{const el=$("day"+b.dataset.k);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".daypills button").forEach((x,i)=>x.setAttribute("aria-current",String(i==+b.dataset.k)));break}
+   case"jumpDay":{const el=$("day"+b.dataset.k);if(el){const row=document.querySelector(".dprow");const cs=row&&getComputedStyle(row);const st=row&&cs.position==="sticky"?(parseFloat(cs.top)||0)+row.offsetHeight:($("bar")?.offsetHeight||64);window.scrollTo({top:el.getBoundingClientRect().top+scrollY-st-8,behavior:"smooth"})}document.querySelectorAll(".daypills button").forEach((x,i)=>x.setAttribute("aria-current",String(i==+b.dataset.k)));break}
    case"findPhotos":Object.values(t.spots||{}).forEach(s=>{if(s.photo&&s.photo.none)delete s.photo});fillPhotos(S.tid);break;
    case"noPhoto":if(change("写真を外しました",t=>{t.spots[id].photo={none:1}}))draw();break;
    case"print":S.print=true;S.copy=null;draw();window.scrollTo(0,0);break;
@@ -2059,24 +2122,24 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"cgOk":{const c=S.cg.c;if(aiApply(c,"days")){cgPush("a",S.cg.msg&&S.cg.msg.length?S.cg.msg:["日程を更新しました"]);S.cg={step:"done"};draw();cgScroll();fillPhotos(S.tid)}break}
    case"cgNo":cgPush("a","わかりました。ほかに変えたいところがあれば言ってください。");S.cg={step:"idle"};draw();cgScroll();break;
    case"cgClear":if(change("会話を消しました",t=>{t.chat=[]},true)){S.cg={step:"idle"};draw()}break;
-   case"roOpen":{const ds=dates(t),td=ymd(new Date());const dd=b.dataset.date||(ds.includes(td)?td:ds[Math.min(S.sday||0,ds.length-1)]);if(!dd)break;S.ro={date:dd,ids:items(t,dd).map(x=>x.id)};S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
+   case"roOpen":{const ds=dates(t),td=ymd(new Date());const dd=b.dataset.date||(ds.includes(td)?td:ds[Math.min(S.sday||0,ds.length-1)]);if(!dd)break;S.ro={date:dd,ids:items(t,dd).map(x=>x.id)};S.ro.orig=[...S.ro.ids];S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
    case"roCancel":S.ro=null;draw();break;
-   case"roDel":{const k=+b.dataset.k;const id2=S.ro.ids[k];S.ro.del=(S.ro.del||[]).concat([id2]);S.ro.ids.splice(k,1);roRender();toast("この日から外します（「この順番にする」で確定）");break}
-   case"roAdd":{const k=dates(t).indexOf(S.ro.date);S.ro=null;S.side=true;S.sday=Math.max(0,k);draw();break}
+   case"roDel":{const k=+b.dataset.k;const id2=S.ro.ids[k];S.ro.del=(S.ro.del||[]).concat([id2]);S.ro.ids.splice(k,1);roRender();toast("この日から外します（「この順番で保存」で確定）");break}
+   case"roAdd":{if(roDirty()){S.ro.ask=true;roRender();break}const k=dates(t).indexOf(S.ro.date);S.ro=null;S.side=true;S.sday=Math.max(0,k);draw();break}
+   case"roAskNo":S.ro.ask=false;roRender();break;
+   case"roAddSave":{const date=S.ro.date;if(roSave(t)){const k=dates(t).indexOf(date);S.side=true;S.sday=Math.max(0,k);draw()}break}
    case"roOpt":{const o=optOrder(t,S.ro.ids);if(o){S.ro.ids=o.ids;Native.haptic("light");roRender();toast(`移動が約${o.save.toFixed(1)}km短い順番にしました`)}break}
    case"bookView":bookView(id);break;
    case"bkImgDel":S.bkImg=null;toast("画像を外します（保存を押すと反映）");b.previousElementSibling?.remove();b.remove();break;
    case"rainAdd":{const s=t.spots[id],date=b.dataset.date;const sl=suggestSlot(t,date,s);const tm=hm(sl.k);if(conflict(t,date,tm)){toast("あいている時間が見つかりませんでした");break}const nid=uid();const dur=DURS.includes(+s.minutes)?+s.minutes:0;
      if(change(`${s.name}を${dates(t).indexOf(date)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind:s.cat==="food"||s.cat==="cafe"?"food":"see",title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw()}break}
    case"roMv":{const k=+b.dataset.k,d=+b.dataset.d,ids=S.ro.ids,j=k+d;const plan=roPlan(t,S.ro.date,ids);if(j<0||j>=ids.length||plan[j].fixed)break;[ids[k],ids[j]]=[ids[j],ids[k]];Native.haptic("light");roRender();break}
-   case"roDone":{const date=S.ro.date,plan=roPlan(t,date,S.ro.ids);const del=S.ro.del||[];if(change(del.length?`順番を変えて、${del.length}件を外しました`:"順番を変えて、時間を入れ直しました",t=>{del.forEach(id=>delete t.items[id]);plan.forEach((p,i)=>{const it=t.items[p.id];if(!it)return;it.order=i+1;if(!p.fixed){it.time=p.time;if(it.kind==="move"&&it.arrive)it.arrive=p.arrive}})})){S.ro=null;draw()}break}
+   case"roDone":if(!roDirty()){S.ro=null;draw();break}if(roSave(t))draw();break;
    case"detail":S.detail=id;S.dtab="info";S.confirm=null;S.assign=null;if(S.tab!=="spots"){S.tab="spots"}draw();window.scrollTo(0,0);break;
    case"detailBack":S.detail=null;S.confirm=null;S.assign=null;draw();break;
    case"dtab":S.dtab=b.dataset.k;draw();break;
    case"cat":S.cat=b.dataset.c||"";draw();break;
-   case"quickAdd":{const s=t.spots[id];const bd=bestDay(t,s);if(!bd){toast("日程がありません");break}const tm=hm(bd.sl.k);if(conflict(t,bd.d,tm)){toast("あいている時間が見つかりませんでした");break}
-     const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
-     if(change(`${s.name}を${bd.k+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date:bd.d,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,bd.d),...(dur?{dur}:{})}}))draw();break}
+   case"quickAdd":{const s=t.spots[id];const bd=bestDay(t,s);if(!bd){toast("日程がありません");break}qaSheet(id,bd.d,hm(bd.sl.k));break}
    case"geoPick":{const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
    case"sfNoPhoto":S.draft=readSpotForm();S.sfPhoto=null;draw();break;
    case"addSpot":S.edit="spot:";S.draft=null;S.sfPhoto=undefined;S.sfDay="";draw();$("sf_name")?.focus();break;
@@ -2117,14 +2180,46 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"testNotif":{const f=notifList(t).find(x=>x.at>new Date())||{title:`${t.title}`,body:"通知はこのように届きます"};const r=await Native.testNotify(f);if(r==="app")toast("5秒後に通知が届きます");else if(r==="web")showBanner(f);else{S.perm=await Native.perm(false);draw();toast("通知が許可されていません。iPhoneの設定から許可してください")}break}
   }});
 /* 並べ替えのドラッグ（≡ を押したまま上下） */
-document.addEventListener("pointerdown",e=>{const h=e.target.closest(".rol .roh");if(!h||!S.ro)return;const li=h.closest("li");if(li.classList.contains("fixed"))return;e.preventDefault();
-  const ol=li.parentNode,rows=[...ol.children],from=rows.indexOf(li),y0=e.clientY;li.classList.add("drag");let to=from;
-  const mids=rows.map(r=>{const b=r.getBoundingClientRect();return b.top+b.height/2});
-  const mv=ev=>{const dy=ev.clientY-y0;li.style.transform=`translateY(${dy}px)`;const y=mids[from]+dy;let k=mids.findIndex(m=>y<m);if(k<0)k=rows.length-1;else if(k>from)k--;to=Math.max(0,Math.min(rows.length-1,k));
-    rows.forEach((r,i)=>{if(r===li)return;const h2=li.getBoundingClientRect().height+8;r.style.transform=from<to&&i>from&&i<=to?`translateY(${-h2}px)`:from>to&&i>=to&&i<from?`translateY(${h2}px)`:""})};
-  const up=()=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);removeEventListener("pointercancel",up);rows.forEach(r=>r.style.transform="");li.classList.remove("drag");
-    if(to!==from){const t=T(),plan=roPlan(t,S.ro.date,S.ro.ids);if(!plan[to].fixed){const ids=S.ro.ids;const [x]=ids.splice(from,1);ids.splice(to,0,x);Native.haptic("light")}}roRender()};
-  addEventListener("pointermove",mv);addEventListener("pointerup",up);addEventListener("pointercancel",up)});
+/* 並べ替え：「≡」はすぐ、並べ替えの行や日程の予定カードは長押し（0.42秒）で持ち上げて動かす（iPhoneのアプリ移動と同じ感覚） */
+const LP={timer:null,drag:null,swallow:false};
+function roStartDrag(li,y){const ol=li.parentNode,rows=[...ol.children],from=rows.indexOf(li);if(from<0)return;
+  const sy0=scrollY,mids=rows.map(r=>{const b=r.getBoundingClientRect();return b.top+scrollY+b.height/2}),hgt=li.getBoundingClientRect().height+8;
+  li.classList.add("drag");Native.haptic("medium");
+  const d={li,rows,from,to:from,y0:y,cy:y};LP.drag=d;
+  d.place=()=>{const dy=d.cy-d.y0+(scrollY-sy0);li.style.transform=`translateY(${dy}px) scale(1.03)`;const yy=mids[from]+dy;let k=mids.findIndex(m=>yy<m);if(k<0)k=rows.length-1;else if(k>from)k--;d.to=Math.max(0,Math.min(rows.length-1,k));
+    rows.forEach((r,i)=>{if(r===li)return;r.style.transform=from<d.to&&i>from&&i<=d.to?`translateY(${-hgt}px)`:from>d.to&&i>=d.to&&i<from?`translateY(${hgt}px)`:""})};
+  /* 画面の端に近づいたら自動でスクロール */
+  const tick=()=>{if(LP.drag!==d)return;if(!d.moved&&Math.abs(d.cy-d.y0)>16)d.moved=true;const top=130,bot=innerHeight-180;const v=!d.moved?0:d.cy<top&&d.cy<d.y0?-Math.min(14,Math.ceil((top-d.cy)/8)):d.cy>bot&&d.cy>d.y0?Math.min(14,Math.ceil((d.cy-bot)/8)):0;if(v){scrollBy(0,v);d.place()}requestAnimationFrame(tick)};requestAnimationFrame(tick);
+  d.place()}
+function roEndDrag(){const d=LP.drag;if(!d)return;LP.drag=null;d.rows.forEach(r=>r.style.transform="");d.li.classList.remove("drag");
+  if(d.to!==d.from&&S.ro){const t=T(),plan=roPlan(t,S.ro.date,S.ro.ids);if(plan[d.to]&&!plan[d.to].fixed){const ids=S.ro.ids;const [x]=ids.splice(d.from,1);ids.splice(d.to,0,x);Native.haptic("light")}else toast("時間が決まっている移動の位置には置けません")}
+  roRender()}
+function lpCancel(){clearTimeout(LP.timer);LP.timer=null}
+document.addEventListener("pointerdown",e=>{LP.swallow=false;if(LP.drag)roEndDrag();if(e.button)return;
+  const h=e.target.closest(".rol .roh");
+  if(h&&S.ro){const li=h.closest("li");if(li.classList.contains("fixed"))return;e.preventDefault();roStartDrag(li,e.clientY);return}
+  const row=S.ro&&e.target.closest(".rol li:not(.fixed)");
+  const card=!row&&!S.ro&&!S.edit&&!S.confirm&&e.target.closest(".day .tl li[data-a=editItem]");
+  if(!row&&!card)return;if(e.target.closest("button,a,input,select,textarea"))return;
+  LP.sx=e.clientX;LP.sy=e.clientY;LP.y=e.clientY;lpCancel();
+  LP.timer=setTimeout(()=>{LP.timer=null;LP.swallow=true;
+    if(row){if(row.isConnected)roStartDrag(row,LP.y);return}
+    const id=card.dataset.id,t=T(),it=t&&t.items[id];if(!it)return;
+    S.ro={date:it.date,ids:items(t,it.date).map(x=>x.id)};S.ro.orig=[...S.ro.ids];S.edit=null;draw();
+    const li=document.querySelector(`#rol li[data-id="${id}"]`);if(!li)return;
+    const r=li.getBoundingClientRect();scrollBy(0,Math.round(r.top+r.height/2-LP.y));
+    if(li.classList.contains("fixed")){Native.haptic("light");toast("並べ替えモードにしました（この移動は時間が決まっているので動かせません）");return}
+    roStartDrag(li,LP.y)},420)});
+document.addEventListener("pointermove",e=>{if(LP.drag){LP.drag.cy=e.clientY;LP.drag.place();return}
+  if(LP.timer){LP.y=e.clientY;if(Math.abs(e.clientX-LP.sx)>8||Math.abs(e.clientY-LP.sy)>8)lpCancel()}});
+document.addEventListener("pointerup",()=>{lpCancel();if(LP.drag)roEndDrag();if(LP.swallow)setTimeout(()=>{LP.swallow=false},120)});
+document.addEventListener("pointercancel",e=>{lpCancel();if(LP.drag&&e.pointerType!=="touch")roEndDrag()});
+document.addEventListener("touchcancel",()=>{lpCancel();if(LP.drag)roEndDrag()});
+/* iPhone：持ち上げている間は画面がスクロールしないようにする（指の位置はタッチから読む） */
+document.addEventListener("touchmove",e=>{if(!LP.drag)return;e.preventDefault();const tc=e.touches[0];if(tc){LP.drag.cy=tc.clientY;LP.drag.place()}},{passive:false});
+document.addEventListener("touchend",()=>{if(LP.drag)roEndDrag()});
+document.addEventListener("contextmenu",e=>{if(LP.drag||LP.timer||LP.swallow)e.preventDefault()});
+document.addEventListener("click",e=>{if(LP.swallow){LP.swallow=false;e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.tab==="ai"&&S.cg&&S.cg.step==="wait"&&S.cg.ai&&!S.cg.back){S.cg.back=true;draw();cgScroll()}});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.ai&&S.ai.sent&&S.ai.step!=="preview"&&!S.ai.back){S.ai.back=true;draw();const b=$("aiBox");if(b)b.scrollIntoView({block:"start",behavior:"smooth"})}});
 /* 日程の「次のスポットを追加する」は、トップの写真を過ぎてから出す */
