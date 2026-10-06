@@ -994,6 +994,10 @@ function phDB(){return new Promise(ok=>{if(PH.db)return ok(PH.db);try{const r=in
 async function phLoad(){const db=await phDB();if(!db)return;await new Promise(ok=>{try{const tx=db.transaction("p");const st=tx.objectStore("p");const c=st.openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(cur.value instanceof Blob)PH.map.set(cur.key,URL.createObjectURL(cur.value));cur.continue()}else ok()};c.onerror=()=>ok()}catch(e){ok()}});if(PH.map.size)draw()}
 /* 予約の画像（確認メールのスクショなど）：端末の中だけ。旅行を渡すコードには入れない */
 async function bkPut(id,blob){const db=await phDB();if(!db)return false;return new Promise(ok=>{try{const tx=db.transaction("r","readwrite");blob?tx.objectStore("r").put(blob,id):tx.objectStore("r").delete(id);tx.oncomplete=()=>ok(true);tx.onerror=()=>ok(false)}catch(e){ok(false)}})}
+/* どの予定からも使われなくなった予約画像を消す（起動時。「元に戻す」で戻せるよう、削除した瞬間には消さない） */
+async function bkGc(){const db=await phDB();if(!db)return;const used=new Set();Object.values(DB.trips||{}).forEach(t=>Object.entries(t.items||{}).forEach(([id,x])=>{if(x&&x.bookImg)used.add(id)}));
+  await new Promise(ok=>{try{const tx=db.transaction("r","readwrite");const st=tx.objectStore("r");const c=st.openKeyCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(!used.has(cur.key))st.delete(cur.key);cur.continue()}};tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}})}
+async function phWipe(){const db=await phDB();if(!db)return;await new Promise(ok=>{try{const tx=db.transaction(["p","r"],"readwrite");tx.objectStore("p").clear();tx.objectStore("r").clear();tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}});PH.map.forEach(u=>{try{URL.revokeObjectURL(u)}catch(e){}});PH.map.clear()}
 async function bkGet(id){const db=await phDB();if(!db)return null;return new Promise(ok=>{try{const q=db.transaction("r").objectStore("r").get(id);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)}catch(e){ok(null)}})}
 async function shrinkBlob(file,max,q){const url=URL.createObjectURL(file);try{const img=new Image();await new Promise((ok,ng)=>{img.onload=ok;img.onerror=ng;img.src=url});const k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,"image/jpeg",q))}finally{URL.revokeObjectURL(url)}}
 function bookBadge(x){return x.bookNo||x.bookImg||x.bookUrl?`<button class="bkb" data-a="bookView" data-id="${x.id}">${li("ticket")}${x.bookNo?`予約 ${esc(x.bookNo)}`:"予約あり"}</button>`:""}
@@ -1630,9 +1634,9 @@ function guessCur(t){const s=`${t.dest||""}${t.title||""}`;const g=CUR_GUESS.fin
 const tripCur=t=>t.cur||guessCur(t);
 const fx=(n,c)=>{const [nm,sym]=CUR[c]||["",c];const d=["JPY","KRW","VND","IDR"].includes(c)||Number.isInteger(+n)?0:2;return `${sym}${(+n).toLocaleString("ja-JP",{minimumFractionDigits:d,maximumFractionDigits:d})}`};
 /* 為替レート：無料・登録不要の ExchangeRate-API（open.er-api.com）。取れないときは手入力 */
-async function fetchRate(tid,force){const t=DB.trips[tid];if(!t)return;const c=tripCur(t);if(c==="JPY"||navigator.onLine===false)return;if(!force&&t.rate&&t.cur===c&&Date.now()-(t.rateAt||0)<12*36e5)return;
+async function fetchRate(tid,force){const t=DB.trips[tid];if(!t)return;const c=tripCur(t);if(c==="JPY"||navigator.onLine===false)return;if(!force&&t.rate&&t.cur===c&&(t.rateMan||Date.now()-(t.rateAt||0)<12*36e5))return;
   try{const r=await fetch(`https://open.er-api.com/v6/latest/${c}`).then(r=>r.json());const v=+r?.rates?.JPY;if(!(v>0))throw 0;
-    const tt=DB.trips[tid];if(!tt)return;tt.cur=c;tt.rate=Math.round(v*1e4)/1e4;tt.rateAt=Date.now();save();if(S.tid===tid&&S.tab==="split")draw();if(force)toast(`レートを更新しました：${fx(1,c)}＝${tt.rate.toLocaleString("ja-JP")}円`)}
+    const tt=DB.trips[tid];if(!tt)return;tt.cur=c;tt.rate=Math.round(v*1e4)/1e4;tt.rateAt=Date.now();tt.rateMan=false;save();if(S.tid===tid&&S.tab==="split")draw();if(force)toast(`レートを更新しました：${fx(1,c)}＝${tt.rate.toLocaleString("ja-JP")}円`)}
   catch(e){if(force)toast("レートを取れませんでした。設定から手で入れられます")}}
 function moneyStats(t){const list=Object.values(t.expenses||{});const spent=list.reduce((s,e)=>s+(e.amount||0),0);const today=ymd(new Date());
   return {list,spent,today:list.filter(e=>e.date===today).reduce((s,e)=>s+(e.amount||0),0),left:(t.budget||0)-spent}}
@@ -1888,7 +1892,7 @@ function cleanMap(o,fn){const r={};if(o&&typeof o==="object")Object.entries(o).s
 function cleanPhoto(p){if(!p||typeof p!=="object")return {};if(p.none)return {photo:{none:1}};if(typeof p.u!=="string"||!/^https:\/\/(upload|thumb)\.wikimedia\.org\/[^\s"'<>]+$/.test(p.u))return {};
   return {photo:{u:p.u.slice(0,600),near:!!p.near,by:cs_(p.by,80)||"作者不明",lic:cs_(p.lic,40),pg:typeof p.pg==="string"&&/^https:\/\/commons\.wikimedia\.org\/[^\s"'<>]+$/.test(p.pg)?p.pg.slice(0,600):""}}}
 function cleanTrip(o){if(!o||typeof o!=="object")return null;const start=cd_(o.start),end=cd_(o.end);if(!start||!end||end<start)return null;
-  const t={title:cs_(o.title,40)||"旅行",start,end,people:cn_(o.people,1,50)??"",created:cn_(o.created,0,1e14)||Date.now(),sid:cid_(o.sid||"")?o.sid:uid(),dest:cs_(o.dest,40),from:cs_(o.from,30),move:MOVES[o.move]?o.move:"",budget:cn_(o.budget,1,1e9)||0,cur:CUR[o.cur]?o.cur:"",rate:cn_(o.rate,1e-6,1e6)||0,rateAt:cn_(o.rateAt,0,1e14)||0,plans:o.plans&&typeof o.plans==="object"?Object.fromEntries(Object.keys(EXCATS).map(k=>[k,cn_(o.plans[k],0,1e9)||0])):{},
+  const t={title:cs_(o.title,40)||"旅行",start,end,people:cn_(o.people,1,50)??"",created:cn_(o.created,0,1e14)||Date.now(),sid:cid_(o.sid||"")?o.sid:uid(),dest:cs_(o.dest,40),from:cs_(o.from,30),move:MOVES[o.move]?o.move:"",budget:cn_(o.budget,1,1e9)||0,cur:CUR[o.cur]?o.cur:"",rate:cn_(o.rate,1e-6,1e6)||0,rateMan:o.rateMan===true,rateAt:cn_(o.rateAt,0,1e14)||0,plans:o.plans&&typeof o.plans==="object"?Object.fromEntries(Object.keys(EXCATS).map(k=>[k,cn_(o.plans[k],0,1e9)||0])):{},
     items:cleanMap(o.items,v=>{const date=cd_(v.date);if(!date)return null;return {date,time:ct_(v.time),arrive:ct_(v.arrive),kind:KINDS[v.kind]?v.kind:"other",title:cs_(v.title,60)||"予定",note:cs_(v.note,160),spot:cid_(v.spot||"")?v.spot:"",order:cn_(v.order,-1e6,1e6)||0,dur:cn_(v.dur,1,600)||0,done:!!v.done,bookNo:cs_(v.bookNo,60),bookUrl:/^https?:\/\//.test(v.bookUrl||"")?cs_(v.bookUrl,500):""}}),
     spots:cleanMap(o.spots,v=>{const name=cs_(v.name,60);if(!name)return null;const lat=cn_(v.lat,-90,90),lon=cn_(v.lon,-180,180);return {name,area:cs_(v.area,30),cat:CATS[v.cat]?v.cat:"",note:cs_(v.note,500),fee:cs_(v.fee,40),url:/^https?:\/\//.test(v.url||"")?cs_(v.url,500):"",lat:lat!=null&&lon!=null?lat:null,lon:lat!=null&&lon!=null?lon:null,book:!!v.book,rain:!!v.rain,minutes:cn_(v.minutes,1,600),created:cn_(v.created,0,1e14)||0,wiki:cs_(v.wiki,80),en:cs_(v.en,80),...cleanPhoto(v.photo)}}),
     members:cleanMap(o.members,v=>{const name=cs_(v.name,20);return name?{name,order:cn_(v.order,0,1e6)||0}:null}),
@@ -1952,7 +1956,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui")}catch(e){}DB={trips:{}};UNDO=null;S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui")}catch(e){}await phWipe();DB={trips:{}};UNDO=null;S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
@@ -2017,7 +2021,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"addItem":S.bkImg=undefined;S.edit="new:"+b.dataset.date;S.confirm=null;draw();itemWarn();break;
    case"editItem":S.edit=id;S.bkImg=undefined;S.confirm=null;draw();itemWarn();break;
    case"delItem":S.confirm=id;draw();break;
-   case"delItemYes":if(change("予定を削除しました",t=>{delete t.items[id]})){bkPut(id,null);S.confirm=null;S.edit=null;draw()}break;
+   case"delItemYes":if(change("予定を削除しました",t=>{delete t.items[id]})){S.confirm=null;S.edit=null;draw()}break;
    case"copyPlan":S.copy=planText(t);draw();{const r=await Native.share(t.title,S.copy);if(r==="copied")toast("コピーしました。LINEなどに貼れます");if(r==="shared"){S.copy=null;draw()}}break;
    case"copyAgain":{const r=await Native.share(t.title,S.copy);if(r)toast("コピーしました");else{$("copybox").select();toast("選択しました。コピーしてください")}break}
    case"closeCopy":S.copy=null;draw();break;
@@ -2033,7 +2037,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"cgOk":{const c=S.cg.c;if(aiApply(c,"days")){cgPush("a",S.cg.msg&&S.cg.msg.length?S.cg.msg:["日程を更新しました"]);S.cg={step:"done"};draw();cgScroll();fillPhotos(S.tid)}break}
    case"cgNo":cgPush("a","わかりました。ほかに変えたいところがあれば言ってください。");S.cg={step:"idle"};draw();cgScroll();break;
    case"cgClear":if(change("会話を消しました",t=>{t.chat=[]},true)){S.cg={step:"idle"};draw()}break;
-   case"roOpen":{const ds=dates(t),td=ymd(new Date());const dd=b.dataset.date||(ds.includes(td)?td:ds[Math.min(S.sday||0,ds.length-1)]);if(!dd)break;S.ro={date:dd,ids:items(t,b.dataset.date).map(x=>x.id)};S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
+   case"roOpen":{const ds=dates(t),td=ymd(new Date());const dd=b.dataset.date||(ds.includes(td)?td:ds[Math.min(S.sday||0,ds.length-1)]);if(!dd)break;S.ro={date:dd,ids:items(t,dd).map(x=>x.id)};S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
    case"roCancel":S.ro=null;draw();break;
    case"roDel":{const k=+b.dataset.k;const id2=S.ro.ids[k];S.ro.del=(S.ro.del||[]).concat([id2]);S.ro.ids.splice(k,1);roRender();toast("この日から外します（「この順番にする」で確定）");break}
    case"roAdd":{const k=dates(t).indexOf(S.ro.date);S.ro=null;S.side=true;S.sday=Math.max(0,k);draw();break}
@@ -2081,7 +2085,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"exCat":{S.exCat=b.dataset.c;const sv=readExDraft();draw();restoreExDraft(sv);break}
    case"rateNow":fetchRate(S.tid,true);break;
    case"moneySet":S.moneySet=true;draw();$("moneySet")?.scrollIntoView({block:"start",behavior:"smooth"});$("mn_budget")?.focus();break;
-   case"editEx":S.wform=id;S.exCat=t.expenses[id]?.cat||null;S.exCur=t.expenses[id]?.cur||null;S.confirm=null;draw();break;
+   case"editEx":S.wform=id;S.exCat=t.expenses[id]?.cat||"other";S.exCur=t.expenses[id]?.cur||null;S.confirm=null;draw();break;
    case"delEx":S.confirm=id;draw();break;
    case"delExYes":if(change("記録を削除しました",t=>{delete t.expenses[id]})){S.confirm=null;draw()}break;
    case"delMember":if(Object.values(t.expenses||{}).some(x=>x.payer===id||(x.split||[]).includes(id))){toast("記録に使われているので外せません");break}if(change("メンバーを外しました",t=>{delete t.members[id]}))draw();break;
@@ -2138,7 +2142,7 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
     /* ずらした後の形で、移動中・到着前に入っていないかを確かめる */
     const tmp=JSON.parse(JSON.stringify(t));const e1=put(tmp);if(e1){toast(e1);return}
     for(const y of items(tmp,date)){if(y.kind!=="move"&&(y.id===nid||sp)){const w=conflict(tmp,date,y.time,y.id);if(w){toast(y.id===nid?w:`ずらすと「${y.title}」が${w}`);return}}}
-    if(change(sp?`予定を保存して、後ろの${sp.later.length}件もずらしました`:moved?`予定を${dates(t).indexOf(date)+1}日目に移しました`:old?"予定を保存しました":"予定を追加しました",t=>{put(t)})){if(bimg!==undefined)bkPut(nid,bimg||null);S.bkImg=undefined;S.edit=null;draw()}return}
+    if(change(sp?`予定を保存して、後ろの${sp.later.length}件もずらしました`:moved?`予定を${dates(t).indexOf(date)+1}日目に移しました`:old?"予定を保存しました":"予定を追加しました",t=>{put(t)})){if(bimg)bkPut(nid,bimg);S.bkImg=undefined;S.edit=null;draw()}return}
   if(f.id==="spotForm"){const id=f.dataset.id||null;const v=readSpotForm();const ll=parseLL($("sf_ll").value);if(ll){v.lat=ll.lat;v.lon=ll.lon}
     if(!v.name){toast("名前を入れてください");return}if(v.url&&!/^https?:\/\//.test(v.url)){toast("リンクは https:// から始まるものにしてください");return}
     const old=id?t.spots[id]:null;
@@ -2163,7 +2167,7 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
   if(f.id==="mnForm"){const budget=Math.round(+$("mn_budget").value.replace(/[^\d]/g,""))||0;const cur=$("mn_cur").value;const rr=$("mn_rate")?+$("mn_rate").value.replace(/[^\d.]/g,""):0;
     const plans={};f.querySelectorAll("[name=mn_plan]").forEach(x=>{const v=Math.round(+x.value.replace(/[^\d]/g,""))||0;if(v)plans[x.dataset.k]=v});
     const curChanged=cur!==tripCur(t);
-    if(change("お金の設定を保存しました",t=>{t.budget=budget;t.cur=cur;t.plans=plans;if(curChanged){t.rate=0;t.rateAt=0}else if(rr>0&&rr!==t.rate){t.rate=rr;t.rateAt=0}})){S.moneySet=false;draw();if(curChanged)fetchRate(S.tid,true)}return}
+    if(change("お金の設定を保存しました",t=>{t.budget=budget;t.cur=cur;t.plans=plans;if(curChanged){t.rate=0;t.rateAt=0;t.rateMan=false}else if(rr>0&&rr!==t.rate){t.rate=rr;t.rateAt=0;t.rateMan=true}})){S.moneySet=false;draw();if(curChanged)fetchRate(S.tid,true)}return}
 });
 window.addEventListener("resize",()=>{if(S.tab==="map"&&S.vb&&$("svg"))setVB(S.vb);if(ML.map)try{ML.map.resize()}catch(e){}});
 /* 戻るボタン（Android・ブラウザ）で旅行一覧へ */
@@ -2181,6 +2185,6 @@ function onboard(){if(DB.onboarded||Object.keys(DB.trips).length)return;let k=0;
   ov.addEventListener("click",e=>{const b=e.target.closest("[data-ob]");if(!b)return;const a=b.dataset.ob;if(a==="next"){k++;r()}else if(a==="end")end();else if(a==="sample"){end();openSample()}});
   let x0=null;ov.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});ov.addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(dx<-50&&k<OB.length-1){k++;r()}else if(dx>50&&k>0){k--;r()}x0=null});
   r();document.body.appendChild(ov)}
-draw();schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));addEventListener("online",()=>{phCache();wxAll()});
+draw();schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();addEventListener("online",()=>{phCache();wxAll()});
 Native.perm(false).then(p=>{S.perm=p;if(S.tab==="notif")draw()});
 </script>
