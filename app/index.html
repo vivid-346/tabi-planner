@@ -1642,7 +1642,7 @@ const fx=(n,c)=>{const [nm,sym]=CUR[c]||["",c];const d=["JPY","KRW","VND","IDR"]
 /* 為替レート：無料・登録不要の ExchangeRate-API（open.er-api.com）。取れないときは手入力 */
 async function fetchRate(tid,force){const t=DB.trips[tid];if(!t)return;const c=tripCur(t);if(c==="JPY"||navigator.onLine===false)return;if(!force&&t.rate&&t.cur===c&&(t.rateMan||Date.now()-(t.rateAt||0)<12*36e5))return;
   try{const r=await fetch(`https://open.er-api.com/v6/latest/${c}`).then(r=>r.json());const v=+r?.rates?.JPY;if(!(v>0))throw 0;
-    const tt=DB.trips[tid];if(!tt)return;tt.cur=c;tt.rate=Math.round(v*1e4)/1e4;tt.rateAt=Date.now();tt.rateMan=false;save();if(S.tid===tid&&S.tab==="split")draw();if(force)toast(`レートを更新しました：${fx(1,c)}＝${tt.rate.toLocaleString("ja-JP")}円`)}
+    const tt=DB.trips[tid];if(!tt||(!force&&tt.rateMan)||tt.cur&&tt.cur!==c)return;tt.cur=c;tt.rate=Math.round(v*1e4)/1e4;tt.rateAt=Date.now();tt.rateMan=false;save();if(S.tid===tid&&S.tab==="split")draw();if(force)toast(`レートを更新しました：${fx(1,c)}＝${tt.rate.toLocaleString("ja-JP")}円`)}
   catch(e){if(force)toast("レートを取れませんでした。設定から手で入れられます")}}
 function moneyStats(t){const list=Object.values(t.expenses||{});const spent=list.reduce((s,e)=>s+(e.amount||0),0);const today=ymd(new Date());
   return {list,spent,today:list.filter(e=>e.date===today).reduce((s,e)=>s+(e.amount||0),0),left:(t.budget||0)-spent}}
@@ -1962,7 +1962,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui")}catch(e){}await phWipe();DB={trips:{}};UNDO=null;S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
