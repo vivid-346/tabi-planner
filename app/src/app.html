@@ -965,6 +965,7 @@ body.onhero .hpill{background:rgba(255,255,255,.22)!important;box-shadow:none!im
 .qac input[type=time]{font:inherit;font-size:20px;font-weight:700;min-height:52px;border-radius:14px;border:1px solid #D0D5DD;padding:0 14px;color:#101828;background:#fff}
 .qahint{font-size:12.5px;color:#475467}
 .qaw{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#FFF7E6;border:1px solid #F5D9A8;color:#8A4B08;font-size:13px;font-weight:600}
+.qaw[hidden],.qae[hidden]{display:none!important}
 .qae{padding:10px 12px;border-radius:12px;background:#FDECEC;color:#B42318;font-size:13px;font-weight:600}
 .qac .qago{min-height:50px;margin-top:6px}.qac .btn.ghost{min-height:44px}
 .cgsteps{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.6;color:#344054}.cgsteps li{margin:2px 0}
@@ -1381,7 +1382,7 @@ function qaSheet(sid,date,tm){const t=T(),s=t.spots[sid];if(!s)return;document.q
    <div class="qaw" ${w?"":"hidden"}><span aria-hidden="true">⚠</span><span id="qa_w">${esc(w)}</span></div>
    <div class="qae" id="qa_e" hidden></div>
    <button class="btn fill qago" data-qa="go">この時間に入れる</button><button class="btn ghost" data-qa="x">やめる</button></div>`;
-   ov.querySelector("#qa_t").addEventListener("input",e=>{time=e.target.value;const w2=qaWarn(s,time);const box=ov.querySelector(".qaw");box.hidden=!w2;ov.querySelector("#qa_w").textContent=w2;ov.querySelector("#qa_e").hidden=true})};
+   ov.querySelector("#qa_t").addEventListener("input",e=>{time=e.target.value;const hn=ov.querySelector(".qahint");if(hn)hn.textContent="時間を変えました。ほかの予定と重なっていないかは「この時間に入れる」で確かめます。";const w2=qaWarn(s,time);const box=ov.querySelector(".qaw");box.hidden=!w2;ov.querySelector("#qa_w").textContent=w2;ov.querySelector("#qa_e").hidden=true})};
   ov.addEventListener("click",e=>{const b=e.target.closest("[data-qa]");if(e.target===ov||b&&b.dataset.qa==="x"){ov.remove();return}if(!b)return;
     if(b.dataset.qa==="d"){d=b.dataset.d;time=hm(suggestSlot(T(),d,s).k);render();return}
     if(b.dataset.qa==="go"){const t2=T();const w=timeKey(time)==null?"時間を入れてください":conflict(t2,d,time);if(w){const e2=ov.querySelector("#qa_e");e2.textContent=w;e2.hidden=false;return}
@@ -2057,7 +2058,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
        if(same&&(!r||r.value==="replace")){DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});
      if(!save()){DB.trips=JSON.parse(backup);toast("この端末に保存できませんでした");break}S.imp=null;UNDO=null;toast(`${n}件の旅行を取り込みました`);draw();break}
    case"aiOpen":S.ai={kind:b.dataset.k,step:"form",o:aiDefaults(t)};S.edit=null;draw();window.scrollTo(0,0);break;
-   case"aiClose":S.ai=null;draw();break;
+   case"aiClose":{const first=S.ai&&S.ai.first;S.ai=null;if(first&&S.tab==="plan"){const d0=dates(t)[0];if(d0&&!items(t,d0).length){S.edit="new:"+d0;draw();setTimeout(()=>{$("day0")?.scrollIntoView({block:"start"});scrollBy(0,-140);toast("1日目の予定から入れていきましょう")},50);break}}draw();break}
    case"aiBack":S.ai.step="form";draw();break;
    case"aiGo":{aiReadForm();const A=S.ai;if(A.kind==="text"&&!(A.o.src||"").trim()){toast("先に文章を貼ってください");break}
      const pr=aiPrompt(t,A.o,A.kind),q=encodeURIComponent(pr),ai=b.dataset.ai;const long=q.length>12000;
@@ -2095,7 +2096,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
      const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
      if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
-   case"jumpDay":{const el=$("day"+b.dataset.k);if(el){const st=[...document.querySelectorAll(".bar,.daypills")].reduce((m,x)=>{const r=x.getBoundingClientRect();return getComputedStyle(x).position.match(/sticky|fixed/)||getComputedStyle(x.parentElement).position.match(/sticky|fixed/)?Math.max(m,r.bottom):m},64);window.scrollTo({top:el.getBoundingClientRect().top+scrollY-st-8,behavior:"smooth"})}document.querySelectorAll(".daypills button").forEach((x,i)=>x.setAttribute("aria-current",String(i==+b.dataset.k)));break}
+   case"jumpDay":{const el=$("day"+b.dataset.k);if(el){const row=document.querySelector(".dprow");const cs=row&&getComputedStyle(row);const st=row&&cs.position==="sticky"?(parseFloat(cs.top)||0)+row.offsetHeight:($("bar")?.offsetHeight||64);window.scrollTo({top:el.getBoundingClientRect().top+scrollY-st-8,behavior:"smooth"})}document.querySelectorAll(".daypills button").forEach((x,i)=>x.setAttribute("aria-current",String(i==+b.dataset.k)));break}
    case"findPhotos":Object.values(t.spots||{}).forEach(s=>{if(s.photo&&s.photo.none)delete s.photo});fillPhotos(S.tid);break;
    case"noPhoto":if(change("写真を外しました",t=>{t.spots[id].photo={none:1}}))draw();break;
    case"print":S.print=true;S.copy=null;draw();window.scrollTo(0,0);break;
@@ -2194,7 +2195,7 @@ function roEndDrag(){const d=LP.drag;if(!d)return;LP.drag=null;d.rows.forEach(r=
   if(d.to!==d.from&&S.ro){const t=T(),plan=roPlan(t,S.ro.date,S.ro.ids);if(plan[d.to]&&!plan[d.to].fixed){const ids=S.ro.ids;const [x]=ids.splice(d.from,1);ids.splice(d.to,0,x);Native.haptic("light")}else toast("時間が決まっている移動の位置には置けません")}
   roRender()}
 function lpCancel(){clearTimeout(LP.timer);LP.timer=null}
-document.addEventListener("pointerdown",e=>{LP.swallow=false;if(e.button)return;
+document.addEventListener("pointerdown",e=>{LP.swallow=false;if(LP.drag)roEndDrag();if(e.button)return;
   const h=e.target.closest(".rol .roh");
   if(h&&S.ro){const li=h.closest("li");if(li.classList.contains("fixed"))return;e.preventDefault();roStartDrag(li,e.clientY);return}
   const row=S.ro&&e.target.closest(".rol li:not(.fixed)");
@@ -2212,7 +2213,8 @@ document.addEventListener("pointerdown",e=>{LP.swallow=false;if(e.button)return;
 document.addEventListener("pointermove",e=>{if(LP.drag){LP.drag.cy=e.clientY;LP.drag.place();return}
   if(LP.timer){LP.y=e.clientY;if(Math.abs(e.clientX-LP.sx)>8||Math.abs(e.clientY-LP.sy)>8)lpCancel()}});
 document.addEventListener("pointerup",()=>{lpCancel();if(LP.drag)roEndDrag();if(LP.swallow)setTimeout(()=>{LP.swallow=false},120)});
-document.addEventListener("pointercancel",()=>{lpCancel()});
+document.addEventListener("pointercancel",e=>{lpCancel();if(LP.drag&&e.pointerType!=="touch")roEndDrag()});
+document.addEventListener("touchcancel",()=>{lpCancel();if(LP.drag)roEndDrag()});
 /* iPhone：持ち上げている間は画面がスクロールしないようにする（指の位置はタッチから読む） */
 document.addEventListener("touchmove",e=>{if(!LP.drag)return;e.preventDefault();const tc=e.touches[0];if(tc){LP.drag.cy=tc.clientY;LP.drag.place()}},{passive:false});
 document.addEventListener("touchend",()=>{if(LP.drag)roEndDrag()});
