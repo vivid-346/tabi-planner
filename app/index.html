@@ -400,6 +400,41 @@ input[type=text],input[type=date],input[type=number],select,textarea{background:
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input[type=text],:root:not([data-theme="light"]) input[type=date],:root:not([data-theme="light"]) input[type=number],:root:not([data-theme="light"]) select,:root:not([data-theme="light"]) textarea{background:rgba(255,255,255,.06)}}
 .nph{background:var(--sea)}
 .toast{background:#2B2640}
+/* 日程を見ながら候補を入れるパネル */
+.cpanel{position:fixed;left:10px;right:10px;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0px));z-index:24;max-width:640px;margin:0 auto;border-radius:20px;padding:12px 0 12px;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3);box-shadow:0 12px 40px rgba(60,40,140,.22),inset 0 0 0 1px rgba(255,255,255,.7)}
+.cpanel .ch{display:flex;align-items:center;gap:8px;padding:0 12px 10px}
+.cpanel .ch>b{font-size:15px;white-space:nowrap}
+.cpanel .cd{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
+.cpanel .cd button{border:0;border-radius:999px;padding:6px 11px;min-height:34px;font-size:13px;font-weight:700;background:var(--soft);color:var(--ink2);cursor:pointer;white-space:nowrap}
+.cpanel .cd button[aria-pressed="true"]{background:var(--dc);color:#fff}
+.cpanel .ct{display:none;padding:4px 12px 8px;margin:0;font-size:12px}
+.cpanel .cl{display:flex;gap:10px;overflow-x:auto;padding:0 12px 2px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.cc{flex:0 0 78%;max-width:300px;scroll-snap-align:start;display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:14px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--line)}
+.cc>img,.cc .ccn{flex:0 0 60px;width:60px;height:60px;border-radius:10px;object-fit:cover;overflow:hidden;background:var(--sea);display:block}
+.cc .ccn svg{width:100%;height:100%}
+.cc .cb{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cc .cb b{font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cc .cb .sub{font-size:11.5px;line-height:1.35}
+.cc .btn{min-height:34px;padding:4px 10px;font-size:13px;align-self:flex-start;margin-top:2px}
+.cc.in{opacity:.55}
+.page:has(.cpanel){padding-bottom:calc(64px + 230px + env(safe-area-inset-bottom,0px))}
+@media (max-width:899px){body:has(.cpanel) .toast{width:max-content;bottom:calc(64px + 215px + env(safe-area-inset-bottom,0px))}}
+.sfimg{display:block;width:100%;max-height:220px;object-fit:cover;border-radius:12px}
+.geol{display:flex;flex-direction:column;gap:6px}
+.btn.geo{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;height:auto;padding:8px 12px;white-space:normal}
+.btn.geo small{font-size:11.5px;color:var(--muted);font-weight:500}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--accent),var(--shadow)}100%{box-shadow:var(--shadow)}}
+.day li.flash{animation:flash 2.4s ease-out}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cpanel{background:rgba(33,31,46,.93);box-shadow:0 12px 40px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.08)}:root:not([data-theme="light"]) .cc{background:rgba(255,255,255,.05)}}
+@media (min-width:900px){
+ .pw{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+ .cpanel{position:sticky;top:76px;left:auto;right:auto;bottom:auto;max-width:none;margin:0;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+ .cpanel .ch{flex-wrap:wrap;padding-bottom:0}.cpanel .cd{order:3;flex:1 0 100%}.cpanel .ct{display:block}
+ .cpanel .cl{flex-direction:column;overflow-x:hidden;overflow-y:auto;scroll-snap-type:none;padding-bottom:4px}
+ .cc{flex:0 0 auto;max-width:none}
+ .page:has(.cpanel){padding-bottom:56px}
+}
+@media (prefers-reduced-motion:reduce){.day li.flash{animation:none;box-shadow:0 0 0 3px var(--accent)}}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -506,7 +541,7 @@ const addMin=(tm,n)=>{const k=timeKey(tm);if(k==null)return"";const x=Math.min(k
 const fuelYen=km=>Math.round(km/FUEL.kmpl*FUEL.yen/10)*10;
 
 /* 画面の状態（保存しない） */
-const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null};
+const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null,side:false,sday:0,flash:null,sfPhoto:undefined,sfDay:""};
 try{const u=JSON.parse(localStorage.getItem(KEY+"-ui")||"{}");if(u.tid&&DB.trips[u.tid]){S.tid=u.tid;S.tab=u.tab||"plan"}}catch(e){}
 function saveUI(){try{localStorage.setItem(KEY+"-ui",JSON.stringify({tid:S.tid,tab:S.tab}))}catch(e){}}
 const T=()=>DB.trips[S.tid];
@@ -554,7 +589,7 @@ const APP_VER="1.0.0";
 const LINKS={privacy:"https://vivid-346.github.io/tabi-planner/app/privacy.html",support:"https://vivid-346.github.io/tabi-planner/app/support.html"};
 function aboutView(){return `<section class="card form"><h2 style="font-size:20px">このアプリについて</h2>
    <p class="sub" style="color:var(--ink)">旅のノートは、旅行の日程・行きたい場所・地図・割り勘・持ち物・通知をひとつにまとめる旅のしおりアプリです。</p>
-   <div class="inbox form"><b>データの扱い</b><span class="sub">入力した内容はすべてこの端末の中だけに保存されます。アカウント登録はなく、アプリから開発者のサーバーにデータが送られることはありません（下の「場所の写真を自動で探す」がオンのときだけ、場所の名前をウィキペディアに送ります）。地図は端末の中のデータで描くので、電波がなくても見られます。</span>
+   <div class="inbox form"><b>データの扱い</b><span class="sub">入力した内容はすべてこの端末の中だけに保存されます。アカウント登録はなく、アプリから開発者のサーバーにデータが送られることはありません。ただし、下の「場所の写真を自動で探す」がオンのときは場所の名前をウィキペディアに、場所を追加するときに「名前から探す」を押すとその名前を地図の検索サービス（Photon）に送ります。詳しい地図は、表示している範囲を地図のサーバーに送ります。簡易地図は端末の中のデータだけで描くので、電波がなくても見られます。</span>
     <span class="sub">「AIで日程と候補を作る」では、指示文をあなた自身がコピーして、あなたが選んだAIのサービスに貼ります。アプリがAIに直接データを送ることはありません。</span>
     <span class="sub">「旅行を送る」「バックアップ」は、旅行の内容をコードにして、あなたが選んだアプリ（LINEなど）で送る機能です。</span></div>
    <div class="inbox form"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><b>場所の写真を自動で探す</b>${sw("set_photo",photoOn(),"場所の写真を自動で探す")}</div><span class="sub">オンのとき、行きたい場所の<b>名前だけ</b>をウィキペディア（Wikimedia）に送って、自由に使える写真を探します。写真の下に作者とライセンスを表示します。写真はネットから読み込むので、電波がないときは表示されません。</span></div>
@@ -592,16 +627,37 @@ const readTime=id=>{const h=$(id+"_h")?.value;return !h?"":pad(h)+":"+$(id+"_m")
 function tripPhoto(t){const rank={view:0,nature:1,activity:2,see:3};const ss=spots(t).filter(s=>s.photo&&s.photo.u&&!s.photo.near).sort((a,b)=>(rank[a.cat]??9)-(rank[b.cat]??9)||(a.created||0)-(b.created||0));return ss[0]||null}
 function daysLeft(t){const today=ymd(new Date());return t.start&&today<t.start?Math.round((toD(t.start)-toD(today))/864e5):null}
 function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
-  return `<section class="hero${p?"":" nophoto"}"${p?` style="background-image:url('${esc(p.photo.u).replace(/'/g,"%27")}')"`:""}>${p?`<span class="cr">写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</span>`:""}
+  return `<section class="hero${p?"":" nophoto"}"${p?` style="background-image:url('${esc(p.photo.u).replace(/'/g,"%27")}')"`:""}>${p&&!p.photo.own?`<span class="cr">写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</span>`:""}
    <span class="badge">${n!=null?`出発まで あと<b>${n}</b>日`:esc(countdown(t))}</span><h2>${esc(t.dest||t.title)}</h2>
    <div class="m">${md(ds[0])}（${wd(ds[0])}）〜 ${md(ds[ds.length-1])}（${wd(ds[ds.length-1])}） ・ ${ds.length>1?`${ds.length-1}泊${ds.length}日`:"日帰り"}${t.people?` ・ ${esc(t.people)}人`:""}</div></section>
   ${ds.length>1?`<nav class="dayjump" aria-label="日にち">${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}"><b>${+d.slice(8)}</b>${wd(d)}</button>`).join("")}</nav>`:""}`}
 function planView(t){const ds=dates(t);
-  return `${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}<div class="row"><button class="btn" data-a="aiOpen" data-k="plan">AIで作り直す</button><button class="btn" data-a="copyPlan">LINEで送る</button>${Native.isApp?"":`<button class="btn" data-a="print">印刷</button>`}</div>${nowCard(t)}
+  return `${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}<div class="row">${spots(t).length?`<button class="btn${S.side?" fill":""}" data-a="candOpen" aria-pressed="${!!S.side}">${S.side?"候補を閉じる":`候補から入れる${spots(t).filter(x=>!spotDay(t,x.id)).length?`（${spots(t).filter(x=>!spotDay(t,x.id)).length}）`:""}`}</button>`:""}<button class="btn" data-a="aiOpen" data-k="plan">AIで作り直す</button><button class="btn" data-a="copyPlan">LINEで送る</button>${Native.isApp?"":`<button class="btn" data-a="print">印刷</button>`}</div>${nowCard(t)}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
-  <div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${dayStat(t,date)}</header>
+  ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${dayStat(t,date)}</header>
    <ul>${its.map((x,j)=>(j?gapRow(t,its[j-1],x):"")+(S.edit===x.id?`<li class="full">${itemForm(t,date,x)}</li>`:itemRow(t,x))).join("")}${S.edit==="new:"+date?`<li class="full">${itemForm(t,date,null)}</li>`:""}${!its.length&&S.edit!=="new:"+date?`<li class="full"><span class="sub">まだ予定がありません</span></li>`:""}</ul>
-   ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を追加</button></div>`}</section>`}).join("")}</div>`}
+   ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を追加</button></div>`}</section>`}).join("")}</div>${S.side?candPanel(t)+"</div>":""}`}
+/* 日程を見ながら、行きたい場所の候補を入れる（スマホは下に出るパネル、広い画面は右の列） */
+function itemEnd(t,x){const k=timeKey(x.time);if(k==null)return null;if(x.kind==="move"){const a=timeKey(x.arrive);return a!=null&&a>=k?a:k+30}const sp=x.spot&&t.spots?.[x.spot];return k+(x.dur||sp?.minutes||60)}
+function legTo(t,a,b){if(!a||!b||a.lat==null||b.lat==null)return 30;const km=distKm(a,b)*1.3;return km<0.05?0:Math.round(legMin(km,mainMove(t,km)))}
+/* 前の予定の終わり＋移動のあと、次の予定までに滞在できるいちばん早いすき間。なければ最後の予定のあと */
+function suggestSlot(t,date,s){const its=items(t,date).filter(x=>timeKey(x.time)!=null);const stay=s.minutes||60;const r15=m=>Math.ceil(m/15)*15;const loc=x=>x&&x.spot&&t.spots?.[x.spot]||null;
+  if(!its.length)return {k:600,fit:true};
+  for(let i=0;i<its.length-1;i++){const a=its[i],b=its[i+1];if(a.kind==="stay"&&timeKey(a.time)>=17*60)continue;
+    const st=r15(itemEnd(t,a)+legTo(t,loc(a),s));if(st>=8*60&&st+stay+legTo(t,s,loc(b))<=timeKey(b.time)&&!conflict(t,date,pad(Math.floor(st/60))+":"+pad(st%60)))return {k:st,fit:true}}
+  const last=its[its.length-1];const st=Math.min(r15(itemEnd(t,last)+legTo(t,loc(last),s)),23*60+45);const close=s.cat==="food"||s.cat==="cafe"||s.cat==="shop"?22*60:18*60;return {k:st,fit:st+stay<=close}}
+const hm=k=>pad(Math.floor(k/60))+":"+pad(k%60);
+function candPanel(t){const ds=dates(t);const di=Math.min(S.sday||0,ds.length-1),date=ds[di];
+  const pts=items(t,date).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
+  const near=s=>s.lat==null||!pts.length?null:Math.min(...pts.map(p=>distKm(p,s)*1.3));
+  const list=spots(t).map(s=>{const d=spotDay(t,s.id);return {s,d,km:near(s),sl:d?null:suggestSlot(t,date,s)}}).sort((a,b)=>(!!a.d-!!b.d)||((a.sl&&!a.sl.fit)-(b.sl&&!b.sl.fit))||((a.km??1e9)-(b.km??1e9)));
+  const card=({s,d,km,sl})=>{const ph=s.photo&&s.photo.u?s.photo:null;
+    return `<div class="cc${d?" in":""}">${ph?`<img src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="ccn">${inJapan(s)?miniMap(s,16,16):""}</span>`}
+     <div class="cb"><b>${esc(s.name)}</b><span class="sub">${s.cat&&CATS[s.cat]?CATS[s.cat]+" ・ ":""}${s.minutes?"約"+fmtMin(s.minutes):""}${km!=null&&!d?` ・ この日の予定から約${km.toFixed(km<10?1:0)}km`:""}</span>
+     ${d?`<span class="sub">${d}日目に入っています</span>`:`<button class="btn fill" data-a="candAdd" data-id="${s.id}">＋ ${hm(sl.k)}に入れる</button>${sl.fit?"":`<span class="sub" style="color:var(--warn)">この日は空きがありません</span>`}`}</div></div>`};
+  return `<aside class="cpanel" aria-label="行きたい場所の候補"><div class="ch"><b>候補から入れる</b><div class="cd">${ds.map((d,k)=>`<button data-a="candDay" data-k="${k}" aria-pressed="${k===di}" style="--dc:${dayColor(k+1)}">${k+1}日目</button>`).join("")}</div><button class="ib icon" data-a="candOpen" aria-label="閉じる" title="閉じる">✕</button></div>
+   <p class="sub ct">押すと${di+1}日目のあいている時間に入ります。時間はあとで直せます。</p>
+   <div class="cl">${list.map(card).join("")}</div></aside>`}
 /* 予定と予定の間の移動の目安（直線距離×1.3を道のりとみなす。徒歩4.5km/h、車・電車は平均30km/h＋10分） */
 function distKm(a,b){const R=6371,r=Math.PI/180,dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;const h=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 const fmtMin=m=>m>=60?`${Math.floor(m/60)}時間${m%60?Math.round(m%60)+"分":""}`:`${Math.max(1,Math.round(m))}分`;
@@ -634,7 +690,7 @@ function nowCard(t){const now=new Date(),today=ymd(now);if(!dates(t).includes(to
 function itemRow(t,x){const s=x.spot&&t.spots?.[x.spot];
   const td=ymd(new Date());const canDone=td>=t.start&&td<=t.end&&x.date<=td;
   const ph=s&&s.photo&&s.photo.u?s.photo:null;
-  return `<li class="k-${x.kind}${x.kind==="move"?" mv":""}${x.done?" done":""}"><span class="t">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:x.dur&&x.time?`<small>〜${addMin(x.time,x.dur)}</small>`:""}</span>
+  return `<li id="it_${x.id}" class="k-${x.kind}${x.kind==="move"?" mv":""}${x.done?" done":""}${S.flash===x.id?" flash":""}"><span class="t">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:x.dur&&x.time?`<small>〜${addMin(x.time,x.dur)}</small>`:""}</span>
    <span>${x.kind==="move"?"":`<span class="kind">${KINDS[x.kind]||""}</span>`}<span class="ti">${esc(x.title)}</span>${x.note?`<span class="no">${esc(x.note)}</span>`:""}${s&&s.lat!=null?`<span class="no"><button class="ib" style="padding:0" data-a="showSpot" data-id="${x.spot}">地図で見る</button></span>`:""}
    ${S.confirm===x.id?`<span class="row" style="margin-top:6px"><span class="sub" style="color:var(--warn)">削除しますか？</span><button class="btn danger" data-a="delItemYes" data-id="${x.id}">削除</button><button class="btn" data-a="noConfirm">やめる</button></span>`:""}</span>
    <span class="acts">${S.confirm===x.id?"":`${canDone?`<button class="ib${x.done?" ok":""}" data-a="doneItem" data-id="${x.id}" aria-pressed="${!!x.done}">${x.done?"✓ 行った":"行った"}</button>`:""}${ph?`<img class="thumb" src="${esc(ph.u)}" alt="" loading="lazy" onerror="this.remove()">`:s&&inJapan(s)&&x.kind!=="move"?`<span class="thumb">${miniMap(s,16,16)}</span>`:""}<span class="row1"><button class="ib icon" data-a="editItem" data-id="${x.id}" aria-label="編集" title="編集">${ico("edit")}</button><button class="ib icon" data-a="delItem" data-id="${x.id}" aria-label="削除" title="削除">${ico("del")}</button></span>`}</span></li>`}
@@ -684,7 +740,7 @@ function miniMap(s,w,h){const [x,y]=proj(s.lat,s.lon);const vw=w||28,vh=h||17.5;
 function noPhotoCover(s){const ic=CAT_ICON[s.cat]||CAT_ICON.see;
   return `<figure class="sph nph">${inJapan(s)?miniMap(s):""}<span class="nic"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg></span><figcaption>${inJapan(s)?"写真がないので、地図で場所を表示しています":"写真が見つかりませんでした"}</figcaption></figure>`}
 function spotCard(t,s){const ph=s.photo&&s.photo.u?s.photo:null;
-  return `<article class="spot">${!ph&&s.photo?noPhotoCover(s):""}${ph?`<figure class="sph"><img src="${esc(ph.u)}" alt="${esc(s.name)}" loading="lazy" onerror="this.parentNode.hidden=true"><figcaption>${ph.near?"周辺の写真 ・ ":""}写真：${esc(ph.by)} / ${esc(ph.lic)}${ph.pg?`（<a href="${esc(ph.pg)}" target="_blank" rel="noopener">Wikimedia Commons</a>）`:""}</figcaption></figure>`:""}<div class="meta">${dayTag(t,s.id)}${s.cat&&CATS[s.cat]?`<span class="tag">${CATS[s.cat]}</span>`:""}${s.area?`<span>${esc(s.area)}</span>`:""}${s.book?`<span class="tag warn">要予約</span>`:""}${s.minutes?`<span>約${s.minutes>=60?(s.minutes/60).toFixed(s.minutes%60?1:0)+"時間":s.minutes+"分"}</span>`:""}${s.lat==null?`<span class="tag warn">位置なし</span>`:""}</div>
+  return `<article class="spot">${!ph&&s.photo?noPhotoCover(s):""}${ph?`<figure class="sph"><img src="${esc(ph.u)}" alt="${esc(s.name)}" loading="lazy" onerror="this.parentNode.hidden=true"><figcaption>${ph.own?"自分の写真":`${ph.near?"周辺の写真 ・ ":""}写真：${esc(ph.by)} / ${esc(ph.lic)}`}${ph.pg?`（<a href="${esc(ph.pg)}" target="_blank" rel="noopener">Wikimedia Commons</a>）`:""}</figcaption></figure>`:""}<div class="meta">${dayTag(t,s.id)}${s.cat&&CATS[s.cat]?`<span class="tag">${CATS[s.cat]}</span>`:""}${s.area?`<span>${esc(s.area)}</span>`:""}${s.book?`<span class="tag warn">要予約</span>`:""}${s.minutes?`<span>約${s.minutes>=60?(s.minutes/60).toFixed(s.minutes%60?1:0)+"時間":s.minutes+"分"}</span>`:""}${s.lat==null?`<span class="tag warn">位置なし</span>`:""}</div>
   <h3>${esc(s.name)}</h3>${s.note?`<p>${esc(s.note)}</p>`:""}${s.fee?`<span class="sub">料金：${esc(s.fee)}</span>`:""}
   ${S.confirm===s.id?`<div class="inbox row"><span class="sub" style="color:var(--warn)">削除しますか？（日程の予定は残ります）</span><button class="btn danger" data-a="delSpotYes" data-id="${s.id}">削除</button><button class="btn" data-a="noConfirm">やめる</button></div>`:""}
   ${planBtns(t,s)}
@@ -693,21 +749,42 @@ function planBtns(t,s){const d=spotDay(t,s.id);
   if(S.assign===s.id)return `<div class="assign"><span class="lbl">何時に入れる？（日にちを押すと入ります）</span>${timeSel("as_t",S.atime)}<div class="row" id="as_days">${asDays(t,s)}</div><div><button class="btn" data-a="cancel">やめる</button></div></div>`;
   return d?`<button class="btn" data-a="unassign" data-id="${s.id}" style="align-self:flex-start">日程から外す</button>`:`<button class="btn fill" data-a="assign" data-id="${s.id}" style="align-self:flex-start">日程に入れる</button>`}
 function asDays(t,s){return dates(t).map((d,k)=>{const w=conflict(t,d,S.atime);return `<button class="btn" data-a="assignDay" data-id="${s.id}" data-date="${d}" ${w?`disabled title="${esc(w)}"`:""} style="border-color:${dayColor(k+1)}">${k+1}日目 ${md(d)}${w?`<small style="color:var(--warn)">${esc(w.replace(/（.*$/,""))}</small>`:""}</button>`}).join("")}
-function spotForm(t){const id=S.edit.split(":")[1];const v=S.draft||(id?{...t.spots[id]}:{name:"",area:"",note:"",fee:"",url:"",lat:null,lon:null});
+function spotForm(t){const id=S.edit.split(":")[1];const v=S.draft||(id?{...t.spots[id]}:{name:"",area:"",note:"",fee:"",url:"",lat:null,lon:null,cat:"see",minutes:60});
+  const ph=S.sfPhoto!==undefined?S.sfPhoto:(v.photo&&v.photo.u?v.photo:null);const ds=dates(t);
   return `<form class="card form" id="spotForm" data-id="${id||""}"><h2 style="font-size:19px">${id?"場所を編集":"行きたい場所を追加"}</h2>
    <div class="field"><label for="sf_name">名前</label><input type="text" id="sf_name" required maxlength="60" value="${esc(v.name)}" placeholder="例：東京スカイツリー"></div>
+   <div class="two"><div class="field"><label for="sf_cat">種類</label><select id="sf_cat">${Object.entries(CATS).map(([k,l])=>`<option value="${k}" ${(v.cat||"see")===k?"selected":""}>${l}</option>`).join("")}</select></div><div class="field"><label for="sf_min">いる時間の目安</label><select id="sf_min">${[30,45,60,90,120,150,180,240].map(n=>`<option value="${n}" ${(+v.minutes||60)===n?"selected":""}>${fmtMin(n)}</option>`).join("")}</select></div></div>
    <div class="two"><div class="field"><label for="sf_area">エリア（任意）</label><input type="text" id="sf_area" maxlength="30" value="${esc(v.area)}" placeholder="押上"></div><div class="field"><label for="sf_fee">料金（任意）</label><input type="text" id="sf_fee" maxlength="40" value="${esc(v.fee)}" placeholder="大人 2,100円"></div></div>
    <div class="field"><label for="sf_note">メモ（任意）</label><textarea id="sf_note" maxlength="500" placeholder="見どころ、営業時間、インスタで見た投稿など">${esc(v.note)}</textarea></div>
    <div class="field"><label for="sf_url">参考リンク（任意）</label><input type="text" id="sf_url" maxlength="500" value="${esc(v.url)}" placeholder="https://"></div>
+   <div class="inbox form"><span class="lbl">写真</span><div id="sf_ph">${sfPhotoHtml(ph)}</div>
+    <div class="row"><label class="btn" style="cursor:pointer">${ph?"写真を変える":"自分の写真を選ぶ"}<input type="file" id="sf_file" accept="image/*" hidden></label>${ph?`<button class="btn" type="button" data-a="sfNoPhoto">写真を外す</button>`:""}</div>
+    <span class="sub">${ph?"写真はこの端末の中だけに保存されます。":"選ばなくても、追加したあと自動で写真を探します（有名な場所のみ）。"}</span></div>
    <div class="inbox form"><span class="lbl">地図の位置</span><span id="sf_pos">${v.lat!=null?`<span class="tag">設定済み（${(+v.lat).toFixed(4)}, ${(+v.lon).toFixed(4)}）</span>`:`<span class="sub">まだ決まっていません</span>`}</span>
-    <button class="btn" type="button" data-a="pickDraft" style="align-self:flex-start">地図を押して決める</button>
+    <div class="row"><button class="btn fill" type="button" data-a="geoFind">名前から探す</button><button class="btn" type="button" data-a="pickDraft">地図を押して決める</button></div><div id="sf_geo" class="geol"></div>
     <div class="field"><label for="sf_ll">または Googleマップのリンク／「緯度, 経度」を貼る</label><input type="text" id="sf_ll" placeholder="例：https://www.google.com/maps/place/…/@35.7101,139.8107…"></div>
     <p class="sub">Googleマップで場所を長押しすると出る数字（例：35.7101, 139.8107）をコピーして貼ってもOKです。短いリンク（maps.app.goo.gl）は読めません。</p></div>
    <input type="hidden" id="sf_lat" value="${v.lat??""}"><input type="hidden" id="sf_lon" value="${v.lon??""}">
+   ${!id&&ds.length?`<div class="field"><label for="sf_day">日程にも入れる</label><select id="sf_day"><option value="">入れない（候補にしておく）</option>${ds.map((d,k)=>`<option value="${d}" ${S.sfDay===d?"selected":""}>${k+1}日目 ${md(d)}（${wd(d)}）のあいている時間</option>`).join("")}</select></div>`:""}
    <div class="row"><button class="btn fill" type="submit">${id?"保存":"追加"}</button><button class="btn" type="button" data-a="cancel">やめる</button></div></form>`}
+function sfPhotoHtml(ph){return ph?`<img class="sfimg" src="${esc(ph.u)}" alt="">`:`<span class="sub">まだありません</span>`}
+/* 自分の写真：長い辺を720pxにしてJPEGで保存（この端末の中だけ。旅行を渡すコードには入れない） */
+async function shrinkImg(file){const url=URL.createObjectURL(file);try{const img=new Image();await new Promise((ok,ng)=>{img.onload=ok;img.onerror=ng;img.src=url});
+  const k=Math.min(1,720/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+  c.getContext("2d").drawImage(img,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.72)}finally{URL.revokeObjectURL(url)}}
+function tripCenter(t){const p=spots(t).filter(s=>s.lat!=null);if(!p.length)return null;return {lat:p.reduce((a,s)=>a+s.lat,0)/p.length,lon:p.reduce((a,s)=>a+s.lon,0)/p.length}}
+/* 名前から位置を探す：ウィキペディアの記事の位置 → 地図の地名検索（Photon / OpenStreetMap） */
+async function geoFind(){const box=$("sf_geo"),q=$("sf_name").value.trim();if(!box)return;if(!q){toast("先に名前を入れてください");return}
+  if(navigator.onLine===false){box.innerHTML=`<span class="sub">電波がないので探せません</span>`;return}
+  box.innerHTML=`<span class="sub">探しています…</span>`;const t=T(),c=tripCenter(t),out=[];
+  try{for(const host of ["ja.wikipedia.org","en.wikipedia.org"]){const r=await wapi(host,{action:"query",titles:q,redirects:"1",prop:"coordinates|pageprops",ppprop:"disambiguation"});const pg=r.query?.pages?.[0];const co=pg&&!pg.missing&&!(pg.pageprops&&"disambiguation" in pg.pageprops)&&pg.coordinates?.[0];if(co){out.push({lat:co.lat,lon:co.lon,label:pg.title,src:"ウィキペディア"});break}}}catch(e){}
+  try{const r=await fetch("https://photon.komoot.io/api/?"+new URLSearchParams({q,limit:"6",...(c?{lat:c.lat.toFixed(3),lon:c.lon.toFixed(3)}:{})})).then(r=>r.json());
+    (r.features||[]).forEach(f=>{const p=f.properties||{},g=f.geometry?.coordinates;if(!g)return;out.push({lat:+g[1],lon:+g[0],label:[p.name,p.street,p.city||p.county||p.district,p.state,p.country].filter((x,i,a)=>x&&a.indexOf(x)===i).join("・"),src:"地図"})})}catch(e){}
+  const seen=[];const list=out.filter(o=>isFinite(o.lat)&&isFinite(o.lon)&&!seen.some(x=>distKm(x,o)<0.05)&&seen.push(o)).slice(0,6);
+  box.innerHTML=list.length?`<span class="sub">当てはまるものを押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">見つかりませんでした。「地図を押して決める」か、Googleマップのリンクを貼ってください。</span>`}
 function parseLL(s){s=(s||"").trim();let m=/@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(s)||/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(s)||/[?&](?:q|query|ll|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(s)||/^(-?\d{1,2}\.\d+)\s*[,、 ]\s*(-?\d{2,3}\.\d+)$/.exec(s);
   if(!m)return null;const lat=+m[1],lon=+m[2];if(Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat,lon}}
-function readSpotForm(){return {name:$("sf_name").value.trim(),area:$("sf_area").value.trim(),note:$("sf_note").value.trim(),fee:$("sf_fee").value.trim(),url:$("sf_url").value.trim(),lat:$("sf_lat").value===""?null:+$("sf_lat").value,lon:$("sf_lon").value===""?null:+$("sf_lon").value}}
+function readSpotForm(){if($("sf_day"))S.sfDay=$("sf_day").value;return {cat:$("sf_cat").value,minutes:+$("sf_min").value,name:$("sf_name").value.trim(),area:$("sf_area").value.trim(),note:$("sf_note").value.trim(),fee:$("sf_fee").value.trim(),url:$("sf_url").value.trim(),lat:$("sf_lat").value===""?null:+$("sf_lat").value,lon:$("sf_lon").value===""?null:+$("sf_lon").value}}
 
 /* ================= 画面：地図 ================= */
 const proj=(lat,lon)=>[(lon-GEO.W0)*GEO.C*GEO.K,(GEO.N0-lat)*GEO.K];
@@ -883,12 +960,12 @@ function aiPrompt(t,o,kind){const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日
 - note は必ず60〜80字（短すぎないように）
 - 緯度・経度（lat, lon）は小数5桁。分からなければ null
 - 料金・営業時間は目安でよい。変わりやすいものは note に「要確認」と書く
-- 返事は下の形の JSON だけ。説明文は付けない`;
+- 返事は下の形の JSON だけ。説明文は付けない。出典・リンク・参考にしたサイト名は入れない（長くなって途中で切れるのを防ぐため）`;
   const shape=`## 返事の形（JSON）
 {
   "days": [ { "date": "YYYY-MM-DD", "area": "その日のエリア", "items": [
     { "time": "HH:MM", "arrive": "HH:MM（移動のときだけ。着く時間）", "kind": "move | see | food | stay | other",
-      "title": "予定の内容", "note": "ひとこと", "spot": "spots の name と同じ文字（行きたい場所の予定のとき）" } ] } ],
+      "title": "予定の内容", "note": "ひとこと（30字くらい）", "spot": "spots の name と同じ文字（行きたい場所の予定のとき）" } ] } ],
   "spots": [ { "name": "場所の名前", "area": "エリア", "category": "see | food | shop | nature | activity | view | cafe",
     "note": "おすすめの理由・見どころ（60〜80字。何が楽しいか・どんな人に向くかが分かるように）",
     "wiki": "日本語版ウィキペディアの記事名（その場所の記事がなければ空文字）", "name_en": "英語の名前（例：Nirai Kanai Bridge）", "fee": "料金の目安", "lat": 0.0, "lon": 0.0,
@@ -936,11 +1013,28 @@ ${o.budget?`- 予算の目安：${o.budget}\n`:""}${o.extra?`- その他の希�
 ${rules}
 
 ${shape}`}
-function pickJSON(s){s=String(s||"");const m=/```(?:json)?\s*([\s\S]*?)```/.exec(s);if(m)s=m[1];const a=s.indexOf("{"),b=s.lastIndexOf("}");if(a<0||b<a)throw new Error("nojson");s=s.slice(a,b+1);
-  try{return JSON.parse(s)}catch(e){
-    /* スマホのコピーや一部のAIで " が “ ” に変わることがある。直してから読み直す */
-    const t=s.replace(/[“”„‟″＂]/g,'"').replace(/[ 　]/g," ").replace(/,\s*([}\]])/g,"$1");
-    return JSON.parse(t)}}
+function pickJSON(s){s=String(s||"");const m=/```(?:json)?\s*([\s\S]*?)```/.exec(s);if(m)s=m[1];const a=s.indexOf("{");if(a<0)throw new Error("nojson");
+  const b=s.lastIndexOf("}");try{if(b>a)return JSON.parse(s.slice(a,b+1))}catch(e){}
+  const r=fixJSON(s.slice(a));const o=JSON.parse(r.text);if(r.cut&&o&&typeof o==="object")Object.defineProperty(o,"_cut",{value:true});return o}
+/* AIの答えをコピーしたときによく崩れる所を直す：
+   ・" が “ ” になる　・ChatGPTの出典リンクが改行つきで文の中に入る　・答えが途中で切れる（最後まで読めた所までにする） */
+function fixJSON(s){s=s.replace(/[“”„‟″＂]/g,'"').replace(/[ 　]/g," ");
+  let out="",inStr=false,esc=false,skip=false,cur="",good=0,goodSt=[];const st=[];
+  for(const c of s){
+    if(inStr){if(esc){esc=false;if(!skip){out+=c;cur+=c}continue}
+      if(c==="\\"){esc=true;if(!skip)out+=c;continue}
+      if(c==='"'){inStr=false;skip=false;out+=c;continue}
+      if(c==="\n"||c==="\r"){if(skip)continue;if(/[。．.!！?？)）]\s*$/.test(cur))skip=true;else{out+=" ";cur+=" "}continue}
+      if(c<" "){if(!skip)out+=" ";continue}
+      if(!skip){out+=c;cur+=c}continue}
+    if(c==='"'){inStr=true;cur="";out+=c;continue}
+    if(c==="{"||c==="[")st.push(c==="{"?"}":"]");
+    else if(c==="}"||c==="]"){st.pop();out+=c;good=out.length;goodSt=st.slice();if(!st.length)break;continue}
+    out+=c}
+  const tidy=x=>x.replace(/,(\s*[}\]])/g,"$1");
+  if(!inStr&&!st.length)return {text:tidy(out),cut:false};
+  if(!good)throw new Error("nojson");
+  return {text:tidy(out.slice(0,good).replace(/,\s*$/,"")+goodSt.reverse().join("")),cut:true}}
 const normName=s=>String(s||"").replace(/[\s　・（）()「」]/g,"").toLowerCase();
 const okTime=s=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(s||"").trim());return m&&+m[1]<24&&+m[2]<60?pad(+m[1])+":"+m[2]:""};
 const str=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
@@ -1011,14 +1105,14 @@ function aiReadForm(){const A=S.ai,o=A.o,v=id=>$(id)?$(id).value:undefined;
   ["dest","from","move","pace","people","budget","extra","theme","count","src"].forEach(k=>{const x=v("ai_"+k);if(x!==undefined)o[k]=x});
   o.prefs=[...document.querySelectorAll("[name=ai_pref]:checked")].map(x=>x.value);A.paste=v("ai_paste")??A.paste;
   const m=document.querySelector("[name=ai_mode]:checked");if(m)o.mode=m.value}
-function aiParse(text){const t=T();try{const raw=pickJSON(text);S.ai.c=aiCheck(t,raw,S.ai.kind);S.ai.step="preview";draw();window.scrollTo(0,0)}
+function aiParse(text){const t=T();try{const raw=pickJSON(text);S.ai.c=aiCheck(t,raw,S.ai.kind);if(raw._cut)S.ai.c.warn.unshift("AIの答えが途中で切れていたので、最後まで読めたところまで入れます。足りない分は、取り込んだあと「AIで候補を増やす」で足せます");S.ai.step="preview";draw();window.scrollTo(0,0)}
   catch(e){toast(e.message==="empty"?"場所も予定も見つかりませんでした。AIの答えをまるごと貼ってください":"読み取れませんでした。AIの答えを { から } までまるごと貼ってください")}}
 
 /* ================= 旅行を渡す・バックアップ =================
    旅行のデータを圧縮して「コード」（TABI1:…）にする。LINEなどで送り、相手は貼るだけで取り込める */
 const b64u=u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
 const unb64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");const b=atob(s);return Uint8Array.from(b,c=>c.charCodeAt(0))};
-async function packCode(kind,obj){const raw=new TextEncoder().encode(JSON.stringify(obj));
+async function packCode(kind,obj){const raw=new TextEncoder().encode(JSON.stringify(obj,(k,v)=>k==="photo"&&v&&v.own?undefined:v));
   if(window.CompressionStream){try{const cs=new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"));return `TABI${kind}1:`+b64u(new Uint8Array(await new Response(cs).arrayBuffer()))}catch(e){}}
   return `TABI${kind}0:`+b64u(raw)}
 async function unpackCode(text){const m=/TABI(ALL)?([01]):([A-Za-z0-9_-]{8,})/.exec(String(text||"").replace(/\s+/g,""));if(!m)throw new Error("nocode");
@@ -1137,6 +1231,11 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"cancel":if(S.tripForm){S.tripForm=null;S.confirm=null}else{S.edit=null;S.assign=null;S.wform=null;S.draft=null}draw();break;
    case"noConfirm":S.confirm=null;draw();break;
    case"tab":go(b.dataset.t);break;
+   case"candOpen":{if(!S.side){const secs=[...document.querySelectorAll(".day")];let k=0;secs.forEach((el,i)=>{if(el.getBoundingClientRect().top<innerHeight*0.4)k=i});S.sday=k}S.side=!S.side;S.flash=null;draw();break}
+   case"candDay":{S.sday=+b.dataset.k;draw();const el=$("day"+S.sday);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});break}
+   case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
+     const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
+     if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
    case"jumpDay":{const el=$("day"+b.dataset.k);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".dayjump button").forEach((x,i)=>{x.style.background=i==+b.dataset.k?"var(--paper)":"none";x.style.color=i==+b.dataset.k?"var(--ink)":"";x.style.boxShadow=i==+b.dataset.k?"var(--shadow)":"none"});break}
    case"findPhotos":Object.values(t.spots||{}).forEach(s=>{if(s.photo&&s.photo.none)delete s.photo});fillPhotos(S.tid);break;
    case"noPhoto":if(change("写真を外しました",t=>{t.spots[id].photo={none:1}}))draw();break;
@@ -1151,8 +1250,11 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"copyPlan":S.copy=planText(t);draw();{const r=await Native.share(t.title,S.copy);if(r==="copied")toast("コピーしました。LINEなどに貼れます");if(r==="shared"){S.copy=null;draw()}}break;
    case"copyAgain":{const r=await Native.share(t.title,S.copy);if(r)toast("コピーしました");else{$("copybox").select();toast("選択しました。コピーしてください")}break}
    case"closeCopy":S.copy=null;draw();break;
-   case"addSpot":S.edit="spot:";S.draft=null;draw();$("sf_name")?.focus();break;
-   case"editSpot":S.edit="spot:"+id;S.draft=null;draw();break;
+   case"geoFind":geoFind();break;
+   case"geoPick":{const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
+   case"sfNoPhoto":S.draft=readSpotForm();S.sfPhoto=null;draw();break;
+   case"addSpot":S.edit="spot:";S.draft=null;S.sfPhoto=undefined;S.sfDay="";draw();$("sf_name")?.focus();break;
+   case"editSpot":S.edit="spot:"+id;S.draft=null;S.sfPhoto=undefined;draw();break;
    case"delSpot":S.confirm=id;draw();break;
    case"delSpotYes":if(change("場所を削除しました",t=>{delete t.spots[id];Object.values(t.items||{}).forEach(x=>{if(x.spot===id)x.spot=""})})){S.confirm=null;if(S.sel===id)S.sel=null;draw()}break;
    case"assign":S.assign=id;S.atime="";S.tab==="map"?redrawMap():draw();break;
@@ -1184,7 +1286,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"askPerm":{S.perm=await Native.perm(true);if(S.perm==="granted"){schedNotif();toast("通知をオンにしました")}draw();break}
    case"testNotif":{const f=notifList(t).find(x=>x.at>new Date())||{title:`${t.title}`,body:"通知はこのように届きます"};const r=await Native.testNotify(f);if(r==="app")toast("5秒後に通知が届きます");else if(r==="web")showBanner(f);else{S.perm=await Native.perm(false);draw();toast("通知が許可されていません。iPhoneの設定から許可してください")}break}
   }});
-document.addEventListener("change",e=>{if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
+document.addEventListener("change",async e=>{if(e.target.id==="sf_file"){const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await shrinkImg(f);S.draft=readSpotForm();S.sfPhoto={u,own:true,by:"自分の写真",lic:""};draw()}catch(err){toast("この写真は読み込めませんでした")}return}if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
   const t=T();if(!t)return;
   if(e.target.dataset&&e.target.dataset.check){const id=e.target.dataset.check,v=e.target.checked;if(change(v?"チェックしました":"チェックを外しました",t=>{t.checks[id].done=v},true))draw();return}
   if(e.target.id==="c_hide"){S.hideDone=e.target.checked;draw();return}
@@ -1220,7 +1322,11 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
     if(!v.name){toast("名前を入れてください");return}if(v.url&&!/^https?:\/\//.test(v.url)){toast("リンクは https:// から始まるものにしてください");return}
     const old=id?t.spots[id]:null;
     const sid=id||uid();const renamed=old&&old.name!==v.name;
-    if(change(old?"場所を保存しました":"場所を追加しました",t=>{t.spots=t.spots||{};t.spots[sid]={...v,wiki:renamed?"":old?.wiki||"",photo:renamed?undefined:old?.photo,created:old?.created||Date.now()};if(!t.spots[sid].photo)delete t.spots[sid].photo})){S.edit=null;S.draft=null;draw();if(!old||renamed)fillPhotos(S.tid,[sid])}return}
+    const day=!old&&$("sf_day")?$("sf_day").value:"";const own=S.sfPhoto;let msg=old?"場所を保存しました":"場所を追加しました",nid=null;
+    if(day){const sl=suggestSlot(t,day,v);const tm=hm(sl.k);if(!conflict(t,day,tm)){nid=uid();msg=`${v.name}を追加して、${dates(t).indexOf(day)+1}日目の${tm}に入れました`}}
+    if(change(msg,t=>{t.spots=t.spots||{};t.spots[sid]={...v,wiki:renamed?"":old?.wiki||"",photo:own!==undefined?(own||{none:1}):renamed?undefined:old?.photo,created:old?.created||Date.now()};if(!t.spots[sid].photo)delete t.spots[sid].photo;
+      if(nid){t.items=t.items||{};t.items[nid]={date:day,time:hm(suggestSlot(t,day,v).k),arrive:"",kind:v.cat==="food"||v.cat==="cafe"?"food":"see",title:v.name,note:"",spot:sid,order:nextOrder(t,day),...(DURS.includes(v.minutes)?{dur:v.minutes}:{})}}})){
+      S.edit=null;S.draft=null;S.sfPhoto=undefined;S.sfDay="";if(nid){S.flash=nid;S.tab="plan"}draw();if(nid){const el=$("it_"+nid);if(el)el.scrollIntoView({block:"center"})}if(own===undefined&&(!old||renamed))fillPhotos(S.tid,[sid])}return}
   if(f.id==="cForm"){const title=$("c_title").value.trim();if(!title)return;const g=$("c_group").value;const cs=checks(t);
     if(change("項目を追加しました",t=>{t.checks=t.checks||{};t.checks[uid()]={title,group:g,done:false,order:(cs.length?Math.max(...cs.map(c=>c.order||0)):0)+1}},true)){draw();$("c_title")?.focus()}return}
   if(f.id==="mForm"){const name=$("m_name").value.trim();if(!name)return;const ms=mems(t);if(ms.some(m=>m.name===name)){toast("同じ名前の人がいます");return}if(ms.length>=20){toast("メンバーは20人までです");return}
