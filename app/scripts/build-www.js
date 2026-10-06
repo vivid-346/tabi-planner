@@ -5,10 +5,10 @@ const app=fs.readFileSync(path.join(root,"src/app.html"),"utf8");
 const g=JSON.parse(fs.readFileSync(path.join(root,"src/jp-geo.json"),"utf8"));
 const geo=JSON.stringify({d:g.d,W0:g.W0,N0:g.N0,C:g.C,K:g.K,vw:g.vw,vh:g.vh});
 if(!app.includes("__GEO__"))throw new Error("src/app.html に __GEO__ がありません");
-const head=`<!doctype html><html lang="ja"><head><meta charset="utf-8">
+const head=`<!doctype html><html lang="ja" data-theme="light"><head><meta charset="utf-8">
+<meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#F4F2FB" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14131C" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFFFFF">
 <meta name="format-detection" content="telephone=no">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head><body>`;
