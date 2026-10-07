@@ -1158,9 +1158,14 @@ async function pickFile(files){if(!files.length)return null;
    取り違え防止：AIが付けた記事名はそのまま使う。場所の名前で引くときは、転送・あいまいさ回避ページを使わない。
    Commons の検索結果は、ファイル名に場所の名前が入っているものだけ使う */
 const squash=x=>String(x||"").normalize("NFKC").replace(/[\s_・･（）()「」『』.\-]/g,"").toLowerCase();
+/* チェーン全体の写真を特定の支店の写真として表示しない。自分の写真は保持。 */
+function chainPhotoUnknown(s){return /スタバ|スターバックス|starbucks/i.test(s?.name||"")}
+function spotPhoto(s){return s?.photo?.u&&(!chainPhotoUnknown(s)||s.photo.own)?s.photo:null}
+function placeQuery(name){return String(name||"").replace(/スタバ/g,"スターバックス")}
 async function findPhoto(s){
+  if(chainPhotoUnknown(s))return null;
   const tries=[];if(s.wiki)tries.push([s.wiki,true]);if(s.name&&s.name!==s.wiki)tries.push([s.name,false]);
-  for(const [title,trusted] of tries){const r=await wapi("ja.wikipedia.org",{action:"query",titles:title,redirects:"1",prop:"pageimages|pageprops",ppprop:"disambiguation",piprop:"name",pilicense:"free"});
+  for(const [title,trusted] of tries){if(trusted&&!squash(s.name).includes(squash(title)))continue;const r=await wapi("ja.wikipedia.org",{action:"query",titles:title,redirects:"1",prop:"pageimages|pageprops",ppprop:"disambiguation",piprop:"name",pilicense:"free"});
     const pg=r.query?.pages?.[0];if(!pg||pg.missing)continue;if(pg.pageprops&&"disambiguation" in pg.pageprops)continue;
     if(!trusted&&squash(pg.title)!==squash(title))continue;
     if(okFile(pg.pageimage)){const x=await pickFile(["File:"+pg.pageimage]);if(x)return x}if(trusted)break}
@@ -1335,7 +1340,7 @@ function tripForm(){const ed=S.tripForm==="edit";const t=ed?T():{title:"",start:
 function timeSel(id,val){const m=/^(\d{1,2}):(\d{2})/.exec(val||"");const h=m?String(+m[1]):"",mi=m?m[2]:"00";
   return `<span class="tsel"><select id="${id}_h" aria-label="時">${["",...Array.from({length:24},(_,k)=>String(k))].map(v=>`<option value="${v}" ${v===h?"selected":""}>${v===""?"時間なし":v+"時"}</option>`).join("")}</select><select id="${id}_m" aria-label="分">${["00","15","30","45"].map(v=>`<option ${v===mi?"selected":""}>${v}</option>`).join("")}</select></span>`}
 const readTime=id=>{const h=$(id+"_h")?.value;return !h?"":pad(h)+":"+$(id+"_m").value};
-function tripPhoto(t){const rank={view:0,nature:1,activity:2,see:3};const ss=spots(t).filter(s=>s.photo&&s.photo.u&&!s.photo.near).sort((a,b)=>(rank[a.cat]??9)-(rank[b.cat]??9)||(a.created||0)-(b.created||0));return ss[0]||null}
+function tripPhoto(t){const rank={view:0,nature:1,activity:2,see:3};const ss=spots(t).filter(s=>spotPhoto(s)&&!s.photo.near).sort((a,b)=>(rank[a.cat]??9)-(rank[b.cat]??9)||(a.created||0)-(b.created||0));return ss[0]||null}
 function daysLeft(t){const today=ymd(new Date());return t.start&&today<t.start?Math.round((toD(t.start)-toD(today))/864e5):null}
 /* 旅行中：いまの予定と次の予定 */
 function nextStop(t){const now=new Date(),today=ymd(now),nm=now.getHours()*60+now.getMinutes();const its=items(t,today).filter(x=>timeKey(x.time)!=null);if(!its.length)return null;
@@ -1438,7 +1443,7 @@ function roView(t,date){const ids=S.ro.ids;const plan=roPlan(t,date,ids);const p
   const opt=optOrder(t,ids);const dirty=roDirty();
   return `<div class="ro"><p class="sub">予定を長押しするか「≡」をつまんで、上下に動かします。置くと、移動時間を考えて時間が自動で入り直します。${plan.some(p=>p.fixed)?"鍵マークの移動は時間を変えません。":""}</p>
    <ol class="rol" id="rol">${ids.map((id,k)=>{const x=t.items[id];const p=pm[id];const ch=p.time!==x.time;const prv=k?t.items[ids[k-1]]:null;const leg=prv?legOf(t,{id:ids[k-1],...prv},{id,...x}):null;
-     return `<li data-id="${id}" class="${p.fixed?"fixed":""}"><span class="roh" aria-hidden="true">${p.fixed?li("lock"):"≡"}</span>${(()=>{const s=x.spot&&t.spots?.[x.spot];const ph=s&&s.photo&&s.photo.u;return ph?`<img class="roimg" src="${esc(phSrc(ph))}" alt="" loading="lazy" onerror="this.remove()">`:s?`<span class="roimg ticon">${li("pin")}</span>`:""})()}<span class="rom"><span class="rot"><b>${p.time}</b>${ch&&x.time?`<s>${esc(x.time)}</s>`:""}</span><b class="ronm">${esc(x.title)}</b>${leg?`<small class="rolg">${legTxt(leg)}</small>`:""}</span><span class="rob"><button type="button" class="sr" data-a="roMv" data-k="${k}" data-d="-1" aria-label="上へ" ${k===0||p.fixed?"disabled":""}>↑</button><button type="button" class="sr" data-a="roMv" data-k="${k}" data-d="1" aria-label="下へ" ${k===ids.length-1||p.fixed?"disabled":""}>↓</button>${p.fixed?"":`<button type="button" class="rox" data-a="roDel" data-k="${k}" aria-label="この日から外す">×</button>`}</span></li>`}).join("")}</ol>
+     return `<li data-id="${id}" class="${p.fixed?"fixed":""}"><span class="roh" aria-hidden="true">${p.fixed?li("lock"):"≡"}</span>${(()=>{const s=x.spot&&t.spots?.[x.spot];const ph=spotPhoto(s)?.u;return ph?`<img class="roimg" src="${esc(phSrc(ph))}" alt="" loading="lazy" onerror="this.remove()">`:s?`<span class="roimg ticon">${li("pin")}</span>`:""})()}<span class="rom"><span class="rot"><b>${p.time}</b>${ch&&x.time?`<s>${esc(x.time)}</s>`:""}</span><b class="ronm">${esc(x.title)}</b>${leg?`<small class="rolg">${legTxt(leg)}</small>`:""}</span><span class="rob"><button type="button" class="sr" data-a="roMv" data-k="${k}" data-d="-1" aria-label="上へ" ${k===0||p.fixed?"disabled":""}>↑</button><button type="button" class="sr" data-a="roMv" data-k="${k}" data-d="1" aria-label="下へ" ${k===ids.length-1||p.fixed?"disabled":""}>↓</button>${p.fixed?"":`<button type="button" class="rox" data-a="roDel" data-k="${k}" aria-label="この日から外す">×</button>`}</span></li>`}).join("")}</ol>
    ${S.ro.ask?`<div class="roask"><b>並べ替えの変更が、まだ保存されていません</b><small>保存してから、行きたい場所から追加しますか？</small><div class="row"><button class="btn fill" data-a="roAddSave">保存して追加</button><button class="btn" data-a="roAskNo">やめる</button></div></div>`:`<button class="roadd" data-a="roAdd">＋ 行きたい場所から追加</button>`}
    ${opt?`<div class="roopt"><span class="ti">${li("route")}</span><div><b>移動が短い順番があります</b><small>観光の場所を入れ替えると、移動が約${opt.save.toFixed(1)}km短くなります</small></div><button class="btn" data-a="roOpt">この案を試す</button></div>`:""}
    <div class="robar"><span class="rost">${dirty?"未保存の変更":"変更なし"}</span><button class="btn" data-a="roCancel">やめる</button><button class="btn fill" data-a="roDone">この順番で保存</button></div></div>`}
@@ -1514,7 +1519,7 @@ function qaWarn(s,tm){const k=timeKey(tm);if(k==null)return"時間を入れて�
   if(!food&&k>=18*60)return"観光の予定が18時以降です。営業時間を確認してください。";if(food&&k>=22*60)return"22時以降です。営業時間を確認してください。";if(k<7*60)return"朝早い時間です。営業時間を確認してください。";return""}
 function qaSheet(sid,date,tm){const t=T(),s=t.spots[sid];if(!s)return;document.querySelector(".qaov")?.remove();const ds=dates(t);let d=date,time=tm;
   const ov=document.createElement("div");ov.className="qaov";
-  const ph=s.photo&&s.photo.u?s.photo:null;
+  const ph=spotPhoto(s);
   const render=()=>{const w=qaWarn(s,time);ov.innerHTML=`<div class="qac" role="dialog" aria-modal="true" aria-label="日程に入れる">
    <div class="qah">${ph?`<img src="${esc(phSrc(ph.u))}" alt="" onerror="this.remove()">`:""}<div><small>日程に入れる</small><b>${esc(s.name)}</b></div><button class="ib icon" data-qa="x" aria-label="閉じる">✕</button></div>
    <span class="lbl">何日目？</span><div class="qad">${ds.map((x,k)=>`<button type="button" data-qa="d" data-d="${x}" aria-pressed="${x===d}"><b>${k+1}日目</b><small>${md(x)}（${wd(x)}）</small></button>`).join("")}</div>
@@ -1539,7 +1544,7 @@ function candPanel(t){const ds=dates(t);const di=Math.min(S.sday||0,ds.length-1)
   const pts=items(t,date).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
   const near=s=>s.lat==null||!pts.length?null:Math.min(...pts.map(p=>distKm(p,s)*1.3));
   const list=spots(t).map(s=>{const d=spotDay(t,s.id);return {s,d,km:near(s),sl:d?null:suggestSlot(t,date,s)}}).sort((a,b)=>(!!a.d-!!b.d)||((a.sl&&!a.sl.fit)-(b.sl&&!b.sl.fit))||((a.km??1e9)-(b.km??1e9)));
-  const card=({s,d,km,sl})=>{const ph=s.photo&&s.photo.u?s.photo:null;
+  const card=({s,d,km,sl})=>{const ph=spotPhoto(s);
     return `<div class="cc${d?" in":""}">${ph?`<img src="${esc(phSrc(ph.u))}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="ccn ticon"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}
      <div class="cb"><b>${esc(s.name)}</b><span class="sub">${s.cat&&CATS[s.cat]?CATS[s.cat]+" ・ ":""}${s.minutes?"約"+fmtMin(s.minutes):""}${km!=null&&!d?` ・ この日の予定から約${km.toFixed(km<10?1:0)}km`:""}</span>
      ${d?`<span class="sub">${d}日目に入っています</span>`:`<button class="btn fill" data-a="candAdd" data-id="${s.id}">＋ ${hm(sl.k)}に入れる</button>${sl.fit?"":`<span class="sub" style="color:var(--warn)">この日は空きがありません</span>`}`}</div></div>`};
@@ -1583,7 +1588,7 @@ const legTxt=l=>l?`${MODE_L[l.mm]} 約${fmtMin(l.min)}`:"";
 function todBadge(tod){if(!tod)return"";const r=TOD.find(x=>x[0]===tod)||TOD[0];return `<span class="tod" style="--tc:${r[2]};--tf:${r[3]};--tb:${r[4]}">${tod}</span>`}
 function itemRow(t,x,o){o=o||{};const s=x.spot&&t.spots?.[x.spot];
   const td=ymd(new Date());const canDone=td>=t.start&&td<=t.end&&x.date<=td;
-  const ph=s&&s.photo&&s.photo.u?s.photo:null;
+  const ph=s&&spotPhoto(s);
   /* 写真がある予定は、写真を主役にした大きなカード */
   if(ph&&x.kind!=="move"&&S.confirm!==x.id){const tm=`${esc(x.time||"")}${x.dur&&x.time?`〜${addMin(x.time,x.dur)}`:""}`;
     const mins=x.dur||s.minutes;
@@ -1641,7 +1646,7 @@ function spotsView(t){const ss=spots(t);
   ${ss.length?`<div class="excards" id="excards">${exList(t)}</div><p class="sub" style="text-align:center">${ss.length}か所 ・ 「日程に入れる」で日にちと時間を選べます</p>`:`<div class="empty exempty"><b>行きたい場所を集めましょう</b><span>行き先に合った候補を、ふだん使っているAI（ChatGPT など）にまとめて出してもらえます。行きたい場所が決まっているなら、名前で登録もできます。</span><button class="btn fill big" data-a="aiOpen" data-k="more">AIに候補を出してもらう</button><button class="btn" data-a="addSpot">名前で場所を登録する</button></div>`}`}
 function exList(t){const q=normName(S.q||"");const ss=spots(t).filter(s=>(!S.cat||s.cat===S.cat)&&(!q||normName(`${s.name}${s.area||""}${s.note||""}${CATS[s.cat]||""}`).includes(q)));
   if(!ss.length)return `<p class="sub" style="text-align:center;padding:24px 0">見つかりませんでした</p>`;
-  return ss.map(s=>{const ph=s.photo&&s.photo.u?s.photo:null;const d=spotDay(t,s.id);
+  return ss.map(s=>{const ph=spotPhoto(s);const d=spotDay(t,s.id);
     return `<article class="exc" data-a="detail" data-id="${s.id}"><figure>${ph?`<img src="${esc(phSrc(ph.u))}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="exni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}</figure>
      ${d?`<span class="exday" style="--dc:${dayColor(d)}">${d}日目</span>`:""}${s.book?`<span class="exbk">要予約</span>`:""}
      <div class="exo"><b>${esc(s.name)}</b><span>${CATS[s.cat]||"観光"}${s.minutes?` ・ 約${fmtMin(s.minutes)}`:""}${s.area?` ・ ${esc(s.area)}`:""}</span></div>
@@ -1649,7 +1654,7 @@ function exList(t){const q=normName(S.q||"");const ss=spots(t).filter(s=>(!S.cat
 /* ＋：入れやすい日（その日の予定に近くて、あいている時間がある日）を選んで入れる */
 function bestDay(t,s){const ds=dates(t);let best=null;ds.forEach((d,k)=>{const sl=suggestSlot(t,d,s);const pts=items(t,d).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
   const km=s.lat!=null&&pts.length?Math.min(...pts.map(p=>distKm(p,s))):50;const score=(sl.fit?0:1000+sl.k)+km;if(!best||score<best.score)best={d,k,sl,score}});return best}
-function spotDetail(t,id){const s=t.spots[id];const ph=s.photo&&s.photo.u?s.photo:null;const d=spotDay(t,id);const tab=S.dtab||"info";
+function spotDetail(t,id){const s=t.spots[id];const ph=spotPhoto(s);const d=spotDay(t,id);const tab=S.dtab||"info";
   const near=s.lat==null?[]:spots(t).filter(x=>x.id!==id&&x.lat!=null).map(x=>({x,km:distKm(s,x)*1.3})).sort((a,b)=>a.km-b.km).slice(0,6);
   const row=(ic,l,v)=>v?`<div class="sdr"><span class="sdi">${ic}</span><span class="sdl">${l}</span><span class="sdv">${v}</span></div>`:"";
   return `<article class="sd"><figure class="sdh${ph?"":" nph2"}">${ph?`<img src="${esc(phSrc(ph.u))}" alt="" onerror="this.remove()">`:`<span class="exni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}
@@ -1662,7 +1667,7 @@ function spotDetail(t,id){const s=t.spots[id];const ph=s.photo&&s.photo.u?s.phot
      <div class="sdrows">${row(li("clock"),"所要時間",s.minutes?`約${fmtMin(s.minutes)}`:"")}${row(li("yen"),"料金",esc(s.fee||""))}${row(li("umbrella"),"雨の日",rainOk(s)?"楽しめます":"")}${row(li("ticket"),"予約",s.book?"必要":"")}${row(li("cal"),"日程",d?`${d}日目`:"まだ入っていません")}</div>`
     :tab==="access"?`<div class="sdrows">${row(li("pin"),"エリア",esc(s.area||""))}${row(li("target"),"位置",s.lat!=null?`${(+s.lat).toFixed(4)}, ${(+s.lon).toFixed(4)}`:"まだ決まっていません")}</div>
      <div class="row">${s.lat!=null?`<a class="btn" href="${Native.mapUrl(s)}" target="_blank" rel="noopener">Googleマップで開く</a><button class="btn" data-a="showSpot" data-id="${id}">アプリの地図で見る</button>`:`<button class="btn" data-a="pickFor" data-id="${id}">地図で位置を決める</button>`}${s.url?`<a class="btn" href="${esc(s.url)}" target="_blank" rel="noopener">参考リンク</a>`:""}</div>`
-    :near.length?`<div class="nearl">${near.map(({x,km})=>{const p2=x.photo&&x.photo.u?x.photo:null;const mm=mainMove(t,km);return `<button class="nearr" data-a="detail" data-id="${x.id}">${p2?`<img src="${esc(phSrc(p2.u))}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="nearni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[x.cat]||CAT_ICON.see}"/></svg></span>`}<span><b>${esc(x.name)}</b><small>約${km.toFixed(km<10?1:0)}km ・ ${MODE_L[mm]} 約${fmtMin(legMin(km,mm))}</small></span><span aria-hidden="true">›</span></button>`}).join("")}</div>`:`<p class="sub">位置が決まっているほかの場所がありません。</p>`}</div>
+    :near.length?`<div class="nearl">${near.map(({x,km})=>{const p2=spotPhoto(x);const mm=mainMove(t,km);return `<button class="nearr" data-a="detail" data-id="${x.id}">${p2?`<img src="${esc(phSrc(p2.u))}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="nearni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[x.cat]||CAT_ICON.see}"/></svg></span>`}<span><b>${esc(x.name)}</b><small>約${km.toFixed(km<10?1:0)}km ・ ${MODE_L[mm]} 約${fmtMin(legMin(km,mm))}</small></span><span aria-hidden="true">›</span></button>`}).join("")}</div>`:`<p class="sub">位置が決まっているほかの場所がありません。</p>`}</div>
    <div class="sdcta">${s.lat!=null?`<a class="btn fill big" href="${Native.dirUrl(s)}" target="_blank" rel="noopener">ここに行く（ナビ開始）</a>`:""}${planBtns(t,{id,...s})}</div></article>`}
 function dayTag(t,id){const d=spotDay(t,id);return d?`<span class="tag" style="background:color-mix(in srgb,${dayColor(d)} 16%,transparent);color:${dayColor(d)}">${d}日目</span>`:`<span class="tag cand">候補</span>`}
 /* 写真がないときの表紙：アプリの中の地図で、その場所のまわりを描く（電波がなくても出る・間違えない） */
@@ -1673,7 +1678,7 @@ function miniMap(s,w,h){const [x,y]=proj(s.lat,s.lon);const vw=w||28,vh=h||17.5;
 function catThumb(s){return `<span class="thumb ticon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}
 function noPhotoCover(s){const ic=CAT_ICON[s.cat]||CAT_ICON.see;
   return `<figure class="sph nph">${inJapan(s)?miniMap(s):""}<span class="nic"><svg viewBox="0 0 24 24"><path d="${ic}"/></svg></span></figure>`}
-function spotCard(t,s){const ph=s.photo&&s.photo.u?s.photo:null;
+function spotCard(t,s){const ph=spotPhoto(s);
   return `<article class="spot">${!ph&&s.photo?noPhotoCover(s):""}${ph?`<figure class="sph"><img src="${esc(phSrc(ph.u))}" alt="${esc(s.name)}" loading="lazy" onerror="this.parentNode.hidden=true">${ph.own?"":`<figcaption>${ph.pg?`<a href="${esc(ph.pg)}" target="_blank" rel="noopener">`:""}${esc(ph.by)} / ${esc(ph.lic)}${ph.pg?"</a>":""}</figcaption>`}</figure>`:""}<div class="meta">${dayTag(t,s.id)}${s.cat&&CATS[s.cat]?`<span class="tag">${CATS[s.cat]}</span>`:""}${s.area?`<span>${esc(s.area)}</span>`:""}${s.book?`<span class="tag warn">要予約</span>`:""}${s.minutes?`<span>約${s.minutes>=60?(s.minutes/60).toFixed(s.minutes%60?1:0)+"時間":s.minutes+"分"}</span>`:""}${s.lat==null?`<span class="tag warn">位置なし</span>`:""}</div>
   <h3>${esc(s.name)}</h3>${s.note?`<p>${esc(s.note)}</p>`:""}${s.fee?`<span class="sub">料金：${esc(s.fee)}</span>`:""}
   ${S.confirm===s.id?`<div class="inbox row"><span class="sub" style="color:var(--warn)">削除しますか？（日程の予定は残ります）</span><button class="btn danger" data-a="delSpotYes" data-id="${s.id}">削除</button><button class="btn" data-a="noConfirm">やめる</button></div>`:""}
@@ -1684,18 +1689,18 @@ function planBtns(t,s){const d=spotDay(t,s.id);
   return d?`<button class="btn" data-a="unassign" data-id="${s.id}" style="align-self:flex-start">日程から外す</button>`:`<button class="btn fill" data-a="assign" data-id="${s.id}" style="align-self:flex-start">日程に入れる</button>`}
 function asDays(t,s){return dates(t).map((d,k)=>{const w=conflict(t,d,S.atime);return `<button class="btn" data-a="assignDay" data-id="${s.id}" data-date="${d}" ${w?`disabled title="${esc(w)}"`:""} style="border-color:${dayColor(k+1)}">${k+1}日目 ${md(d)}${w?`<small style="color:var(--warn)">${esc(w.replace(/（.*$/,""))}</small>`:""}</button>`}).join("")}
 function spotForm(t){const id=S.edit.split(":")[1];const v=S.draft||(id?{...t.spots[id]}:{name:"",area:"",note:"",fee:"",url:"",lat:null,lon:null,cat:"see",minutes:60});
-  const ph=S.sfPhoto!==undefined?S.sfPhoto:(v.photo&&v.photo.u?v.photo:null);const ds=dates(t);
+  const ph=S.sfPhoto!==undefined?S.sfPhoto:(spotPhoto(v));const ds=dates(t);
   return `<form class="card form" id="spotForm" data-id="${id||""}"><h2 style="font-size:19px">${id?"場所を編集":"行きたい場所を追加"}</h2>
-   <div class="field"><label for="sf_name">名前</label><input type="text" id="sf_name" required maxlength="60" value="${esc(v.name)}" placeholder="例：東京スカイツリー"></div>
+   <div class="field"><label for="sf_name">名前</label><input type="text" id="sf_name" required maxlength="60" value="${esc(v.name)}" placeholder="店名・支店名（例：スタバ 富山環水公園）"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn fill" type="button" data-a="geoFind">この名前でお店・場所を探す</button><button class="btn" type="button" data-a="spotMapSearch">Googleマップで探す</button></div><div id="sf_geo" class="geol" aria-live="polite"></div></div>
    <div class="two"><div class="field"><label for="sf_cat">種類</label><select id="sf_cat">${Object.entries(CATS).map(([k,l])=>`<option value="${k}" ${(v.cat||"see")===k?"selected":""}>${l}</option>`).join("")}</select></div><div class="field"><label for="sf_min">いる時間の目安</label><select id="sf_min">${[30,45,60,90,120,150,180,240].map(n=>`<option value="${n}" ${(+v.minutes||60)===n?"selected":""}>${fmtMin(n)}</option>`).join("")}</select></div></div>
    <div class="two"><div class="field"><label for="sf_area">エリア（任意）</label><input type="text" id="sf_area" maxlength="30" value="${esc(v.area)}" placeholder="押上"></div><div class="field"><label for="sf_fee">料金（任意）</label><input type="text" id="sf_fee" maxlength="40" value="${esc(v.fee)}" placeholder="大人 2,100円"></div></div>
    <div class="field"><label for="sf_note">メモ（任意）</label><textarea id="sf_note" maxlength="500" placeholder="見どころ、営業時間、インスタで見た投稿など">${esc(v.note)}</textarea></div>
    <div class="field"><label for="sf_url">参考リンク（任意）</label><input type="text" id="sf_url" maxlength="500" value="${esc(v.url)}" placeholder="https://"></div>
    <div class="inbox form"><span class="lbl">写真</span><div id="sf_ph">${sfPhotoHtml(ph)}</div>
     <div class="row"><label class="btn" style="cursor:pointer">${ph?"写真を変える":"自分の写真を選ぶ"}<input type="file" id="sf_file" accept="image/*" hidden></label>${ph?`<button class="btn" type="button" data-a="sfNoPhoto">写真を外す</button>`:""}</div>
-    <span class="sub">${ph?"写真はこの端末の中だけに保存されます。":"選ばなくても、追加したあと自動で写真を探します（有名な場所のみ）。"}</span></div>
+    <span class="sub">${ph?"写真はこの端末の中だけに保存されます。":(chainPhotoUnknown(v)?"支店を確認できない写真は自動で付けません。自分の写真を選べます。":"選ばなくても、追加したあと自動で写真を探します（有名な場所のみ）。")}</span></div>
    <div class="inbox form"><span class="lbl">地図の位置</span><span id="sf_pos" role="status" aria-live="polite">${v.lat!=null?`<span class="tag">設定済み（${(+v.lat).toFixed(4)}, ${(+v.lon).toFixed(4)}）</span>`:`<span class="sub">まだ決まっていません</span>`}</span>
-    <div class="row"><button class="btn fill" type="button" data-a="geoFind">名前から探す</button><button class="btn" type="button" data-a="pickDraft">地図を押して決める</button></div><div id="sf_geo" class="geol" aria-live="polite"></div>
+    <div class="row"><button class="btn" type="button" data-a="pickDraft">地図を押して決める</button></div>
     <div class="field"><label for="sf_ll">または Googleマップのリンク／「緯度, 経度」を貼る</label><input type="text" id="sf_ll" placeholder="例：https://www.google.com/maps/place/…/@35.7101,139.8107…"></div>
     <p class="sub">Googleマップで場所を長押しすると出る数字（例：35.7101, 139.8107）をコピーして貼ってもOKです。短いリンク（maps.app.goo.gl）は読めません。</p></div>
    <input type="hidden" id="sf_lat" value="${v.lat??""}"><input type="hidden" id="sf_lon" value="${v.lon??""}">
@@ -1715,17 +1720,18 @@ function tripCenter(t){const p=spots(t).filter(s=>s.lat!=null);if(!p.length)retu
 async function geoFind(){const box=$("sf_geo"),q=$("sf_name").value.trim();if(!box)return;if(!q){toast("先に名前を入れてください");return}
   if(navigator.onLine===false){box.innerHTML=`<span class="sub">電波がないので探せません</span>`;return}
   const request=Symbol();box._request=request;const form=$("spotForm"),t=T(),c=tripCenter(t)||destinationCenter(t),out=[];
+  const searchName=placeQuery(q),region=$("sf_area")?.value.trim()||t.dest||"";
   const current=()=>box.isConnected&&box._request===request&&$("spotForm")===form&&$("sf_name")?.value.trim()===q;
   const bounded=p=>new Promise((ok,no)=>{const timer=setTimeout(()=>no(new Error("timeout")),10000);Promise.resolve(p).then(v=>{clearTimeout(timer);ok(v)},e=>{clearTimeout(timer);no(e)})});
   box.innerHTML=`<span class="sub" role="status">「${esc(q)}」の位置を探しています…</span>`;
   $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置は残しています。新しい検索結果を確認してください。":"検索中・位置はまだ決まっていません";
-  try{for(const host of ["ja.wikipedia.org","en.wikipedia.org"]){const r=await bounded(wapi(host,{action:"query",titles:q,redirects:"1",prop:"coordinates|pageprops",ppprop:"disambiguation"}));const pg=r.query?.pages?.[0];const co=pg&&!pg.missing&&!(pg.pageprops&&"disambiguation" in pg.pageprops)&&pg.coordinates?.[0];if(co){out.push({lat:co.lat,lon:co.lon,label:pg.title,src:"ウィキペディア"});break}}}catch(e){}
-  try{const r=await bounded(fetch("https://photon.komoot.io/api/?"+new URLSearchParams({q,limit:"6",...(c?{lat:c.lat.toFixed(3),lon:c.lon.toFixed(3)}:{})})).then(r=>r.json()));
-    (r.features||[]).forEach(f=>{const p=f.properties||{},g=f.geometry?.coordinates;if(!g)return;out.push({lat:+g[1],lon:+g[0],label:[p.name,p.street,p.city||p.county||p.district,p.state,p.country].filter((x,i,a)=>x&&a.indexOf(x)===i).join("・"),src:"地図"})})}catch(e){}
+  try{for(const host of (chainPhotoUnknown({name:q})?[]:["ja.wikipedia.org","en.wikipedia.org"])){const r=await bounded(wapi(host,{action:"query",titles:q,redirects:"1",prop:"coordinates|pageprops",ppprop:"disambiguation"}));const pg=r.query?.pages?.[0];const co=pg&&!pg.missing&&!(pg.pageprops&&"disambiguation" in pg.pageprops)&&pg.coordinates?.[0];if(co){out.push({lat:co.lat,lon:co.lon,label:pg.title,src:"ウィキペディア"});break}}}catch(e){}
+  try{for(const query of [...new Set([region?region+" "+searchName:searchName,searchName])]){const r=await bounded(fetch("https://photon.komoot.io/api/?"+new URLSearchParams({q:query,limit:"6",...(c?{lat:c.lat.toFixed(3),lon:c.lon.toFixed(3)}:{})})).then(r=>r.json()));
+    (r.features||[]).forEach(f=>{const p=f.properties||{},g=f.geometry?.coordinates;if(!g)return;out.push({lat:+g[1],lon:+g[0],name:p.name||q,area:[p.city||p.county||p.district,p.street,p.housenumber].filter(Boolean).join(" "),label:[p.name,p.street,p.housenumber,p.city||p.county||p.district,p.state,p.country].filter((x,i,a)=>x&&a.indexOf(x)===i).join("・"),src:"地図"})});if(out.some(o=>o.src==="地図"))break}}catch(e){}
   if(!current())return;
   const seen=[];const list=out.filter(o=>isFinite(o.lat)&&isFinite(o.lon)&&!seen.some(x=>distKm(x,o)<0.05)&&seen.push(o)).slice(0,6);
   $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置があります。変更する場合は候補を選んでください。":list.length?"候補が見つかりました・まだ未設定":"位置が見つかりませんでした・未設定";
-  box.innerHTML=list.length?`<span class="sub">位置はまだ確定していません。正しい場所の「この位置に決める」を押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><span>この位置に決める</span><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">見つかりませんでした。「地図を押して決める」か、Googleマップのリンクを貼ってください。</span>`}
+  box.innerHTML=list.length?`<span class="sub">位置はまだ確定していません。店名と住所を確認して「この場所を選ぶ」を押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-name="${esc(o.name||q)}" data-area="${esc(o.area||"")}" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><span>この場所を選ぶ</span><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">この検索では見つかりませんでした。支店名を入れ直すか、上の「Googleマップで探す」で確認できます。位置なしでも候補に追加できます。</span>`}
 function parseLL(s){s=(s||"").trim();let m=/@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(s)||/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(s)||/[?&](?:q|query|ll|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(s)||/^(-?\d{1,2}\.\d+)\s*[,、 ]\s*(-?\d{2,3}\.\d+)$/.exec(s);
   if(!m)return null;const lat=+m[1],lon=+m[2];if(Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat,lon}}
 function readSpotForm(){if($("sf_day"))S.sfDay=$("sf_day").value;return {cat:$("sf_cat").value,minutes:+$("sf_min").value,name:$("sf_name").value.trim(),area:$("sf_area").value.trim(),note:$("sf_note").value.trim(),fee:$("sf_fee").value.trim(),url:$("sf_url").value.trim(),lat:$("sf_lat").value===""?null:+$("sf_lat").value,lon:$("sf_lon").value===""?null:+$("sf_lon").value}}
@@ -1744,7 +1750,7 @@ function nextRoute(t){const ds=dates(t),today=ymd(new Date());const d=S.mapDay?d
   const a=its[k],b=its[k+1],sa=t.spots[a.spot],sb=t.spots[b.spot];const km=distKm(sa,sb)*1.3,mm=mainMove(t,km);
   return `<div class="card nroute"><div><span class="sub">次のルート${d!==today?`（${ds.indexOf(d)+1}日目）`:""}</span><b>${esc(sa.name)} → ${esc(sb.name)}</b><span class="sub">${MODE_L[mm]}で約${fmtMin(legMin(km,mm))}（${km.toFixed(1)}km）</span></div><a class="btn fill" href="${Native.dirUrl(sb)}" target="_blank" rel="noopener">ナビ開始</a></div>`}
 function mapBottomHtml(t){const nos=spots(t).filter(s=>s.lat==null);const sel=S.sel&&t.spots[S.sel]?{id:S.sel,...t.spots[S.sel]}:null;
-  return S.pick?"":(sel?`<div class="card selcard">${sel.photo&&sel.photo.u?`<img class="selph" src="${esc(phSrc(sel.photo.u))}" alt="" onerror="this.remove()">`:""}<div class="row">${dayTag(t,sel.id)}${sel.area?`<span class="sub">${esc(sel.area)}</span>`:""}</div><h3 style="font-size:19px">${esc(sel.name)}</h3>${sel.note?`<p class="sub" style="color:var(--ink)">${esc(sel.note)}</p>`:""}${planBtns(t,sel)}<div class="row"><a class="btn fill" href="${Native.dirUrl(sel)}" target="_blank" rel="noopener">ここへ行く</a><a class="btn" href="${Native.mapUrl(sel)}" target="_blank" rel="noopener">Googleマップ</a></div></div>`
+  return S.pick?"":(sel?`<div class="card selcard">${spotPhoto(sel)?`<img class="selph" src="${esc(phSrc(sel.photo.u))}" alt="" onerror="this.remove()">`:""}<div class="row">${dayTag(t,sel.id)}${sel.area?`<span class="sub">${esc(sel.area)}</span>`:""}</div><h3 style="font-size:19px">${esc(sel.name)}</h3>${sel.note?`<p class="sub" style="color:var(--ink)">${esc(sel.note)}</p>`:""}${planBtns(t,sel)}<div class="row"><a class="btn fill" href="${Native.dirUrl(sel)}" target="_blank" rel="noopener">ここへ行く</a><a class="btn" href="${Native.mapUrl(sel)}" target="_blank" rel="noopener">Googleマップ</a></div></div>`
    :(spots(t).some(s=>s.lat!=null)?`${richMap()?"":nextRoute(t)}<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。${richMap()?"地図のお店や観光地を押すと、候補に追加できます。":""}</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所を探す」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
    +(nos.length?`<div class="card form"><span class="lbl">位置が決まっていない場所</span><div class="row">${nos.map(s=>`<button class="btn" data-a="pickFor" data-id="${s.id}">${esc(s.name)}を置く</button>`).join("")}</div></div>`:"")}
 function mapView(t){
@@ -1796,7 +1802,7 @@ function mlData(t){const map=ML.map;if(!map||!ML.ok||!t)return;
   const ds=dates(t);
   spots(t).forEach((s,i)=>{if(s.lat==null)return;const d=spotDay(t,s.id),on=S.sel===s.id,dim=S.mapDay&&d!==S.mapDay;
     const el=document.createElement("button");el.type="button";el.className="mk"+(d?"":" cand")+(dim?" dim":"")+(on?" on":"");el.style.setProperty("--c",d?dayColor(d):"var(--muted)");el.setAttribute("aria-label",s.name);
-    el.innerHTML=`<span class="dot">${s.photo&&s.photo.u?`<img src="${esc(phSrc(s.photo.u))}" alt="" onerror="this.remove()">`:""}<b>${i+1}</b></span><span class="nm">${esc(s.name)}</span>`;
+    el.innerHTML=`<span class="dot">${spotPhoto(s)?`<img src="${esc(phSrc(s.photo.u))}" alt="" onerror="this.remove()">`:""}<b>${i+1}</b></span><span class="nm">${esc(s.name)}</span>`;
     el.addEventListener("click",ev=>{ev.stopPropagation();S.sel=s.id;S.assign=null;S.tapLL=null;redrawMap()});
     ML.markers.push(new maplibregl.Marker({element:el,anchor:"top-left",offset:[-20,-20]}).setLngLat([s.lon,s.lat]).addTo(map))});
   const mark=S.pick&&S.pick.ll||(!S.pick&&S.tapLL);
@@ -2268,6 +2274,7 @@ ${aiCopyRules()}
    case"copyPlan":S.copy=planText(t);draw();{const r=await Native.share(t.title,S.copy);if(r==="copied")toast("コピーしました。LINEなどに貼れます");if(r==="shared"){S.copy=null;draw()}}break;
    case"copyAgain":{const r=await Native.share(t.title,S.copy);if(r)toast("コピーしました");else{$("copybox").select();toast("選択しました。コピーしてください")}break}
    case"closeCopy":S.copy=null;draw();break;
+   case"spotMapSearch":{const name=placeQuery($("sf_name")?.value.trim());if(!name){toast("先に店名・場所の名前を入れてください");break}const region=$("sf_area")?.value.trim()||t.dest||"";window.open("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent([region,name].filter(Boolean).join(" ")),"_blank","noopener");break}
    case"geoFind":geoFind();break;
    case"cgAsk":cgAsk(b.dataset.q);break;
    case"cgGo":{const C=S.cg;if(!C)break;const ai=b.dataset.ai;aiOpen(cgPrompt(t,C.req),ai);C.ai=ai;C.copyText=null;C.back=false;if(DB.lastAI!==ai){DB.lastAI=ai;save()}draw();cgScroll();break}
@@ -2298,7 +2305,7 @@ ${aiCopyRules()}
    case"dtab":S.dtab=b.dataset.k;draw();break;
    case"cat":S.cat=b.dataset.c||"";draw();break;
    case"quickAdd":{const s=t.spots[id];const bd=bestDay(t,s);if(!bd){toast("日程がありません");break}qaSheet(id,bd.d,hm(bd.sl.k));break}
-   case"geoPick":{if($("sf_geo"))$("sf_geo")._request=null;const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
+   case"geoPick":{if(b.dataset.name)$("sf_name").value=b.dataset.name;if(b.dataset.area)$("sf_area").value=b.dataset.area;if($("sf_geo"))$("sf_geo")._request=null;const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
    case"sfNoPhoto":S.draft=readSpotForm();S.sfPhoto=null;draw();break;
    case"addSpot":S.edit="spot:";S.draft=null;S.sfPhoto=undefined;S.sfDay="";draw();$("sf_name")?.focus();break;
    case"editSpot":S.edit="spot:"+id;S.draft=null;S.sfPhoto=undefined;draw();break;
