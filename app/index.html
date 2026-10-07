@@ -2003,7 +2003,17 @@ function pickJSON(s){s=String(s||"");const m=/```(?:json)?\s*([\s\S]*?)```/.exec
   const r=fixJSON(s.slice(a));const o=JSON.parse(r.text);if(r.cut&&o&&typeof o==="object")Object.defineProperty(o,"_cut",{value:true});return o}
 /* AIの答えをコピーしたときによく崩れる所を直す：
    ・" が “ ” になる　・ChatGPTの出典リンクが改行つきで文の中に入る　・答えが途中で切れる（最後まで読めた所までにする） */
-function fixJSON(s){s=s.replace(/[“”„‟″＂]/g,'"').replace(/[ 　]/g," ");
+/* コピー時のMarkdownエスケープだけを除く。JSONの正しいエスケープは保つ。 */
+function unescapeJSONMarkdown(s){let out="",inStr=false;
+  for(let i=0;i<s.length;i++){const c=s[i],n=s[i+1];
+    if(c==="\\"){
+      if(!inStr){if(n==="\r"||n==="\n"||/[\[\]{}]/.test(n||""))continue;out+=c;continue}
+      if(n&&'"\\/bfnrtu'.includes(n)){out+=c+n;i++;continue}
+      if(n&&/[\[\]{}_*#\x60>!~()-]/.test(n)){out+=n;i++;continue}
+      out+=c;continue}
+    if(c==='"')inStr=!inStr;out+=c}
+  return out}
+function fixJSON(s){s=unescapeJSONMarkdown(s);s=s.replace(/[“”„‟″＂]/g,'"').replace(/[ 　]/g," ");
   let out="",inStr=false,esc=false,skip=false,cur="",good=0,goodSt=[];const st=[];
   for(const c of s){
     if(inStr){if(esc){esc=false;if(!skip){out+=c;cur+=c}continue}
