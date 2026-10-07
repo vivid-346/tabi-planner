@@ -1083,6 +1083,8 @@ body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-bac
 .tools{background:#F5F5F7!important}.tools .tool:nth-child(1){--tool-bg:#EAF2FC;--tool-color:#225EA8}.tools .tool:nth-child(2){--tool-bg:#EAF5EE;--tool-color:#246C43}.tools .tool:nth-child(3){--tool-bg:#FFF1E5;--tool-color:#A64B00}.tools .tool:nth-child(4){--tool-bg:#F0EDFC;--tool-color:#5743C4}.tools .tool{background:var(--tool-bg)!important}.tools .tool .ti{color:var(--tool-color)!important}.tools .tool b{color:#262631!important}.tools .tool small{color:#484852!important}.tools .tool:hover{filter:brightness(.98)}.tools .tool:active{filter:brightness(.95)}
 .mhero button.h2chip{background:#A64B00!important;color:#fff!important;min-height:44px;min-width:44px;padding:10px 14px!important;border:0;border-radius:12px!important;font-family:var(--sans);font-size:15px;font-weight:600;opacity:1!important}
 @media(min-width:700px){.ai-services{grid-template-columns:repeat(3,minmax(0,1fr))}.ai-services .btn{padding-inline:10px}}
+
+.ai-copy-steps{padding-left:24px;margin:12px 0;color:#262631;line-height:1.65}.ai-copy-steps li+li{margin-top:8px}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -1438,6 +1440,8 @@ function roView(t,date){const ids=S.ro.ids;const plan=roPlan(t,date,ids);const p
 function roRender(){const t=T();if(!t||!S.ro)return;const sec=document.querySelector(`#day${dates(t).indexOf(S.ro.date)} .ro`);if(sec)sec.outerHTML=roView(t,S.ro.date)}
 /* ===== AI 旅のコンシェルジュ（理想の4番）：会話で頼む → あなたのAIが答える → 「このプランでOK」で反映 ===== */
 const CG_Q=["混雑を避けて、ゆっくり回りたい","雨の日でも楽しめるプランにして","グルメを多めにしたい","移動を少なくしたい","朝はゆっくりスタートしたい"];
+/* 日程・候補・相談・続きの返事を、同じ1つのコピー枠にまとめてもらう。 */
+function aiCopyRules(){return '## コピーしやすい答えの出し方\n- 最初に「下の枠の右上などにある『コピー』（重なった四角のアイコン）を押し、旅のノートに戻って『コピーした答えを読み込む』を押してください。」と1文だけ案内する。\n- その直後に、言語名jsonのコードブロックを必ず1つだけ出す。日程と場所を分割せず、下の形のJSON全体をその1つの枠にまとめる。\n- JSONの前後に見出し・表・旅行の説明・出典・リンク・別のコードブロックを付けない（上記の案内1文だけは枠の外に出す）。\n- WordやPDFのファイル・添付・ダウンロードリンク・別画面の文書は作らない。チャット本文に、コピーできる1つのコードブロックとして返す。\n- JSONは正しい形式にする。行末や角括弧や項目名に、Markdown用の余計なバックスラッシュを付けない。'}
 function cgPrompt(t,req){const ds=dates(t);const plan=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）${t.dayInfo?.[d]?.area?" "+t.dayInfo[d].area:""}\n`+(items(t,d).map(x=>`- ${x.time||"--:--"}${x.arrive?`〜${x.arrive}`:x.dur?`（${x.dur}分）`:""} [${x.kind}] ${x.title}${x.spot&&t.spots?.[x.spot]?` ＝場所「${t.spots[x.spot].name}」`:""}`).join("\n")||"- （予定なし）")).join("\n");
   const inPlan=new Set(Object.values(t.items||{}).map(x=>x.spot));const cands=spots(t).filter(s=>!inPlan.has(s.id)).map(s=>s.name);
   return `あなたは旅行のコンシェルジュです。次の旅行の日程を、お願いに合わせて直してください。
@@ -1454,7 +1458,8 @@ ${req}
 - 行きと帰りの移動（新幹線・飛行機など）の時刻は変えない
 - 実在して、今も営業している場所だけ。ぎちぎちにしない。昼ごはんと夜ごはんの時間を入れる
 - 変えない日も含めて、全部の日の予定を返す
-- 出典・リンクは入れない。返事は下の形の JSON だけ
+- 出典・リンクは入れない。返事のデータは下の形の JSON にする
+${aiCopyRules()}
 {"message":["変えた点を短く（3〜5個）"],"days":[{"date":"YYYY-MM-DD","area":"その日のエリア","items":[{"time":"HH:MM","arrive":"HH:MM（移動のときだけ）","kind":"move | see | food | stay | other","title":"予定の内容","note":"ひとこと（30字くらい）","spot":"場所の名前（行きたい場所の予定のとき）"}]}],"spots":[{"name":"新しく加えた場所の名前","area":"エリア","category":"see | food | shop | nature | activity | view | cafe","note":"おすすめの理由（60字くらい）","wiki":"日本語版ウィキペディアの記事名（なければ空文字）","name_en":"英語の名前","fee":"料金の目安","lat":0.0,"lon":0.0,"booking":false,"minutes":60,"rain_ok":false}]}`}
 function cgView(t){const C=S.cg||{step:"idle"},hist=t.chat||[];
   const active=C.step==="wait",preview=C.step==="preview";
@@ -1469,8 +1474,8 @@ function aiFlowBox(A,prefix,prompt){const cg=prefix==="cg",last=DB.lastAI||"chat
  const phase=A.copyText?1:(cg?A.ai:A.sent)||A.back?2:1;
  const fallback=A.copyText?`<div class="field"><label for="${prefix}_prompt">この文を選択してコピー</label><textarea id="${prefix}_prompt" readonly>${esc(A.copyText)}</textarea><button class="btn" data-a="${act("Copied")}">コピーできた → 次へ</button></div>`:"";
  const order=[...AIS].sort((a,b)=>(b[0]===ai)-(a[0]===ai));
- let content=phase===1?`<h3>${cg?2:1} AIに聞く</h3><p>使いたいAIを選んでください。ChatGPT・Claudeは指示文入りで開きます。Geminiはコピーした指示文を貼って送信してください。</p><div class="ai-services">${order.map(([k,l])=>`<button class="btn ${k===ai?"fill":""} big" data-a="${act("Go")}" data-ai="${k}">${l}で聞く</button>`).join("")}</div>${fallback}<details><summary>指示文だけコピーする</summary><button class="btn" data-a="${act("Copy")}">指示文だけコピー</button></details><button class="btn" data-a="${act("Ready")}">もう答えをコピーしてある → 読み込む</button>`:
- `<h3>${cg?3:2} AIの答えを読み込む</h3><p>AIの答えの下にある「コピー」を押してから、下のボタンを押してください。読み込んでも、確認してOKを押すまで日程は変わりません。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details${manual?" open":""}><summary>うまく読み込めないときは、ここに貼る</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>AIをもう一度開く</summary><div class="ai-services">${order.map(([k,l])=>`<button class="btn" data-a="${act("Go")}" data-ai="${k}">${l}をもう一度開く</button>`).join("")}</div><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
+ let content=phase===1?`<h3>${cg?2:1} AIに聞く</h3><p>使いたいAIを選んでください。ChatGPT・Claudeは指示文入りで開きます。Geminiはコピーした指示文を貼って送信してください。</p><div class="ai-services">${order.map(([k,l])=>`<button class="btn ${k===ai?"fill":""} big" data-a="${act("Go")}" data-ai="${k}">${l}で聞く</button>`).join("")}</div><details><summary>AIの答えは、どこをコピーする？</summary><p>答えが出そろったら、日程と場所がまとまった枠の右上などにある「コピー」か、重なった四角のアイコンを押します。自分が送った指示文ではなく、AIが返した答えをコピーしてください。</p><p>コピーできたら旅のノートに戻り、「コピーした答えを読み込む」を押します。</p><p>枠のコピーが見つからなければ、AIの返事全体のコピーボタンでも読み込めます。</p></details>${fallback}<details><summary>指示文だけコピーする</summary><button class="btn" data-a="${act("Copy")}">指示文だけコピー</button></details><button class="btn" data-a="${act("Ready")}">もう答えをコピーしてある → 読み込む</button>`:
+ `<h3>${cg?3:2} AIの答えを読み込む</h3><ol class="ai-copy-steps"><li>AIの答えが出そろうまで待つ</li><li>答えの枠の右上などにある「コピー」か、重なった四角のアイコンを押す</li><li>旅のノートに戻り、下の「コピーした答えを読み込む」を押す</li></ol><p>自分が送った指示文ではなく、AIが返した答えをコピーします。枠のコピーが見つからなければ、返事全体のコピーボタンでもOKです。</p><p>読み込んだ内容を確認してから日程に入れられます。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details${manual?" open":""}><summary>うまく読み込めないときは、ここに貼る</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>AIをもう一度開く</summary><div class="ai-services">${order.map(([k,l])=>`<button class="btn" data-a="${act("Go")}" data-ai="${k}">${l}をもう一度開く</button>`).join("")}</div><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
  phase===2?`<h3>2 自分のAIを開いて貼る</h3><p>AIの入力欄に貼って送信し、返ってきた答えをコピーしてください。</p><div class="row">${AIS.map(([k,l])=>`<button class="btn ${k===ai?"fill":""}" data-a="${act("Go")}" data-ai="${k}">${l}を開く</button>`).join("")}</div><button class="btn fill big" data-a="${act("Ready")}">答えをコピーした → 読み込む</button>`:
  `<h3>3 AIの答えを読み込む</h3><p>読み込んだ内容を確認してから反映できます。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details${manual?" open":""}><summary>答えを自分で貼る</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>AIの答えを取り直す</summary><button class="btn" data-a="${act("Go")}" data-ai="${ai}">${AI_NAME[ai]}を開く</button><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
  return `<div class="flowcard" id="${cg?"cgFlow":"aiBox"}" aria-live="polite">${cg?`<p>依頼：${esc(A.req)}</p>`:""}${content}${cg?'<button class="btn" data-a="cgNo">やめて、入力に戻る</button>':'<button class="ib" data-a="aiEdit">← 条件を変える</button>'}</div>`}
@@ -1939,7 +1944,8 @@ function aiPrompt(t,o,kind){const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日
 - note は必ず60〜80字（短すぎないように）
 - 緯度・経度（lat, lon）は小数5桁。分からなければ null
 - 料金・営業時間は目安でよい。変わりやすいものは note に「要確認」と書く
-- 返事は下の形の JSON だけ。説明文は付けない。出典・リンク・参考にしたサイト名は入れない（長くなって途中で切れるのを防ぐため）`;
+- 返事のデータは下の形の JSON にする。出典・リンク・参考にしたサイト名は入れない（長くなって途中で切れるのを防ぐため）
+${aiCopyRules()}`;
   const shape=`## 返事の形（JSON）
 {
   "days": [ { "date": "YYYY-MM-DD", "area": "その日のエリア", "items": [
@@ -2211,6 +2217,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
 
    case"aiRead":aiReadForm();aiParse(S.ai.paste);break;
    case"aiCont":{const c=S.ai.c;const names=c.spots.map(x=>x.name).join("、");const pr=`さっきの答えは途中で切れてしまいました。まだ出していない「行きたい場所の候補」だけを、次の形の JSON で返してください。説明文・出典・リンクは付けないでください。
+${aiCopyRules()}
 すでに出した場所：${names}
 {"spots":[{"name":"場所の名前","area":"エリア","category":"see | food | shop | nature | activity | view | cafe","note":"おすすめの理由（60字くらい）","wiki":"日本語版ウィキペディアの記事名（なければ空文字）","name_en":"英語の名前","fee":"料金の目安","lat":0.0,"lon":0.0,"booking":false,"minutes":60,"rain_ok":false}]}`;
      try{await navigator.clipboard.writeText(pr);S.ai.contNext=true;toast("続きを頼む文をコピーしました。同じAIのチャットに貼って送ってください")}catch(e){S.ai.paste=pr;S.ai.manual=true;draw();toast("下の欄の文をコピーして、AIに送ってください")}break}
