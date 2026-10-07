@@ -1222,12 +1222,12 @@ const dayColor=i=>`var(--c${((i-1)%7)+1})`;
 function timeKey(t){const m=/^(\d{1,2}):(\d{2})/.exec(t||"");return m?+m[1]*60+ +m[2]:null}
 const KINDS={move:"移動",see:"観光",food:"ごはん",stay:"宿",other:"メモ"};
 /* 移動の目安（NAVITIME のような実際の経路検索ではなく、直線距離×1.3からの概算） */
-const MOVES={train:"電車・バス",car:"車（レンタカー）",walk:"歩き中心"};
+const MOVES={train:"電車・バス",car:"車（レンタカー）",owncar:"自家用車",walk:"歩き中心"};
 const SPEED={walk:[4.5,0],car:[35,5],train:[25,12]}; /* 時速km・乗り降りや待ちの分 */
 const FUEL={kmpl:13,yen:175}; /* 燃費13km/L・ガソリン175円/L で計算 */
 const DURS=[0,15,30,45,60,90,120,150,180,240,300];
 const legMin=(km,m)=>km/SPEED[m][0]*60+SPEED[m][1];
-function mainMove(t,km){const m=t.move||"train";if(km<1.2)return"walk";if(m==="walk")return km<3?"walk":"train";return m}
+function mainMove(t,km){const m=t.move==="owncar"?"car":t.move||"train";if(km<1.2)return"walk";if(m==="walk")return km<3?"walk":"train";return m}
 const addMin=(tm,n)=>{const k=timeKey(tm);if(k==null)return"";const x=Math.min(k+n,1439);return pad(Math.floor(x/60))+":"+pad(x%60)};
 const fuelYen=km=>Math.round(km/FUEL.kmpl*FUEL.yen/10)*10;
 
@@ -1331,6 +1331,7 @@ function tripForm(){const ed=S.tripForm==="edit";const t=ed?T():{title:"",start:
    <div class="field"><label for="tf_dest">行き先</label><input type="text" id="tf_dest" maxlength="40" value="${esc(t.dest||"")}" placeholder="例：沖縄本島、京都、北海道の道東">${ed?"":`<span class="sub">入れると、作ったあとにAIで日程と行きたい場所の候補をまとめて作れます</span>`}</div>
    <div class="two"><div class="field"><label for="tf_start">出発日</label><input type="date" id="tf_start" required value="${esc(t.start)}"></div><div class="field"><label for="tf_end">帰る日</label><input type="date" id="tf_end" required value="${esc(t.end)}"></div></div>
    <div class="two"><div class="field"><label for="tf_people">人数（任意）</label><input type="number" id="tf_people" min="1" max="50" value="${esc(t.people)}"></div><div class="field"><label for="tf_move">おもな移動</label><select id="tf_move">${Object.entries(MOVES).map(([k,l])=>`<option value="${k}" ${(t.move||"train")===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
+   <div class="field"><label for="tf_budget">旅行の予算（全員分・円／任意）</label><input type="number" id="tf_budget" min="0" max="1000000000" step="1" inputmode="numeric" value="${t.budget||""}" placeholder="金額を入力、または下から選ぶ"><div class="row" style="gap:8px;flex-wrap:wrap">${[30000,50000,100000].map(v=>`<button class="btn" type="button" data-a="tripBudget" data-value="${v}">${v/10000}万円</button>`).join("")}<button class="btn" type="button" data-a="tripBudget" data-value="">あとで決める</button></div><span class="sub">1人分ではなく、旅行全体の合計です。予算管理であとから変更できます。</span></div>
    <div class="two"><div class="field"><label for="tf_from">出発地（任意）</label><input type="text" id="tf_from" maxlength="30" value="${esc(t.from||"")}" placeholder="例：名古屋、東京"></div><div class="field"><label for="tf_title">旅行の名前（任意）</label><input type="text" id="tf_title" maxlength="40" value="${esc(t.title)}" placeholder="空なら「行き先＋泊数」"></div></div>
    <div class="row"><button class="btn fill" type="submit">${S.tripForm==="edit"?"保存":"作る"}</button><button class="btn" type="button" data-a="cancel">やめる</button></div>
    ${S.tripForm==="edit"?`<div class="inbox form" id="shareBox"><span class="lbl">友達に渡す・バックアップ</span><span class="sub">この旅行（予定・場所・割り勘・持ち物）をコードにして送れます。相手は「受け取った旅行を取り込む」に貼るだけ。同じ旅行を送り直すと、相手の手元のものを新しい内容に置き換えられます。</span><button class="btn" type="button" data-a="shareTrip" style="align-self:flex-start">LINEなどで送る（コードを作る）</button>${codeOutBox()}</div>`:""}
@@ -1466,6 +1467,7 @@ ${cands.length?cands.map(n=>"- "+n).join("\n"):"- なし"}
 ${req}
 ## 守ってほしいこと
 - 行きと帰りの移動（新幹線・飛行機など）の時刻は変えない
+${t.move==="owncar"?"- 自家用車で移動する。レンタカーの予約・受け取り・貸出手続き・返却は予定に入れない。":""}
 - 実在して、今も営業している場所だけ。ぎちぎちにしない。昼ごはんと夜ごはんの時間を入れる
 - 変えない日も含めて、全部の日の予定を返す
 - 出典・リンクは入れない。返事のデータは下の形の JSON にする
@@ -1565,11 +1567,11 @@ function gapRow(t,a,b){const sa=a.spot&&t.spots?.[a.spot],sb=b.spot&&t.spots?.[b
 function dayStat(t,date){const its=items(t,date);const pts=its.filter(x=>x.kind!=="move"&&x.spot&&t.spots?.[x.spot]?.lat!=null).map(x=>t.spots[x.spot]);
   let km=0;for(let i=1;i<pts.length;i++)km+=distKm(pts[i-1],pts[i])*1.3;
   const done=its.filter(x=>x.done).length,today=ymd(new Date());const out=[];
-  if(km>=0.5)out.push(`移動 約${km.toFixed(km<10?1:0)}km${(t.move||"train")==="car"?`（ガソリン代 約${fuelYen(km)}円）`:""}`);
+  if(km>=0.5)out.push(`移動 約${km.toFixed(km<10?1:0)}km${["car","owncar"].includes(t.move||"train")?`（ガソリン代 約${fuelYen(km)}円）`:""}`);
   if(today>=t.start&&today<=t.end&&date<=today&&its.length)out.push(`行った ${done}/${its.length}`);
   if(pts.length>=2)out.push(`<a href="${esc(routeUrl(t,pts))}" target="_blank" rel="noopener">${li("route")}ルートを開く</a>`);
   return out.length?`<span class="stat">${out.join("<span>・</span>")}</span>`:""}
-function routeUrl(t,pts){const ll=p=>`${p.lat},${p.lon}`;const p=pts.slice(0,10);const mode={car:"driving",walk:"walking"}[t.move||"train"];
+function routeUrl(t,pts){const ll=p=>`${p.lat},${p.lon}`;const p=pts.slice(0,10);const mode={car:"driving",owncar:"driving",walk:"walking"}[t.move||"train"];
   return `https://www.google.com/maps/dir/?api=1&origin=${ll(p[0])}&destination=${ll(p[p.length-1])}${p.length>2?`&waypoints=${p.slice(1,-1).map(ll).join("%7C")}`:""}${mode?`&travelmode=${mode}`:""}`}
 /* 旅行中：いまの予定と次の予定 */
 function nowCard(t){const now=new Date(),today=ymd(now);if(!dates(t).includes(today))return"";const nm=now.getHours()*60+now.getMinutes();
@@ -1945,7 +1947,7 @@ function notifView(t){const n=nset(t),list=notifList(t),now=new Date();const fut
 let SAMPLE=null;(async()=>{try{SAMPLE=await window.claude?.use?.("sample")}catch(e){}if(SAMPLE&&S.ai)draw()})();
 const CATS={see:"観光",food:"ごはん",shop:"買い物",nature:"自然",activity:"体験",view:"景色",cafe:"カフェ"};
 const PREFS=["定番の名所","ごはん・グルメ","映える景色","自然","歴史・文化","カフェ","買い物","体験・アクティビティ","温泉","のんびり"];
-function aiDefaults(t){return {dest:t.dest||t.title.replace(/\s*\d+泊\d+日.*$/,""),from:t.from||DB.home||"",people:t.people||"",prefs:["定番の名所","ごはん・グルメ"],pace:"ふつう",move:t.move==="car"?"レンタカー":t.move==="walk"?"徒歩と電車":"電車・バス",budget:"",src:"",extra:"",count:12,theme:"",mode:"replace"}}
+function aiDefaults(t){return {dest:t.dest||t.title.replace(/\s*\d+泊\d+日.*$/,""),from:t.from||DB.home||"",people:t.people||"",prefs:["定番の名所","ごはん・グルメ"],pace:"ふつう",move:t.move==="owncar"?"自家用車":t.move==="car"?"レンタカー":t.move==="walk"?"徒歩と電車":"電車・バス",budget:t.budget?`${t.budget}円（全員分）`:"",src:"",extra:"",count:12,theme:"",mode:"replace"}}
 function aiPrompt(t,o,kind){const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）`).join("、");
   const have=spots(t).map(s=>s.name);
   const rules=`## 守ってほしいこと
@@ -2007,6 +2009,7 @@ ${ds.map(d=>d+"\n"+(items(t,d).map(x=>`- ${x.time||"時刻未定"}${x.arrive?"�
 - 昼ごはん（11:30〜13:30）と夜ごはん（18:00〜20:00）を入れる。宿のチェックインも入れる${o.mode==="add"?"（既存の日程にあるものは追加しない）":""}
 - 初日は到着してから、最終日は帰りの出発の1時間以上前までに予定を終える
 - 移動（新幹線・飛行機など）は kind を "move" にして、出発 time と到着 arrive を入れる
+${o.move==="自家用車"?"- 自家用車で移動する。レンタカーの予約・受け取り・貸出手続き・返却は予定に入れない。出発地が分かる場合はそこからの車移動を考え、分からなければ出発地を勝手に決めない。":""}
 - 行きたい場所の候補は ${o.count}か所。日程に入れた場所に加えて、入れ替え用の候補も入れる。雨の日でも楽しめる場所を2か所以上
 ${rules}
 
@@ -2095,7 +2098,7 @@ function aiView(t){const A=S.ai,o=A.o;const more=A.kind==="more",txt=A.kind==="t
    ${more?"":`<p class="cond"><b>${esc(o.dest||"行き先未定")}</b>${o.from?` ・ ${esc(o.from)}から`:""}${o.people?` ・ ${esc(o.people)}人`:""} ・ ${esc(o.move)} ・ ${esc(o.pace)} ・ ${esc(o.prefs.join("、")||"好みはおまかせ")}</p>`}
    ${more?"":`<details class="condd"><summary>条件や好みを変える（任意）</summary><div class="form" style="margin-top:10px">`}
    <div class="two"><div class="field"><label for="ai_dest">行き先</label><input type="text" id="ai_dest" maxlength="40" value="${esc(o.dest)}" placeholder="例：沖縄本島"></div>${more?`<div class="field"><label for="ai_theme">テーマ（任意）</label><input type="text" id="ai_theme" maxlength="40" value="${esc(o.theme)}" placeholder="例：雨の日、夜ごはん、映え"></div>`:`<div class="field"><label for="ai_from">出発地</label><input type="text" id="ai_from" maxlength="30" value="${esc(o.from)}"></div>`}</div>
-   <div class="two"><div class="field"><label for="ai_move">移動手段</label><select id="ai_move">${["電車・バス","レンタカー","徒歩と電車","おまかせ"].map(v=>`<option ${o.move===v?"selected":""}>${v}</option>`).join("")}</select></div>
+   <div class="two"><div class="field"><label for="ai_move">移動手段</label><select id="ai_move">${["電車・バス","レンタカー","自家用車","徒歩と電車","おまかせ"].map(v=>`<option ${o.move===v?"selected":""}>${v}</option>`).join("")}</select></div>
     ${more?`<div class="field"><label for="ai_count">何か所</label><select id="ai_count">${[10,12,15,20].map(v=>`<option value="${v}" ${+o.count===v?"selected":""}>${v}か所</option>`).join("")}</select></div>`:`<div class="field"><label for="ai_pace">ペース</label><select id="ai_pace">${["ゆったり","ふつう","たくさん"].map(v=>`<option ${o.pace===v?"selected":""}>${v}</option>`).join("")}</select></div>`}</div>
    <div class="field"><span class="lbl">好み（いくつでも）</span><div class="row" style="gap:6px">${chips}</div></div>
    ${more?"":`<div class="two"><div class="field"><label for="ai_people">人数</label><input type="number" id="ai_people" min="1" max="50" value="${esc(o.people)}"></div><div class="field"><label for="ai_budget">予算（任意）</label><input type="text" id="ai_budget" maxlength="30" value="${esc(o.budget)}" placeholder="1人3万円くらい"></div></div>`}
@@ -2241,6 +2244,7 @@ ${aiCopyRules()}
      try{const r=await SAMPLE(aiPrompt(t,A.o,A.kind),{modelTier:"complex",onText:({text})=>{A.live=`${text.length}文字…`;const el=$("ai_live");if(el)el.textContent=A.live}});A.busy=false;if(S.ai!==A)break;aiParse(r.text)}
      catch(e){A.busy=false;draw();toast(e&&e.code==="not_granted"?"Claudeを使う許可がありません。ほかのAIで作る方法を使ってください":e&&e.code==="rate_limited"?"混み合っています。少し待ってからもう一度":"Claudeで作れませんでした。ほかのAIで作る方法も使えます")}break}
 
+   case"tripBudget":if($("tf_budget")){$("tf_budget").value=b.dataset.value||"";$("tf_budget").focus()}break;
    case"newTrip":S.tripForm="new";draw();$("tf_dest")?.focus();break;
    case"sample":openSample();break;
    case"open":S.tid=id;S.tab="plan";S.vb=null;S.sel=null;S.mapDay=0;draw();window.scrollTo(0,0);break;
@@ -2402,13 +2406,13 @@ document.addEventListener("change",async e=>{if(e.target.id==="f_bimg"){const f=
       if(on&&Native.isApp&&S.perm!=="granted")Native.perm(true).then(p=>{S.perm=p;if(p==="granted")schedNotif();draw()})}}
 });
 document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const t=T();
-  if(f.id==="tripForm"){let title=$("tf_title").value.trim();const start=$("tf_start").value,end=$("tf_end").value,people=$("tf_people").value,move=$("tf_move").value,dest=$("tf_dest").value.trim(),from=$("tf_from").value.trim();
+  if(f.id==="tripForm"){let title=$("tf_title").value.trim();const start=$("tf_start").value,end=$("tf_end").value,people=$("tf_people").value,move=$("tf_move").value,dest=$("tf_dest").value.trim(),from=$("tf_from").value.trim(),budget=Math.round(+$("tf_budget").value)||0;
     if(!start||!end){toast("日にちを入れてください");return}if(!title&&!dest){toast("行き先か旅行の名前を入れてください");return}
     if(!title){const n=Math.round((toD(end)-toD(start))/864e5);title=`${dest} ${n>0?`${n}泊${n+1}日`:"日帰り"}`}if(from)DB.home=from;if(end<start){toast("帰る日は出発日より後にしてください");return}
     if((toD(end)-toD(start))/864e5>30){toast("31日以内の旅行にしてください");return}
     if(S.tripForm==="edit"){const ds=dates({start,end});const out=Object.values(t.items||{}).filter(x=>!ds.includes(x.date)).length;
-      if(change("旅行の設定を保存しました",t=>{Object.assign(t,{title,start,end,people,move,dest,from})})){S.tripForm=null;if(out)toast(`日付の外になった予定が${out}件あります（消してはいません）`);draw()}}
-    else{const id=uid();DB.trips[id]={title,start,end,people,move,dest,from,created:Date.now(),sid:uid(),items:{},spots:{},members:{},expenses:{},notif:{...NDEF}};
+      if(change("旅行の設定を保存しました",t=>{Object.assign(t,{title,start,end,people,move,dest,from,budget})})){S.tripForm=null;if(out)toast(`日付の外になった予定が${out}件あります（消してはいません）`);draw()}}
+    else{const id=uid();DB.trips[id]={title,start,end,people,move,dest,from,budget,created:Date.now(),sid:uid(),items:{},spots:{},members:{},expenses:{},notif:{...NDEF}};
       if(!save()){delete DB.trips[id];toast("この端末に保存できませんでした");return}S.tripForm=null;S.tid=id;S.tab="plan";UNDO=null;toast("旅行を作りました");
       if(dest){S.tab="plan";S.ai={kind:"plan",first:true,step:"form",o:{...aiDefaults(DB.trips[id]),count:12}}}draw();window.scrollTo(0,0)}
     return}
