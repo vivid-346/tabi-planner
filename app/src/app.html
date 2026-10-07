@@ -1325,6 +1325,7 @@ function tripForm(){const ed=S.tripForm==="edit";const t=ed?T():{title:"",start:
    <div class="field"><label for="tf_dest">行き先</label><input type="text" id="tf_dest" maxlength="40" value="${esc(t.dest||"")}" placeholder="例：沖縄本島、京都、北海道の道東">${ed?"":`<span class="sub">入れると、作ったあとにAIで日程と行きたい場所の候補をまとめて作れます</span>`}</div>
    <div class="two"><div class="field"><label for="tf_start">出発日</label><input type="date" id="tf_start" required value="${esc(t.start)}"></div><div class="field"><label for="tf_end">帰る日</label><input type="date" id="tf_end" required value="${esc(t.end)}"></div></div>
    <div class="two"><div class="field"><label for="tf_people">人数（任意）</label><input type="number" id="tf_people" min="1" max="50" value="${esc(t.people)}"></div><div class="field"><label for="tf_move">おもな移動</label><select id="tf_move">${Object.entries(MOVES).map(([k,l])=>`<option value="${k}" ${(t.move||"train")===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
+   <div class="field"><label for="tf_budget">旅行の予算（全員分・円／任意）</label><input type="number" id="tf_budget" min="0" max="1000000000" step="1" inputmode="numeric" value="${t.budget||""}" placeholder="金額を入力、または下から選ぶ"><div class="row" style="gap:8px;flex-wrap:wrap">${[30000,50000,100000].map(v=>`<button class="btn" type="button" data-a="tripBudget" data-value="${v}">${v/10000}万円</button>`).join("")}<button class="btn" type="button" data-a="tripBudget" data-value="">あとで決める</button></div><span class="sub">1人分ではなく、旅行全体の合計です。予算管理であとから変更できます。</span></div>
    <div class="two"><div class="field"><label for="tf_from">出発地（任意）</label><input type="text" id="tf_from" maxlength="30" value="${esc(t.from||"")}" placeholder="例：名古屋、東京"></div><div class="field"><label for="tf_title">旅行の名前（任意）</label><input type="text" id="tf_title" maxlength="40" value="${esc(t.title)}" placeholder="空なら「行き先＋泊数」"></div></div>
    <div class="row"><button class="btn fill" type="submit">${S.tripForm==="edit"?"保存":"作る"}</button><button class="btn" type="button" data-a="cancel">やめる</button></div>
    ${S.tripForm==="edit"?`<div class="inbox form" id="shareBox"><span class="lbl">友達に渡す・バックアップ</span><span class="sub">この旅行（予定・場所・割り勘・持ち物）をコードにして送れます。相手は「受け取った旅行を取り込む」に貼るだけ。同じ旅行を送り直すと、相手の手元のものを新しい内容に置き換えられます。</span><button class="btn" type="button" data-a="shareTrip" style="align-self:flex-start">LINEなどで送る（コードを作る）</button>${codeOutBox()}</div>`:""}
@@ -1939,7 +1940,7 @@ function notifView(t){const n=nset(t),list=notifList(t),now=new Date();const fut
 let SAMPLE=null;(async()=>{try{SAMPLE=await window.claude?.use?.("sample")}catch(e){}if(SAMPLE&&S.ai)draw()})();
 const CATS={see:"観光",food:"ごはん",shop:"買い物",nature:"自然",activity:"体験",view:"景色",cafe:"カフェ"};
 const PREFS=["定番の名所","ごはん・グルメ","映える景色","自然","歴史・文化","カフェ","買い物","体験・アクティビティ","温泉","のんびり"];
-function aiDefaults(t){return {dest:t.dest||t.title.replace(/\s*\d+泊\d+日.*$/,""),from:t.from||DB.home||"",people:t.people||"",prefs:["定番の名所","ごはん・グルメ"],pace:"ふつう",move:t.move==="car"?"レンタカー":t.move==="walk"?"徒歩と電車":"電車・バス",budget:"",src:"",extra:"",count:12,theme:"",mode:"replace"}}
+function aiDefaults(t){return {dest:t.dest||t.title.replace(/\s*\d+泊\d+日.*$/,""),from:t.from||DB.home||"",people:t.people||"",prefs:["定番の名所","ごはん・グルメ"],pace:"ふつう",move:t.move==="car"?"レンタカー":t.move==="walk"?"徒歩と電車":"電車・バス",budget:t.budget?`${t.budget}円（全員分）`:"",src:"",extra:"",count:12,theme:"",mode:"replace"}}
 function aiPrompt(t,o,kind){const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）`).join("、");
   const have=spots(t).map(s=>s.name);
   const rules=`## 守ってほしいこと
@@ -2235,6 +2236,7 @@ ${aiCopyRules()}
      try{const r=await SAMPLE(aiPrompt(t,A.o,A.kind),{modelTier:"complex",onText:({text})=>{A.live=`${text.length}文字…`;const el=$("ai_live");if(el)el.textContent=A.live}});A.busy=false;if(S.ai!==A)break;aiParse(r.text)}
      catch(e){A.busy=false;draw();toast(e&&e.code==="not_granted"?"Claudeを使う許可がありません。ほかのAIで作る方法を使ってください":e&&e.code==="rate_limited"?"混み合っています。少し待ってからもう一度":"Claudeで作れませんでした。ほかのAIで作る方法も使えます")}break}
 
+   case"tripBudget":if($("tf_budget")){$("tf_budget").value=b.dataset.value||"";$("tf_budget").focus()}break;
    case"newTrip":S.tripForm="new";draw();$("tf_dest")?.focus();break;
    case"sample":openSample();break;
    case"open":S.tid=id;S.tab="plan";S.vb=null;S.sel=null;S.mapDay=0;draw();window.scrollTo(0,0);break;
@@ -2396,13 +2398,13 @@ document.addEventListener("change",async e=>{if(e.target.id==="f_bimg"){const f=
       if(on&&Native.isApp&&S.perm!=="granted")Native.perm(true).then(p=>{S.perm=p;if(p==="granted")schedNotif();draw()})}}
 });
 document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const t=T();
-  if(f.id==="tripForm"){let title=$("tf_title").value.trim();const start=$("tf_start").value,end=$("tf_end").value,people=$("tf_people").value,move=$("tf_move").value,dest=$("tf_dest").value.trim(),from=$("tf_from").value.trim();
+  if(f.id==="tripForm"){let title=$("tf_title").value.trim();const start=$("tf_start").value,end=$("tf_end").value,people=$("tf_people").value,move=$("tf_move").value,dest=$("tf_dest").value.trim(),from=$("tf_from").value.trim(),budget=Math.round(+$("tf_budget").value)||0;
     if(!start||!end){toast("日にちを入れてください");return}if(!title&&!dest){toast("行き先か旅行の名前を入れてください");return}
     if(!title){const n=Math.round((toD(end)-toD(start))/864e5);title=`${dest} ${n>0?`${n}泊${n+1}日`:"日帰り"}`}if(from)DB.home=from;if(end<start){toast("帰る日は出発日より後にしてください");return}
     if((toD(end)-toD(start))/864e5>30){toast("31日以内の旅行にしてください");return}
     if(S.tripForm==="edit"){const ds=dates({start,end});const out=Object.values(t.items||{}).filter(x=>!ds.includes(x.date)).length;
-      if(change("旅行の設定を保存しました",t=>{Object.assign(t,{title,start,end,people,move,dest,from})})){S.tripForm=null;if(out)toast(`日付の外になった予定が${out}件あります（消してはいません）`);draw()}}
-    else{const id=uid();DB.trips[id]={title,start,end,people,move,dest,from,created:Date.now(),sid:uid(),items:{},spots:{},members:{},expenses:{},notif:{...NDEF}};
+      if(change("旅行の設定を保存しました",t=>{Object.assign(t,{title,start,end,people,move,dest,from,budget})})){S.tripForm=null;if(out)toast(`日付の外になった予定が${out}件あります（消してはいません）`);draw()}}
+    else{const id=uid();DB.trips[id]={title,start,end,people,move,dest,from,budget,created:Date.now(),sid:uid(),items:{},spots:{},members:{},expenses:{},notif:{...NDEF}};
       if(!save()){delete DB.trips[id];toast("この端末に保存できませんでした");return}S.tripForm=null;S.tid=id;S.tab="plan";UNDO=null;toast("旅行を作りました");
       if(dest){S.tab="plan";S.ai={kind:"plan",first:true,step:"form",o:{...aiDefaults(DB.trips[id]),count:12}}}draw();window.scrollTo(0,0)}
     return}
