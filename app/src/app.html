@@ -1368,6 +1368,7 @@ function cgParse(text){const t=T();try{const raw=pickJSON(text);const c=aiCheck(
   S.cg={...S.cg,step:"preview",c,msg};draw();cgScroll()}catch(e){S.cg.manual=true;draw();toast(e.message==="noplan"?"答えに日程が見つかりませんでした。AIの答えをまるごとコピーしてください":"読み取れませんでした。AIの答えを { から } までまるごとコピーしてください")}}
 function planView(t){const ds=dates(t);setTimeout(()=>wxFetch(S.tid),0);
   return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${dates(t).includes(ymd(new Date()))&&nextStop(t)?"":nowCard(t)}
+  ${S.codeOut&&!S.tripForm?`<div id="codeOutWrap">${codeOutBox()}</div>`:""}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
   ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><div class="dh1"><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span>${wxChip(t.wx?.[date])}</div><div class="dh2"><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${its.length>1&&!(S.ro&&S.ro.date===date)?`<button class="roopen" data-a="roOpen" data-date="${date}" aria-label="並べ替え" title="並べ替え">${li("sort")}<span class="rotx">並べ替え</span></button>`:""}</div>${dayStat(t,date)}</header>
    ${!S.ro&&k===0&&its.filter(x=>!(x.kind==="move"&&x.arrive)).length>1&&!roHintSeen()?`<p class="rohint">${li("sort")}予定を<b>長押し</b>すると、指で順番を入れ替えられます</p>`:""}${rainPlan(t,date)}${S.ro&&S.ro.date===date?roView(t,date):`<ul class="tl">${(()=>{let lastTod="";return its.map((x,j)=>{const g=j?gapRow(t,its[j-1],x):"";const tod=x.kind==="move"?"":todOf(x.time);const show=tod&&tod!==lastTod;if(tod)lastTod=tod;
@@ -1996,9 +1997,9 @@ function cleanTrip(o){if(!o||typeof o!=="object")return null;const start=cd_(o.s
   if(dates(t).length>31)return null;return t}
 async function shareTrip(t){if(!t.sid){change("",x=>{x.sid=uid()},true)}const code=await packCode("",{...T(),v:1});
   const msg=`旅のノートの旅行「${t.title}」です。\nアプリの「受け取った旅行を取り込む」に、このメッセージをまるごと貼ってください。\n\n${code}`;
-  const r=await Native.share(t.title,msg);if(r==="copied")toast("コードをコピーしました。LINEなどに貼って送れます");else if(!r){S.codeOut=msg;draw()}}
+  const r=await Native.share(t.title,msg);if(r==="copied")toast("コードをコピーしました。LINEなどに貼って送れます");else if(!r){S.codeOut=msg;draw();setTimeout(()=>$("codeOutWrap")?.scrollIntoView({block:"center"}),50)}}
 async function backupAll(){const code=await packCode("ALL",{v:1,trips:DB.trips});const msg=`旅のノートのバックアップ（旅行${Object.keys(DB.trips).length}件・${new Date().toLocaleDateString("ja-JP")}）\n「受け取った旅行を取り込む」に貼ると戻せます。\n\n${code}`;
-  const r=await Native.share("旅のノートのバックアップ",msg);if(r==="copied")toast("バックアップをコピーしました。メモアプリなどに貼って保存してください");else if(!r){S.codeOut=msg;draw()}}
+  const r=await Native.share("旅のノートのバックアップ",msg);if(r==="copied")toast("バックアップをコピーしました。メモアプリなどに貼って保存してください");else if(!r){S.codeOut=msg;draw();setTimeout(()=>$("codeOutWrap")?.scrollIntoView({block:"center"}),50)}}
 function importView(){const I=S.imp;
   if(I.list)return `<section class="card form"><h2 style="font-size:20px">取り込む旅行の確認</h2>
     ${I.list.map((x,i)=>{const same=Object.entries(DB.trips).find(([k,v])=>v.sid&&v.sid===x.sid);return `<div class="inbox form"><b>${esc(x.title)}</b><span class="sub">${x.start.replace(/-/g,".")}〜${md(x.end)} ・ 予定${Object.keys(x.items).length}件 ・ 場所${Object.keys(x.spots).length}か所 ・ 割り勘${Object.keys(x.expenses).length}件</span>
@@ -2049,7 +2050,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
