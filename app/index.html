@@ -20,14 +20,8 @@
   --num:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;
   --tabh:62px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
-  --ground:#0B1817;--paper:#132322;--ink:#E2EEEC;--muted:#93ABA8;--line:#253E3B;--accent:#5FC3C9;--accent-soft:#163939;
-  --sea:#0E282C;--land:#1E2C28;--land-line:#3A4F47;--c1:#F07587;--c2:#74A9EC;--c3:#E7B44A;--c4:#7CC77A;--c5:#B996E0;--c6:#F2955F;--c7:#7FA3E0;
-  --warn:#F08A7F;--warn-soft:#3A1F1C;--ok:#7CCB98;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35)}}
-:root[data-theme="dark"]{color-scheme:dark;
-  --ground:#0B1817;--paper:#132322;--ink:#E2EEEC;--muted:#93ABA8;--line:#253E3B;--accent:#5FC3C9;--accent-soft:#163939;
-  --sea:#0E282C;--land:#1E2C28;--land-line:#3A4F47;--c1:#F07587;--c2:#74A9EC;--c3:#E7B44A;--c4:#7CC77A;--c5:#B996E0;--c6:#F2955F;--c7:#7FA3E0;
-  --warn:#F08A7F;--warn-soft:#3A1F1C;--ok:#7CCB98;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35)}
+
+
 *{box-sizing:border-box}
 body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -256,10 +250,8 @@ span.thumb .mm{width:60px;height:60px}
  --shadow:0 4px 12px rgba(20,20,30,.05);--r:20px;
  --sans:"Hiragino Sans","Hiragino Kaku Gothic ProN","Zen Kaku Gothic New","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif;
  --display:var(--sans);--num:"Figtree","Hiragino Sans",system-ui,sans-serif}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#15161A;--paper:#1F2126;--ink:#F2F1EE;--ink2:#D3D2CE;--muted:#A3A7AE;--line:#30333A;--soft:#2A2D33;
- --accent:#FF8A73;--accent-ink:#FF9C88;--accent-soft:#3A2622;--on-accent:#1A1B1F;--c1:#FF8A73;--c2:#7FB2EE;--c3:#E8B64C;--c4:#6FD3AE;--c5:#C3A2EC;--c6:#F59E62;--c7:#5CC8DD;
- --warn:#FF8F84;--warn-soft:#3B2220;--ok:#6FD3AE;--sea:#16232B;--land:#22252B;--land-line:#3A3F47;--shadow:0 4px 12px rgba(0,0,0,.3)}}
-:root[data-theme="dark"]{--ground:#15161A;--paper:#1F2126;--ink:#F2F1EE;--ink2:#D3D2CE;--muted:#A3A7AE;--line:#30333A;--soft:#2A2D33;--accent:#FF8A73;--accent-ink:#FF9C88;--accent-soft:#3A2622;--on-accent:#1A1B1F;--warn:#FF8F84;--warn-soft:#3B2220;--sea:#16232B;--land:#22252B;--land-line:#3A3F47}
+
+
 body{font-size:16px;line-height:1.7;letter-spacing:.01em;font-feature-settings:"palt" 1}
 h1,h2,h3{font-weight:800;letter-spacing:.01em}
 .num{font-family:var(--num);font-weight:700}
@@ -346,7 +338,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);background:va
 .day .t small{font-family:var(--num);font-weight:500;font-size:12px;color:var(--muted)}
 .day .kind{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--soft);color:var(--ink2);margin:0 0 4px}
 .day .k-see .kind{background:#E8F0FA;color:#2563A8}.day .k-food .kind{background:var(--accent-soft);color:var(--accent-ink)}.day .k-stay .kind{background:#EEE8F7;color:#6B45A0}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .day .k-see .kind{background:#1E2B3B;color:#7FB2EE}:root:not([data-theme="light"]) .day .k-stay .kind{background:#2B2438;color:#C3A2EC}}
+
 .day .ti{display:block;font-size:17px;font-weight:700;line-height:1.45}
 .day .no{font-size:13px;margin-top:2px}
 .day .acts{flex-direction:column;align-items:flex-end;gap:2px}
@@ -382,22 +374,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);background:va
  --accent:#5A3FD0;--accent-ink:#5A3FD0;--accent-soft:#ECE8FF;--on-accent:#FFFFFF;
  --c1:#5A3FD0;--c2:#2563A8;--c3:#B0457A;--c4:#1F7A5A;--c5:#B07A0A;--c6:#C2410C;--c7:#0E7490;
  --sea:#E3ECFA;--land:#FBFAFE;--land-line:#CFC8E8;--shadow:0 4px 12px rgba(17,17,26,.06)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#14131C;--paper:rgba(38,35,54,.72);--solid:#211F2E;--ink:#F1EFFA;--ink2:#D4D0E6;--muted:#A7A3BC;--line:rgba(169,150,255,.16);--soft:rgba(169,150,255,.10);
- --accent:#A996FF;--accent-ink:#B9AAFF;--accent-soft:#2C2645;--on-accent:#16141F;--c1:#A996FF;--c2:#7FB2EE;--c3:#F29AC4;--c4:#6FD3AE;--c5:#E8B64C;--c6:#F59E62;--c7:#5CC8DD;
- --sea:#1A2233;--land:#262338;--land-line:#3D3858;--shadow:0 4px 12px rgba(0,0,0,.3)}}
+
 body{background:linear-gradient(170deg,#FCEFF6 0%,#EFEBFF 38%,#E6F1FC 70%,#E7F7F2 100%) fixed var(--ground)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body{background:linear-gradient(170deg,#1D1626 0%,#16152A 45%,#121B26 100%) fixed var(--ground)}}
+
 .card,.empty,.spot,.trip,.nowcard,.day li:not(.mv):not(.full),.day li.full:has(form),.dayjump button:first-child,.chip,.day .foot .btn,.seg .on{background:var(--paper);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:var(--shadow),inset 0 0 0 1px rgba(255,255,255,.6)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .spot,:root:not([data-theme="light"]) .trip,:root:not([data-theme="light"]) .day li:not(.mv):not(.full){box-shadow:var(--shadow),inset 0 0 0 1px rgba(255,255,255,.06)}}
+
 .tabbar{background:rgba(255,255,255,.62)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabbar{background:rgba(38,35,54,.66)}}
+
 .bar{background:transparent}
 .btn.fill,.btn.big.fill{background:linear-gradient(135deg,#6B4FE0,#4C68E0)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.fill{background:linear-gradient(135deg,#B3A2FF,#93A8FF)}}
+
 .hero{background-color:#8E7BE8}
 .day .k-food .kind{background:#FDE7F0;color:#9B2453}.day .k-see .kind{background:#E5EEFC;color:#2563A8}
 input[type=text],input[type=date],input[type=number],select,textarea{background:rgba(255,255,255,.6)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input[type=text],:root:not([data-theme="light"]) input[type=date],:root:not([data-theme="light"]) input[type=number],:root:not([data-theme="light"]) select,:root:not([data-theme="light"]) textarea{background:rgba(255,255,255,.06)}}
+
 .nph{background:var(--sea)}
 .toast{background:#2B2640}
 /* 日程を見ながら候補を入れるパネル */
@@ -428,7 +418,7 @@ input[type=text],input[type=date],input[type=number],select,textarea{background:
 .samplebar{padding:10px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ink2);font-size:13.5px;line-height:1.5}
 @keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--accent),var(--shadow)}100%{box-shadow:var(--shadow)}}
 .day li.flash{animation:flash 2.4s ease-out}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cpanel{background:rgba(33,31,46,.93);box-shadow:0 12px 40px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.08)}:root:not([data-theme="light"]) .cc{background:rgba(255,255,255,.05)}}
+
 @media (min-width:900px){
  .pw{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
  .cpanel{position:sticky;top:76px;left:auto;right:auto;bottom:auto;max-width:none;margin:0;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
@@ -446,10 +436,10 @@ body{background:#F6F6F9}
 body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%;width:80vw;height:80vw;max-width:640px;max-height:640px}
 body::before{top:-22vw;right:-28vw;background:radial-gradient(circle,rgba(160,132,255,.22),transparent 66%)}
 body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,200,240,.18),transparent 66%)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body::before{background:radial-gradient(circle,rgba(140,110,255,.16),transparent 66%)}:root:not([data-theme="light"]) body::after{background:radial-gradient(circle,rgba(80,160,220,.10),transparent 66%)}}
+
 .card,.empty,.spot,.trip,.nowcard,.day li:not(.mv):not(.full),.day li.full:has(form),.dayjump button:first-child,.chip,.day .foot .btn,.seg .on{box-shadow:var(--shadow),0 0 0 1px rgba(17,17,26,.05),inset 0 0 0 1px rgba(255,255,255,.75)}
 .bar{background:rgba(246,246,249,.94);-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 1px 0 rgba(60,60,67,.08)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bar{background:rgba(20,19,28,.94);box-shadow:0 1px 0 rgba(255,255,255,.06)}}
+
 .bar .ttl b{font-size:17px;font-weight:800;letter-spacing:-.01em}
 .page{padding-left:20px;padding-right:20px}
 .card{padding:20px}.spot{padding:16px 18px;gap:8px}
@@ -467,7 +457,7 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 .menu button{border:0;background:none;text-align:left;padding:11px 12px;border-radius:10px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer;min-height:44px}
 .menu button:hover,.menu button:focus-visible{background:var(--soft)}
 .menu .danger{color:var(--warn)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .menu{background:rgba(40,37,56,.97);box-shadow:0 14px 36px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08)}}
+
 @keyframes menuin{from{opacity:0;transform:translateY(-4px) scale(.98)}}
 .day li[data-a]{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}
 .day li[data-a]:active{transform:scale(.985)}
@@ -480,7 +470,7 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 .thumb.ticon svg,.ccn.ticon svg{width:22px;height:22px;fill:none;stroke:var(--accent-ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tabbar button{color:#6E6E73}.tabbar button[aria-current="page"]{color:var(--accent-ink)}
 .tabbar svg{stroke-width:2}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabbar button{color:#A7A3BC}:root:not([data-theme="light"]) .tabbar button[aria-current="page"]{color:var(--accent-ink)}}
+
 #aiForm .note{background:none;padding:0;font-size:12px;color:var(--muted);border-radius:0}
 .cond{background:var(--soft)}
 #app.enter{animation:enter .22s cubic-bezier(.2,.8,.2,1)}
@@ -523,7 +513,7 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 .daypills button{flex:1 0 auto;min-width:120px;border:1.5px solid rgba(17,17,26,.25);background:rgba(255,255,255,.8);border-radius:999px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;line-height:1.25;color:#4B3BC8;cursor:pointer;font:inherit}
 .daypills button b{font-size:15px;font-weight:800}.daypills button small{font-size:11.5px;font-weight:600;opacity:.85}
 .daypills button[aria-current="true"]{background:linear-gradient(135deg,#6A55E3,#5868E3);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(17,17,26,.28)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .daypills button{background:rgba(255,255,255,.06);color:#C9BEFF}}
+
 .dayjump{display:none}
 .dprow{display:flex;align-items:center;gap:6px}.dprow .daypills{flex:1;min-width:0}
 /* タイムライン */
@@ -671,7 +661,7 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 .rainalts{display:flex;flex-wrap:wrap;gap:6px}
 .rainalts button{display:inline-flex;align-items:center;gap:6px;border:0;font:inherit;min-height:38px;padding:0 6px 0 12px;border-radius:999px;background:#fff;color:#1D3E66;font-weight:700;font-size:13.5px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .rainalts i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#2F6FC0;color:#fff}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rainplan{background:#16263A;color:#CFE2FA}:root:not([data-theme="light"]) .rainplan .sub{color:#9DB8D8}:root:not([data-theme="light"]) .rainalts button{background:#22364F;color:#CFE2FA}:root:not([data-theme="light"]) .dwx.rain{background:#1C3049;color:#A9CBF3}}
+
 
 /* 予約 */
 .bkb{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;border:0;font:inherit;margin-top:4px;padding:3px 10px;border-radius:999px;background:#FFF3D6;color:#7A5200;font-size:12.5px;font-weight:800;cursor:pointer}
@@ -681,7 +671,7 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 .bkc img{width:100%;border-radius:12px}
 .bkno{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:var(--soft)}.bkno small{color:var(--muted)}.bkno b{flex:1;font-family:var(--num);font-size:22px;letter-spacing:.04em}
 .h2bk{align-self:flex-start;margin-top:6px;border:0;font:inherit;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.9);color:#5A3B00;font-weight:800;font-size:13px;cursor:pointer}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bkb{background:#3A2E12;color:#F2CC7A}:root:not([data-theme="light"]) .bkc{background:#211F2E}}
+
 
 /* はじめての案内 */
 .obov{position:fixed;inset:0;z-index:70;background:var(--ground);display:grid;place-items:center;padding:24px;animation:enter .25s ease-out}
@@ -712,9 +702,9 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 .rpb{display:flex;flex-direction:column;gap:6px;min-width:0}
 .rainalts button{background:var(--soft);color:var(--ink);box-shadow:none}
 .rainalts i{background:linear-gradient(135deg,#6A55E3,#5868E3)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .rainplan{background:var(--paper);color:var(--ink)}:root:not([data-theme="light"]) .rainalts button{background:var(--soft);color:var(--ink)}}
+
 .bkb{gap:5px;background:var(--soft);color:var(--ink2);font-weight:700}.bkb .li{color:var(--accent-ink);width:14px;height:14px}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bkb{background:var(--soft);color:var(--ink2)}}
+
 .h2bk{display:inline-flex;align-items:center;gap:6px;color:#2A2140}.h2bk .li{color:#5A45D6}
 .bkf summary{display:flex;align-items:center;gap:6px}.bkf summary .li{color:var(--accent-ink)}
 .sdi .li{width:15px;height:15px}
@@ -740,14 +730,14 @@ body::after{bottom:-26vw;left:-30vw;background:radial-gradient(circle,rgba(120,2
 
 /* ===== 理想の画像に合わせて：白い地・紫は押すところだけ ===== */
 :root{--ground:#F6F7F9;--paper:#FFFFFF;--soft:#F1F2F5;--accent-soft:#F1F2F5;--line:#E7E8EC;--ink:#17171C;--ink2:#3C3D45;--muted:#6B6E78;--accent:#5B4BDB;--accent-ink:#5B4BDB;--shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.06)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#0F1014;--paper:#1A1B21;--soft:#24252D;--accent-soft:#24252D;--line:#2C2D35;--ink:#F2F2F5;--ink2:#D0D1D8;--muted:#9A9CA8;--accent:#9C8FFF;--accent-ink:#B3A8FF}}
+
 body{background:var(--ground)!important}
 body::before,body::after{display:none!important}
 .card,.empty,.spot,.trip,.nowcard,.day li:not(.mv):not(.full):not(.tlh),.day li.full:has(form),.chip,.day .foot .btn{background:var(--paper);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:var(--shadow),0 0 0 1px rgba(0,0,0,.035)}
 .bar{background:rgba(255,255,255,.94)!important;box-shadow:0 1px 0 var(--line)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .bar{background:rgba(15,16,20,.94)!important}}
+
 .tabbar{background:rgba(255,255,255,.96)!important;box-shadow:0 -1px 0 var(--line),0 8px 30px rgba(0,0,0,.08)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabbar{background:rgba(26,27,33,.96)!important}}
+
 .tabbar button{color:#8A8D96}
 .day ul.tl::before{background:repeating-linear-gradient(180deg,#D9DBE1 0 6px,transparent 6px 11px)}
 .day li.tlh:not(:has(.tod))::before{border-color:#C9CCD3}
@@ -833,7 +823,7 @@ body::before,body::after{display:none!important}
 .roopt .ti{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#1E9E63;color:#fff;flex:none}
 .roopt>div{flex:1;display:flex;flex-direction:column}.roopt b{font-size:14px}.roopt small{font-size:12px;color:var(--muted)}
 .roopt .btn{background:#1E9E63!important;box-shadow:none}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .roopt{background:#12261D;box-shadow:inset 0 0 0 1px #1D4434}:root:not([data-theme="light"]) .roadd{background:#1C1B26;border-color:#3D3766}}
+
 .rol li{padding:8px 8px 8px 4px}
 /* 地図：次のルートを地図の上に */
 .mapbox.rich{position:relative}
@@ -982,6 +972,117 @@ body.onhero .hpill{background:rgba(255,255,255,.22)!important;box-shadow:none!im
 .roopen:has(.rotx){width:auto!important;padding:0 12px 0 10px!important;gap:2px;display:inline-flex!important;align-items:center}
 .rohint{display:flex;align-items:center;gap:6px;margin:4px 0 2px;font-size:13px;color:#475467}.rohint .li{width:16px;height:16px;flex:none}
 .exempty{display:flex;flex-direction:column;gap:10px;align-items:stretch;text-align:left}.exempty .btn{margin:0}
+/* GPT: actionable reorder controls and neutral, non-chat AI workflow */
+.rob .sr{position:static!important;clip:auto!important;overflow:visible!important;margin:0!important;width:36px!important;min-width:36px!important;height:44px!important;padding:0!important;left:auto!important;top:auto!important}
+.rol li{flex-wrap:wrap}.rol .rom{flex:1;min-width:100px}.rol .rob{margin-left:auto}
+.cgflow{display:flex;flex-direction:column;gap:16px}.cgflow .cgh{border-bottom:1px solid var(--line);padding-bottom:12px}
+.cgflow .cgav{background:#F3F4F6;color:#475467}.cgflow .cgq{flex-wrap:wrap;overflow:visible}
+.cgflow .cgin{position:static!important;display:flex;flex-wrap:wrap;border-radius:12px!important;padding:12px;box-shadow:none!important;border:1px solid var(--line)}
+.cgflow .cgin button{width:auto!important;height:auto!important;border-radius:10px;padding:10px 14px;display:block;min-height:44px}
+.flowcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.flowcard h3{font-size:18px}.flowcard p{margin:0}.flowcard textarea{min-height:120px}.flowcard .row{flex-wrap:wrap}
+.flowhistory{font-size:13px;color:var(--muted)}.flowhistory p{white-space:pre-wrap}
+
+/* R4 iPhone UI — presentation only; action names and data models remain unchanged. */
+:root,:root[data-theme="light"]{
+ color-scheme:light only;--ground:#fff;--paper:#fff;--soft:#F5F5F7;--line:#DCDDE2;
+ --ink:#17171B;--ink2:#303038;--muted:#484852;--accent:#6250D8;--accent-ink:#5743C4;--accent-soft:#F0EDFC;
+ --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--display:var(--sans);--num:var(--sans);
+ --shadow:none;--r:20px;--tabh:64px;--sea:#E6EFF7;--land:#F5F3EC;--land-line:#BCBDB8;
+ --c1:#52616F;--c2:#28638B;--c3:#84622D;--c4:#3B7058;--c5:#68594B;--c6:#8B4C42;--c7:#354F73;
+}
+html{background:#fff;scroll-padding-top:80px}body{margin:0;background:#fff!important;color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5}
+button,input,select,textarea{font-family:var(--sans)}button,a,input,select,textarea{touch-action:manipulation}
+button,a{-webkit-tap-highlight-color:transparent}button:not(:disabled),summary{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+[hidden]{display:none!important}button:disabled{cursor:default}
+h1,h2,h3{font-family:var(--sans);text-wrap:pretty;letter-spacing:-.025em;color:var(--ink)}
+.page{max-width:980px;padding:24px 20px calc(112px + env(safe-area-inset-bottom,0px))!important;gap:24px}
+.sub,.note,.field label,.lbl,.flowhistory{color:var(--muted)!important;font-size:14px;line-height:1.55}
+small{line-height:1.4}.sub{opacity:1!important}.row{gap:10px}.form{gap:16px}.field{gap:7px}.field label,.lbl{font-weight:600}
+/* Navigation and large-title hierarchy */
+.bar{top:0!important;background:rgba(255,255,255,.88)!important;border-bottom:1px solid rgba(60,60,67,.12);box-shadow:none!important;backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);color:var(--ink)!important;z-index:30}
+.bar .in{min-height:64px;padding:8px 16px;gap:8px}.bar .ttl b{font-size:17px;font-weight:600;color:var(--ink)!important;opacity:1!important}
+.bar .ttl small{font-size:13px;color:var(--muted)!important;opacity:1!important}.bar .back{font-size:17px;font-weight:500;min-height:44px;padding:0 4px;color:var(--accent)!important}
+.bar .ib,.hpill{min-height:44px!important;padding:0 10px!important;background:transparent!important;border:0!important;color:var(--accent)!important;font-size:15px;box-shadow:none!important;border-radius:12px}
+.hpill .li{width:18px;height:18px}body.onhero .bar{background:rgba(255,255,255,.88)!important;color:var(--ink)!important}body.onhero .bar .ttl{opacity:1!important}
+body.onhero .bar .ttl b{color:var(--ink)!important}body.onhero .bar .ttl small{color:var(--muted)!important}body.onhero .hpill{background:transparent!important;color:var(--accent)!important}
+body[data-ui="home"] .bar .in{padding:22px 20px 14px;min-height:100px;align-items:flex-start;transition:padding .18s ease,min-height .18s ease}
+body[data-ui="home"] .bar .ttl b{font-size:34px;line-height:1.18;font-weight:700;letter-spacing:-.035em;transition:font-size .18s ease}
+body[data-ui="home"] .bar .ttl small{font-size:15px;margin-top:8px;white-space:normal}
+body[data-ui="home"].ios-scrolled .bar .in{padding:12px 20px;min-height:58px}body[data-ui="home"].ios-scrolled .bar .ttl b{font-size:17px}body[data-ui="home"].ios-scrolled .bar .ttl small{display:none}
+/* Standard translucent tab bar, with the home-indicator safe area */
+.tabbar{left:0!important;right:0!important;bottom:0!important;border-radius:0!important;border:0!important;border-top:1px solid rgba(60,60,67,.16)!important;background:rgba(255,255,255,.86)!important;box-shadow:none!important;backdrop-filter:blur(28px) saturate(160%)!important;-webkit-backdrop-filter:blur(28px) saturate(160%)!important;padding-bottom:max(10px,env(safe-area-inset-bottom,0px))}
+.tabbar .in{height:64px!important}.tabbar button{min-width:44px;min-height:54px;gap:4px;color:#42424B!important;font-size:11px;font-weight:600}.tabbar svg{width:25px;height:25px;stroke-width:1.75}
+.tabbar button[aria-current="page"]{color:var(--accent)!important;background:transparent!important}
+/* Controls: neutral secondary actions, a single primary purple treatment */
+.btn,.ib,.chip,.catchips button,.roopen,.excats button{min-height:44px!important;box-shadow:none!important;font-weight:600}
+.btn{border-radius:12px!important;background:var(--soft);border:1px solid transparent!important;color:var(--ink2)!important;padding:10px 16px;font-size:16px;line-height:1.35}
+.btn.fill,.btn.fill:hover{background:var(--accent)!important;color:#fff!important;border-color:transparent!important;box-shadow:none!important}
+.btn.big{min-height:52px!important;font-size:17px;padding:13px 18px}.btn.icon-only,.btn.add{width:44px!important;min-width:44px!important;height:44px!important;border-radius:14px!important;padding:0!important}
+.btn.danger,.ib.danger{color:#B42318!important;background:#FFF3F2!important}.btn.danger.fill{background:#B42318!important;color:#fff!important}
+.ib{font-size:15px;padding:8px 12px;color:var(--ink2)!important}.btn:not(.fill):not(.danger):hover,.ib:hover{background:#ECECF0!important;color:var(--ink)!important}
+.btn:disabled{opacity:1!important;color:#60606B!important;background:#EAEAF0!important}.btn.fill:disabled{color:#fff!important;background:#716D85!important}
+.chip,.catchips button{background:var(--soft)!important;border:0!important;color:var(--ink2)!important;padding:10px 15px;border-radius:12px!important;font-size:15px;line-height:1.2}
+.chip[aria-pressed="true"],.catchips button[aria-pressed="true"],.excats button[aria-pressed="true"],.qad button[aria-pressed="true"]{background:var(--accent-soft)!important;color:var(--accent-ink)!important;box-shadow:none!important;border-color:transparent!important}
+.chips,.catchips{gap:8px;scroll-padding-inline:4px}.chip i{background:#52616F!important}
+.card,.empty,.inbox,.flowcard,.nowcard,.spot{background:var(--soft)!important;border:0!important;border-radius:20px!important;box-shadow:none!important;padding:20px}
+.note{background:var(--soft)!important}.tag{background:#ECECF0!important;color:#34343C!important}.tag.warn{background:#FFF4E8!important;color:#805315!important}
+input[type=text],input[type=search],input[type=date],input[type=number],input[type=time],select,textarea{min-height:48px;font-size:17px!important;line-height:1.4;background:#fff!important;border:1px solid #D4D4DA!important;border-radius:12px!important;padding:11px 12px;color:var(--ink)!important;box-shadow:none!important}
+input::placeholder,textarea::placeholder{color:#55555F!important;opacity:1}.two{gap:14px}textarea{min-height:112px}.form h2{font-size:28px!important;font-weight:700;line-height:1.25}
+/* Home: calm empty state and photo-led trip cards */
+.empty{padding:28px 22px;gap:16px;text-align:left;align-items:stretch;color:var(--muted)}.empty b{font-size:23px!important;line-height:1.3;color:var(--ink)!important}.empty>span{font-size:16px;line-height:1.6}.empty .btn{white-space:normal}
+.trips{gap:24px}.trip{border:0!important;border-radius:20px!important;background:#fff!important;box-shadow:none!important;overflow:hidden}.trip .band{display:none}.trip .cover{height:188px!important;background-color:#F0F0F3!important;background-size:cover!important;background-position:center!important;border-radius:20px}.trip .cover::before{background:linear-gradient(180deg,rgba(0,0,0,.3),transparent 65%)!important}
+.trip .in{padding:14px 4px 4px;gap:5px}.trip h3{font-size:23px;font-weight:700;line-height:1.25}.trip .sub{font-size:14px}.trip .cd{color:var(--muted)}.cd2{color:#fff;background:rgba(20,20,24,.68)!important;backdrop-filter:blur(12px);font-size:13px!important;box-shadow:none!important}
+.ios-home-actions{display:flex;flex-direction:column;gap:0;border-radius:18px;background:var(--soft);overflow:hidden}.ios-home-actions .btn{justify-content:space-between;background:transparent!important;min-height:54px!important;border-radius:0!important;text-align:left;font-size:16px;padding:14px 16px}.ios-home-actions .btn+.btn{border-top:1px solid var(--line)!important}.ios-home-actions .btn::after{content:'›';font-size:23px;color:#484852;margin-left:12px}
+/* Plan: title above the photograph, compact editorial image, grouped tools */
+.ios-plan-title .h2head{color:var(--ink)!important;gap:10px;position:static;padding:0}.ios-plan-title h2{font-size:34px!important;line-height:1.15;font-weight:700;letter-spacing:-.035em;margin:8px 0}
+.ios-plan-title .h2top{display:flex;justify-content:space-between;gap:12px;align-items:center}.ios-plan-title .h2chip{font-size:14px;color:var(--muted)!important;background:transparent!important;border-radius:0;padding:0;backdrop-filter:none;font-weight:500}
+.ios-plan-title button.h2chip{color:var(--accent)!important;min-height:44px;padding:0 8px!important;border-radius:10px!important}
+.ios-plan-title .h2m{color:var(--muted)!important;font-size:15px;font-weight:500;opacity:1!important}.ios-plan-title .h2prog{margin-top:10px;color:var(--muted);font-size:13px;max-width:240px}.ios-plan-title .h2prog i{background:#E7E7ED!important}.ios-plan-title .h2prog i b{background:#505B65!important}
+.hero2{margin:0!important;min-height:240px!important;padding:20px!important;border-radius:20px!important;box-shadow:none!important;justify-content:flex-end!important;gap:12px;background-size:cover;background-position:center;color:#fff;overflow:hidden}
+.hero2::before{background:linear-gradient(180deg,transparent 20%,rgba(10,15,20,.18) 45%,rgba(10,15,20,.78) 100%)!important}.hero2 .h2body{gap:12px;position:relative;z-index:1}.hero2 .h2lead{font-size:15px!important;line-height:1.5!important;font-weight:600;margin:0}.hero2 .h2cr{font-size:10px!important;color:#fff!important;opacity:1!important;bottom:6px;right:12px;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero2 .h2go{min-height:48px!important;background:rgba(255,255,255,.96)!important;color:var(--accent-ink)!important;font-size:16px;font-weight:600;border-radius:12px!important;padding:12px 16px;box-shadow:none!important}.hero2 .h2next b{font-size:21px}.hero2 .h2next small{color:#fff;opacity:1}
+.hero2.nophoto{min-height:unset!important;background:var(--soft)!important;color:var(--ink)!important;padding:20px!important}.hero2.nophoto::before{display:none!important}.hero2.nophoto .h2lead,.hero2.nophoto .h2next small{color:var(--ink2)!important}.hero2.nophoto .h2go{background:var(--accent)!important;color:#fff!important}.hero2.nophoto .h2wx2{background:#fff;color:var(--ink2)}
+.tools{gap:0!important;background:var(--soft);border-radius:20px;overflow:hidden;grid-template-columns:1fr 1fr}.tool{min-height:84px!important;padding:14px!important;border:0!important;background:transparent!important;border-radius:0!important;box-shadow:none!important;gap:10px}
+.tool:nth-child(odd){border-right:1px solid #DCDDE2!important}.tool:nth-child(-n+2){border-bottom:1px solid #DCDDE2!important}.tool .ti{width:30px!important;height:36px!important;background:transparent!important;color:#434B56!important;border-radius:0!important}.tool .ti .li{width:22px!important;height:22px!important}.tool b{font-size:15px!important;line-height:1.3;font-weight:600!important}.tool small{font-size:13px!important;color:var(--muted)!important;line-height:1.35;white-space:normal!important}
+.dprow{top:64px!important;margin:0 -20px!important;padding:12px 20px!important;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);gap:8px;z-index:20}
+.daypills{gap:4px!important;background:var(--soft);border-radius:14px;padding:4px!important;overflow:auto}.daypills button{flex:0 0 auto;min-width:86px;min-height:46px!important;padding:5px 13px!important;background:transparent!important;border:0!important;border-radius:10px!important;color:var(--ink2)!important;box-shadow:none!important}.daypills button[aria-current="true"]{background:#fff!important;color:var(--accent-ink)!important;box-shadow:0 1px 4px rgba(0,0,0,.08)!important}.daypills b{font-size:15px!important}.daypills small{font-size:12px!important;color:inherit;font-weight:500!important}
+.days{gap:32px}.day{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible}.day header{padding:0 0 16px!important;border:0!important}.day .k{color:var(--muted)!important;font-size:14px!important;font-weight:500;letter-spacing:0}.day h3{font-size:25px!important;font-weight:700!important}.dh2{gap:12px;align-items:center}.roopen{margin-top:0!important;border-radius:10px!important;padding:8px 10px!important;background:var(--soft)!important;color:var(--ink2)!important;font-size:14px}.rotx{font-size:14px;font-weight:600}.dh1{padding-bottom:8px}.daystat{color:var(--muted)}
+.rohint{font-size:14px;line-height:1.5;margin:0 0 16px;color:var(--muted)}.tll{color:var(--muted)!important;font-size:13px!important}.tll a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-ink)!important}
+.day .tl{gap:18px!important}.day .tl li{scroll-margin-top:140px}.day .ti{font-size:17px!important;font-weight:600!important}.day .when{font-size:17px!important;color:var(--ink2)!important}.day .when small,.day .no{font-size:14px;color:var(--muted)!important}.day .kind{background:var(--soft)!important;color:var(--ink2)!important;font-size:12px}.day .thumb.ticon{background:var(--soft)!important;color:var(--muted)!important}.tod{background:#F3F4F6!important;color:#414853!important;box-shadow:0 0 0 4px #fff!important;font-size:12px}.day .foot .btn{min-height:48px!important;border-radius:12px!important;background:var(--soft)!important;color:var(--ink2)!important;font-size:15px;box-shadow:none!important}
+.fab{bottom:calc(90px + env(safe-area-inset-bottom,0px))!important;border:1px solid var(--line)!important;border-radius:14px!important;background:rgba(255,255,255,.94)!important;color:var(--accent-ink)!important;font-size:15px;min-height:48px!important;box-shadow:0 2px 10px rgba(0,0,0,.06)!important}
+/* Explore: pictures, then readable white captions */
+.exh{gap:12px;align-items:center;margin:0}.exh h2{font-size:32px!important;line-height:1.18;font-weight:700!important;letter-spacing:-.035em}.exh .row{flex:none}
+.search{min-height:48px;border:0!important;background:var(--soft)!important;border-radius:12px!important;padding:0 12px;box-shadow:none!important;color:var(--muted)}.search input{min-height:48px;border:0!important;padding:10px 8px!important;background:transparent!important;font-size:16px!important}.search svg{width:20px;height:20px}.catchips{margin:0;padding:0 0 4px!important}
+.excards{gap:24px}.exc{position:relative;border-radius:18px!important;overflow:hidden;border:1px solid var(--line);background:#fff!important;box-shadow:none!important;aspect-ratio:auto!important;min-height:0!important}.exc figure{position:relative!important;margin:0!important;inset:auto!important;height:190px!important;background:#F0F1F4!important;overflow:hidden}.exc figure img{width:100%;height:100%;object-fit:cover}.exc::after,.exc figure::after{display:none!important}.exc .exo{position:static!important;padding:14px 16px!important;background:#fff!important;color:var(--ink)!important;min-height:80px;display:flex;flex-direction:column;gap:5px;text-shadow:none!important}.exc .exo b{font-size:22px!important;line-height:1.25!important;font-weight:700}.exc .exo span{font-size:14px!important;color:var(--muted)!important;opacity:1!important;line-height:1.4}.exc .exni{background:transparent!important;color:#626570!important;box-shadow:none!important}.exc .exni svg{stroke:currentColor}.exday,.exbk{position:absolute;top:12px!important;bottom:auto!important;color:#fff!important;background:rgba(25,30,35,.75)!important;backdrop-filter:blur(12px);font-size:12px!important;box-shadow:none!important}.exday{left:12px!important}.exday::before{display:none!important}.exbk{right:12px!important}.exc .exadd{width:44px!important;height:44px!important;min-width:44px;bottom:100px!important;right:12px!important;top:auto!important;background:#fff!important;color:var(--accent)!important;box-shadow:0 1px 5px rgba(0,0,0,.08)!important;font-size:26px;z-index:3}
+/* Map and bottom sheets */
+.mapbox{border-radius:20px!important;border:1px solid var(--line)!important;box-shadow:none!important;min-height:430px;height:calc(100svh - 250px);max-height:720px;margin:0;overflow:hidden}.mapbox.pick{height:calc(100svh - 190px)}.mapmode{min-height:44px;font-size:14px;color:var(--ink2);border:1px solid var(--line);border-radius:12px!important;background:rgba(255,255,255,.96)!important;box-shadow:0 1px 4px rgba(0,0,0,.06)!important}.zoom{gap:1px!important;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05)}.zoom button{min-height:44px!important;min-width:44px!important;border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;color:var(--ink)!important}.zoom button+button{border-top:1px solid var(--line)!important}.attr{color:#39424B!important;background:rgba(255,255,255,.88);font-size:10px;line-height:1.3;padding:3px 5px;max-width:calc(100% - 70px);border-radius:4px}.pickbar{background:rgba(255,255,255,.96)!important;color:var(--ink)!important;border:1px solid var(--line);box-shadow:none}.pickbar button{min-height:44px}.nroute,.msel{background:#fff!important;border:1px solid var(--line)!important;border-radius:18px!important;box-shadow:0 2px 8px rgba(0,0,0,.05)!important}.mapnr .nroute{box-shadow:0 2px 8px rgba(0,0,0,.06)!important}.nroute b{color:var(--ink)!important}.mapbox .land{stroke:var(--land-line)}.mapbox svg text{font-family:var(--sans)}
+/* AI: grouped choice rows, rather than a cloud of chips */
+.cgflow{gap:24px}.cgflow .cgh{padding-bottom:0;border-bottom:0;align-items:flex-start}.cgflow .cgav{display:none}.cgflow .cgn b{font-size:32px;font-weight:700;letter-spacing:-.035em;line-height:1.2}.cgflow .cgn small{font-size:15px;color:var(--muted);margin-top:8px;line-height:1.5}
+.flowcard{gap:18px!important;padding:20px!important}.flowcard h3{font-size:22px!important;line-height:1.3;font-weight:700}.flowcard p{font-size:16px;color:var(--ink2)}.cgflow .cgq{display:flex;flex-direction:column;flex-wrap:nowrap;gap:0;margin:0;background:#fff;border-radius:14px;overflow:hidden;padding:0}.cgflow .cgq button{width:100%;white-space:normal;min-height:52px!important;display:flex;align-items:center;text-align:left;justify-content:space-between;font-size:16px!important;line-height:1.45;padding:14px 16px!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:var(--ink2)!important;background:#fff!important}.cgflow .cgq button+button{border-top:1px solid var(--line)!important}.cgflow .cgq button::after{content:'›';margin-left:12px;color:#484852;font-size:23px}.cgflow .cgin{background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;gap:12px;flex-direction:column;align-items:stretch;border-radius:0!important}.cgflow .cgin input{width:100%;min-height:50px!important;background:#fff!important;border:1px solid #D4D4DA!important;border-radius:12px!important;padding:12px!important;flex:auto;font-size:17px!important}.cgflow .cgin button{width:100%!important;min-height:50px!important;background:var(--accent)!important;color:#fff!important;border-radius:12px!important;font-size:17px;padding:12px 16px!important;font-weight:600}.flowhistory{padding:16px 4px}.flowhistory summary{min-height:44px;display:flex;align-items:center}.flowcard details>summary,.aimore summary,.condd summary{min-height:44px;line-height:1.45;cursor:pointer;color:var(--ink2)!important;padding:8px 0}.aiback{background:var(--soft)!important;color:var(--ink)!important;box-shadow:none!important}.aisteps li.on,.aisteps i{color:var(--ink2)!important;background:var(--soft)!important}
+/* Reorder: each title gets a full line, 44px controls are on a separate row */
+.ro{gap:20px}.ro>p{font-size:14px;line-height:1.55}.rol{gap:0!important;border:1px solid var(--line);border-radius:18px;background:#fff;overflow:visible;padding:0!important}.day .rol li:not(.zz){display:grid!important;grid-template-columns:44px 40px minmax(0,1fr)!important;column-gap:10px;row-gap:10px;padding:16px!important;margin:0;border:0!important;border-radius:0!important;background:#fff!important;align-items:center!important;overflow:visible}.day .rol li+li:not(.zz){border-top:1px solid var(--line)!important}.day .rol li:first-child{border-radius:18px 18px 0 0!important}.day .rol li:last-child{border-radius:0 0 18px 18px!important}.day .rol li:only-child{border-radius:18px!important}.day .rol li.fixed:not(.zz){background:#F5F5F7!important}.rol .roh{grid-column:1;grid-row:1;width:44px!important;min-height:44px;color:#4C535D!important}.rol .roimg{grid-column:2;grid-row:1;width:40px!important;height:40px!important;border-radius:9px}.rol .rom{grid-column:3;grid-row:1;min-width:0!important;width:auto}.rol li:not(:has(.roimg)) .rom{grid-column:2/4}.rol .rot b{font-size:15px!important;line-height:1.4}.rol .rot s{font-size:12px;color:#53535E!important}.rol .ronm{font-size:17px!important;font-weight:600;line-height:1.45}.rol .rolg{font-size:13px!important;color:var(--muted)!important;margin-top:4px}.rol .rob{grid-column:2/4;grid-row:2;margin:0!important;justify-self:end;display:flex!important;gap:8px!important}.rol .rob button,.rol .rob .sr,.rol .rob .rox{position:static!important;width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;clip:auto!important;overflow:visible!important;padding:0!important;margin:0!important;border:1px solid #D4D4DA!important;border-radius:12px!important;background:#F5F5F7!important;color:#303038!important;font-size:18px;display:grid;place-items:center}.rol .rob button:disabled{color:#60606B!important;background:#E8E8ED!important;border-color:#D4D4DA!important;opacity:1!important}.rol li.drag{box-shadow:0 3px 12px rgba(0,0,0,.12)!important;outline:2px solid var(--accent);border-radius:16px!important;background:#fff!important}.roadd{min-height:50px;background:var(--soft)!important;color:var(--ink2)!important;border:0!important;border-radius:12px;font-weight:600;font-size:16px;padding:12px}.robar{left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px))!important;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 2px 8px rgba(0,0,0,.05)!important;gap:8px;padding:10px;flex-wrap:wrap}.robar .rost{font-size:13px;flex:1 1 70px}.robar .btn{min-height:44px!important;font-size:14px!important;padding:10px 12px}.page:has(.robar){padding-bottom:calc(240px + env(safe-area-inset-bottom,0px))!important}
+/* Supporting screens, sheets and feedback follow the same system */
+.mhero{background:var(--soft)!important;color:var(--ink)!important;box-shadow:none!important;border-radius:20px}.mbig{font-size:34px;font-weight:700}.mhero .ml,.mstats span,.mrate span{color:var(--muted)!important;opacity:1!important}.mmeter{background:#DCDDE2!important}.mmeter i,.mcat i b{background:#54616D!important}.mrate{border-color:var(--line)}.mrate .ib{color:var(--accent-ink)!important;background:#fff}.mhero .over{color:#B42318!important}.nowcard .l{color:var(--muted)!important}
+.sdrows,.sdrow{background:var(--soft)!important;border:0!important;box-shadow:none!important}.sdr{min-height:48px}.sdi,.sdl,.sdv{color:var(--ink2)!important}.sdcta{bottom:calc(90px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.95);padding:12px 0}.sdtab button{min-height:44px}.geol .btn{justify-content:flex-start;text-align:left;background:#fff!important;border:1px solid var(--line)!important}.geol small{font-size:13px!important;color:var(--muted)!important}.geo b{font-size:16px}
+.clist li,.nlist li{min-height:52px;padding-block:10px}.clist button,.nlist button,.check button{min-height:44px;min-width:44px}.clist label,.check label{min-height:44px;display:flex;align-items:center;gap:10px}input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+.toast{bottom:calc(90px + env(safe-area-inset-bottom,0px))!important;z-index:50;max-width:calc(100vw - 32px);font-size:14px!important;color:var(--ink2)!important;background:rgba(255,255,255,.96)!important;border:1px solid var(--line);border-radius:14px!important;box-shadow:0 2px 8px rgba(0,0,0,.06)!important;line-height:1.45}.toast button{min-height:44px;min-width:44px;font-size:14px;padding:10px 12px}.toast:not(:has(button)){pointer-events:none}.banner{background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.qaov{background:rgba(20,20,24,.32)}.qac{border-radius:24px 24px 0 0;box-shadow:none;padding:24px 20px calc(20px + env(safe-area-inset-bottom,0px));gap:14px}.qac::before{content:'';width:36px;height:5px;background:#B8BBC1;border-radius:4px;align-self:center;margin-top:-10px;margin-bottom:4px}.qah b{font-size:22px}.qad button{min-height:52px}.menu{border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.1);background:rgba(255,255,255,.96);backdrop-filter:blur(20px)}.menu button{min-height:48px;font-size:16px}.menu button+button{border-top:1px solid var(--line)}
+/* Keep the global screen white and reserve purple for actions/selection. */
+.kind,.dayTag,.samplebar,.phbar,.cond{background:var(--soft)!important;color:var(--ink2)!important}.samplebar{font-size:14px;border-radius:12px;padding:14px}.btn .li,.ib .li{color:inherit}.h2chip:not(button){color:var(--muted)}.dwx{background:#F2F5F7;color:#344B5C}.roopt{background:var(--soft)!important;border:1px solid var(--line);box-shadow:none}.roopt .ti{background:transparent!important;color:#434B56!important}.roopt .btn{background:var(--accent)!important;color:#fff!important}.h2done{min-height:44px}.h2bk{min-height:44px}
+@media(max-width:359px){.page{padding-inline:16px!important}.exh h2,.cgflow .cgn b{font-size:28px!important}.two{grid-template-columns:1fr}.bar .in{gap:4px;padding-inline:12px}.bar .ttl small{font-size:12px}.bar .ib,.hpill{padding:0 6px!important}.tools{grid-template-columns:1fr}.tool:nth-child(odd){border-right:0!important}.tool:not(:last-child){border-bottom:1px solid var(--line)!important}.rol .rob{grid-column:1/4}.robar .rost{flex-basis:100%}.dprow{margin-inline:-16px!important;padding-inline:16px!important}}
+@media(min-width:700px){.tools{grid-template-columns:repeat(4,1fr)}.tool{border-bottom:0!important}.tool:not(:last-child){border-right:1px solid var(--line)!important}.exc figure{height:220px!important}.hero2{min-height:320px!important}.ios-plan-title h2{font-size:40px!important}}
+@media(min-width:900px){.page{padding-bottom:60px!important}.tabbar{display:none!important}.toptabs button{min-height:44px;font-size:15px}.toptabs button[aria-current=page]{background:var(--accent-soft)!important;color:var(--accent-ink)!important}.robar{left:auto;right:24px;bottom:24px!important;max-width:460px}.toast,.fab,.sdcta{bottom:24px!important}.mapbox{height:600px}.dprow{top:64px!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{.bar,.tabbar,.robar,.fab,.toast,.ios-home-actions{display:none!important}.page{padding:0!important}.card,.day,.hero2{break-inside:avoid}.hero2{min-height:0!important}}
+
+.ios-ai-photo{position:relative;margin:0;overflow:hidden;border-radius:20px;background:#F0F1F4}.ios-ai-photo img{display:block;width:100%;height:180px;object-fit:cover}.ios-ai-photo figcaption{padding:6px 10px;font-size:11px;color:#303038;background:#F5F5F7}.day .t{font-size:17px;color:var(--ink2)}.day .t small{font-size:14px;color:var(--muted)}.pcf{background:#F0F1F4!important}.pc.noimg .pcf{background:#F0F1F4!important}.pc.noimg .pct,.pc.noimg .pct b{color:var(--ink)!important;text-shadow:none!important}.pcgo{min-width:44px;min-height:44px}button{min-height:44px;min-width:44px}
+/* Photo cards keep the caption on white, outside the image. */
+.day li.pc .pcf{aspect-ratio:auto!important;height:auto!important;background:#fff!important}.day li.pc .pcf img{width:100%;height:190px;object-fit:cover}.day li.pc .pcf::after{display:none!important}.day li.pc .pct{position:static!important;display:flex;padding:14px 52px 14px 16px!important;color:var(--ink)!important;background:#fff!important;text-shadow:none!important}.day li.pc .pct b{font-size:20px!important;color:var(--ink)!important;line-height:1.35}.day li.pc .pcx{color:var(--muted)!important;opacity:1!important;font-size:14px}.day li.pc .pcgo{background:transparent!important;color:var(--muted)!important;bottom:16px!important;right:8px!important;border-radius:10px!important}.day li.pc .pcc{top:8px!important;bottom:auto!important;right:8px;background:rgba(20,20,24,.72);color:#fff!important;padding:3px 6px;border-radius:6px}.day li.pc.noimg .pcc{position:static;display:block;background:#F5F5F7;color:var(--muted)!important}.day li.pc.noimg .pct{background:#F5F5F7!important}.day li.pc{border:1px solid var(--line)!important;border-radius:18px!important;box-shadow:none!important}
+body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-backdrop-filter:blur(24px) saturate(150%)!important}.mapbox.rich{background:#E6EFF7!important}.mapbox .mapmode{min-height:44px!important;color:var(--ink2)!important;font-size:14px}.maplibregl-ctrl button{width:44px!important;height:44px!important}.maplibregl-ctrl-group{border-radius:14px!important;box-shadow:0 1px 6px rgba(0,0,0,.08)!important}.obart{background:#F5F5F7!important;box-shadow:none!important;border-radius:24px!important}.obq{background:#E4E6EB!important;color:var(--ink)!important}.obl b{color:var(--ink2)!important}.obr,.obl span{box-shadow:none!important}.oba.dark{background:#F0F1F4!important;color:var(--ink)!important;box-shadow:none!important}.oba.dark small,.oba.dark span{opacity:1!important}.oba.dark em{color:var(--ink2)!important;background:#fff!important}.obc h2{font-size:28px;font-weight:700}.obc p{font-size:16px;line-height:1.6}.rainalts i,.aihint,.cond{background:#F5F5F7!important;color:var(--ink2)!important;box-shadow:none!important}
+@media(max-width:699px){body[data-ui="map"] .page{padding-top:16px!important;gap:16px}body[data-ui="map"] #mapTop .chips{display:flex;gap:4px;background:#F5F5F7;border-radius:14px;padding:4px;overflow:auto}body[data-ui="map"] #mapTop .chip{flex:1;white-space:nowrap;font-size:14px;padding:8px 10px;min-width:65px}body[data-ui="map"] #mapTop .chip i{display:none}body[data-ui="map"] .mapbox{margin-inline:-20px;width:calc(100% + 40px);border-radius:0!important;border-inline:0!important;height:calc(100svh - 250px);min-height:380px}body[data-ui="map"] #mapBottom{border-radius:22px 22px 0 0;background:#fff;padding:20px 0 0}body[data-ui="map"] .mapnr .nroute{border-radius:20px!important;padding:18px!important}}
+@media(max-width:359px){body[data-ui="map"] .mapbox{margin-inline:-16px;width:calc(100% + 32px)}}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -1205,11 +1306,11 @@ function tripsView(){if(S.about)return aboutView();if(S.imp)return importView();
   const list=Object.entries(DB.trips).map(([id,t])=>({id,...t})).sort((a,b)=>(a.start||"").localeCompare(b.start||""));
   if(S.tripForm)return tripForm();
   return `${list.length?`<div class="trips">${list.map((t,i)=>`<button class="trip" data-a="open" data-id="${t.id}" style="--tc:${dayColor(i+1)}"><span class="band"></span>${(()=>{const p=tripPhoto(t),n=daysLeft(t);return `<span class="cover"${p?` style="background-image:url('${esc(phSrc(p.photo.u)).replace(/'/g,"%27")}')"`:""}>${n!=null?`<span class="cd2">あと<b>${n}</b>日</span>`:""}</span>`})()}<span class="in"><span class="sub">${t.start?`${t.start.replace(/-/g,".")} 〜 ${md(t.end)}`:""}</span><h3>${esc(t.title)}</h3>${daysLeft(t)!=null?"":`<span class="cd">${countdown(t)}</span>`}<span class="sub">予定 ${Object.keys(t.items||{}).length}件 ・ 行きたい場所 ${Object.keys(t.spots||{}).length}か所</span></span></button>`).join("")}</div>`
-   :`<div class="empty"><b>まだ旅行がありません</b><span>行き先と日にちを入れると、AIに日程と行きたい場所の候補を作ってもらえます。予定・行きたい場所・地図・割り勘・持ち物をひとつにまとめられます。</span><button class="btn" data-a="sample">見本の旅行を見る（京都 1泊2日）</button></div>`}
+   :`<div class="empty"><b>まだ旅行がありません</b><span>行き先と日にちを選んで、旅の準備をはじめましょう。日程・場所・持ち物・割り勘をまとめられます。</span><button class="btn" data-a="sample">見本の旅行を見る（京都 1泊2日）</button></div>`}
    <button class="btn fill big" data-a="newTrip">＋ 新しい旅行を作る</button>
    ${list.length&&!list.some(t=>t.sample)?`<button class="ib" data-a="sample" style="align-self:center">見本の旅行を見る</button>`:""}
    ${codeOutBox()}
-   <div class="row"><button class="btn" data-a="impOpen">受け取った旅行を取り込む</button>${list.length?`<button class="btn" data-a="backup">すべての旅行をバックアップ</button>`:""}</div>
+   <div class="ios-home-actions"><button class="btn" data-a="impOpen">受け取った旅行を取り込む</button>${list.length?`<button class="btn" data-a="backup">すべての旅行をバックアップ</button>`:""}</div>
    <p class="sub">データはこの端末の中に保存され、電波がなくても見られます。機種変更の前には「バックアップ」でコードを保存しておいてください。</p>
    <button class="ib" data-a="about" style="align-self:center">このアプリについて・プライバシー</button>`;
 }
@@ -1238,10 +1339,11 @@ function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
   const areas=ds.map(d=>t.dayInfo?.[d]?.area).filter(Boolean);const today=ymd(new Date());const ti=Math.max(0,ds.indexOf(today));
   const ttl=t.dest?(/旅行$/.test(t.dest)?t.dest:`${t.dest}旅行`):t.title;const nx=ds.includes(today)?nextStop(t):null;
   const wd0=ds.includes(today)?today:ds.find(d=>t.wx?.[d]);const w=wd0&&t.wx?.[wd0];
-  return `<section class="hero2${p?"":" nophoto"}"${p?` style="background-image:url('${esc(phSrc(p.photo.u)).replace(/'/g,"%27")}')"`:""}>
-   <div class="h2head"><div class="h2top"><span class="h2chip">${n!=null?`出発まで あと <b>${n}</b> 日`:esc(countdown(t))}</span>${Native.isApp?`<button class="h2chip" data-a="copyPlan">しおりを送る</button>`:`<button class="h2chip" data-a="print">旅のしおり</button>`}</div>
+  return `<div class="ios-plan-title">   <div class="h2head"><div class="h2top"><span class="h2chip">${n!=null?`出発まで あと <b>${n}</b> 日`:esc(countdown(t))}</span>${Native.isApp?`<button class="h2chip" data-a="copyPlan">しおりを送る</button>`:`<button class="h2chip" data-a="print">旅のしおり</button>`}</div>
     <h2>${esc(ttl)}</h2><div class="h2m">${ds.length>1?`${ds.length-1}泊${ds.length}日`:"日帰り"}　${+ds[0].slice(5,7)}.${+ds[0].slice(8)}（${wd(ds[0])}）${ds.length>1?` – ${+ds[ds.length-1].slice(5,7)}.${+ds[ds.length-1].slice(8)}（${wd(ds[ds.length-1])}）`:""}${t.people?`　${esc(t.people)}人`:""}</div>
     ${its.length?`<div class="h2prog"><span><b>${done}</b> / ${its.length}</span><i><b style="width:${Math.max(3,Math.round(done/its.length*100))}%"></b></i></div>`:""}</div>
+</div>
+<section class="hero2${p?"":" nophoto"}"${p?` style="background-image:url('${esc(phSrc(p.photo.u)).replace(/'/g,"%27")}')"`:""}>
    <div class="h2body">${nx?`<div class="h2next"><span class="h2nl">次はここ</span><b>${esc(nx.x.time||"")} ${esc(nx.x.title)}</b><small>${nx.left!=null?`あと${fmtMin(nx.left)}`:""}${nx.leg?` ・ ${legTxt(nx.leg)}`:""}</small>${nx.x.bookNo||nx.x.bookImg?`<button class="h2bk" data-a="bookView" data-id="${nx.x.id}">${li("ticket")}${nx.x.bookNo?`予約番号 ${esc(nx.x.bookNo)}`:"予約の画像を見る"}</button>`:""}</div>`
      :`<p class="h2lead">${areas.length?esc(areas.join("、"))+"。<br>":""}最高の${ds.length>1?ds.length+"日間":"1日"}にしよう。</p>`}
     ${w?(()=>{const o=wxOf(w.c);return `<button class="h2wx2" data-a="jumpDay" data-k="${Math.max(0,ds.indexOf(wd0))}"><span class="i">${o.ico}</span><span class="t"><small>${esc((t.dest||"").replace(/旅行$/,"").split(/[・、,\s]/)[0]||"")}の天気${wd0===today?"":`（${md(wd0)}）`}</small><b>${w.hi}°C / ${o.lb}</b></span><span class="chev">›</span></button>`})():""}
@@ -1354,18 +1456,30 @@ ${req}
 - 変えない日も含めて、全部の日の予定を返す
 - 出典・リンクは入れない。返事は下の形の JSON だけ
 {"message":["変えた点を短く（3〜5個）"],"days":[{"date":"YYYY-MM-DD","area":"その日のエリア","items":[{"time":"HH:MM","arrive":"HH:MM（移動のときだけ）","kind":"move | see | food | stay | other","title":"予定の内容","note":"ひとこと（30字くらい）","spot":"場所の名前（行きたい場所の予定のとき）"}]}],"spots":[{"name":"新しく加えた場所の名前","area":"エリア","category":"see | food | shop | nature | activity | view | cafe","note":"おすすめの理由（60字くらい）","wiki":"日本語版ウィキペディアの記事名（なければ空文字）","name_en":"英語の名前","fee":"料金の目安","lat":0.0,"lon":0.0,"booking":false,"minutes":60,"rain_ok":false}]}`}
-function cgView(t){const C=S.cg||{step:"idle"};const hist=t.chat||[];const last=DB.lastAI||"chatgpt";
-  const bub=(r,h)=>`<div class="cgb ${r}">${r==="a"?`<span class="cgav sm">${li("spark")}</span>`:""}<div class="cgt">${h}</div></div>`;
-  const msgs=[bub("a",`こんにちは。旅程の相談にのります。どう変えたいですか？<ol class="cgsteps"><li>変えたいことを書くか、下のボタンを押す</li><li>あなたのAI（ChatGPT など）が開くので、答えを<b>コピー</b>して戻る</li><li>「答えを読み込む」を押すと、日程の案が出ます（OKを押すまで変わりません）</li></ol>`),...hist.map(m=>bub(m.r,m.r==="a"&&Array.isArray(m.x)?`<ul class="cgl">${m.x.map(l=>`<li>${li("check")}${esc(l)}</li>`).join("")}</ul>`:esc(m.x).replace(/\n/g,"<br>")))];
-  if(C.step==="wait"){const order=[...AIS].sort((a,b)=>(b[0]===last)-(a[0]===last));msgs.push(bub("a",`<b>${C.ai?`${AI_NAME[C.ai]}の答えをコピーしたら、読み込んでください`:"あなたのAIに聞きます"}</b>
-    ${C.ai?`<button class="btn fill big${C.back?" pulse":""}" data-a="cgClip">コピーした答えを読み込む</button><button class="ib" data-a="cgGo" data-ai="${C.ai}">${AI_NAME[C.ai]}をもう一度開く</button>`:`<span class="sub">ふだん使っているAIが、お願いと今の日程が入った状態で開きます。答えが出たら「コピー」して戻ってきてください。</span><button class="btn fill big" data-a="cgGo" data-ai="${order[0][0]}">${order[0][1]}で聞く</button><div class="row">${order.slice(1).map(([k,l])=>`<button class="btn" data-a="cgGo" data-ai="${k}">${l}</button>`).join("")}<button class="btn" data-a="cgCopy">指示文をコピー</button></div>`}
-    <button class="ib cgcancel" data-a="cgNo">やめて、入力に戻る</button><details${C.manual?" open":""}><summary class="sub">うまく読み込めないときは、ここに貼る</summary><div class="form" style="margin-top:8px"><textarea id="cg_paste" placeholder="ここにAIの答えを貼る"></textarea><button class="btn" data-a="cgRead" style="align-self:flex-start">貼った答えを読み込む</button></div></details>`))}
-  if(C.step==="preview"){const c=C.c;msgs.push(bub("a",`<b>了解です！こんなプランはどうですか？</b>${C.msg&&C.msg.length?`<ul class="cgl">${C.msg.map(l=>`<li>${li("check")}${esc(l)}</li>`).join("")}</ul>`:""}<span class="sub">予定 ${c.nItems}件${c.spots.filter(x=>!x.dup).length?` ・ 新しい場所 ${c.spots.filter(x=>!x.dup).length}か所`:""}${(()=>{const w=c.warn.find(w=>!/新しい候補/.test(w));return w?` ・ ${esc(w)}`:""})()}</span><span class="sub">このプランで進めますか？</span><button class="btn fill big" data-a="cgOk">このプランでOK！</button><button class="ib" data-a="cgNo">やめる</button>`))}
-  if(C.step==="done")msgs.push(bub("a",`日程を更新しました。<button class="btn" data-a="tab" data-t="plan">日程を見る</button>`));
-  return `<section class="cg"><div class="cgh"><span class="cgav">${li("spark")}</span><div class="cgn"><b>AI 旅のコンシェルジュ</b><small>あなたの ChatGPT などに聞いて、答えを貼り付けて使います</small></div>${hist.length?moreMenu("cg",[["cgClear","会話を消す",""]]):""}</div>
-   <div class="cgmsgs" id="cgmsgs">${msgs.join("")}</div>
-   ${C.step==="idle"||C.step==="done"?`<div class="cgq">${CG_Q.map(q=>`<button data-a="cgAsk" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>`:""}
-   <form id="cgForm" class="cgin"><input type="text" id="cg_in" maxlength="300" placeholder="${C.step==="wait"?"AIの答えを待っています…":C.step==="preview"?"上の案を選んでください":"例：2日目をゆっくりにしたい"}" autocomplete="off" ${C.step==="wait"||C.step==="preview"?"disabled":""}><button type="submit" aria-label="送る" ${C.step==="wait"||C.step==="preview"?"disabled":""}>${li("send")}</button></form></section>`}
+function cgView(t){const C=S.cg||{step:"idle"},hist=t.chat||[];
+  const active=C.step==="wait",preview=C.step==="preview";
+  let body="";
+  if(active)body=aiFlowBox(C,"cg",cgPrompt(t,C.req));
+  else if(preview){const c=C.c;body=`<div class="flowcard"><h3>4 日程の案を確認</h3><p>まだ日程は変更していません。</p>${C.msg?.length?`<ul>${C.msg.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}<p>予定 ${c.nItems}件 ・ 新しい場所 ${c.spots.filter(x=>!x.dup).length}か所</p>${c.warn.map(x=>`<p class="warn">${esc(x)}</p>`).join("")}${Object.entries(c.days).map(([d,its])=>`<div><b>${md(d)}（${wd(d)}）</b><ul>${its.map(x=>`<li>${esc(x.time||"—")} ${esc(x.title)}</li>`).join("")}</ul></div>`).join("")}<button class="btn fill big" data-a="cgOk">このプランでOK！</button><button class="btn" data-a="cgNo">やめる</button></div>`}
+  else body=`${C.step==="done"?'<div class="flowcard" role="status"><b>日程を更新しました</b><button class="btn" data-a="tab" data-t="plan">日程を見る</button></div>':""}<div class="flowcard"><h3>1 変えたいことを選ぶ</h3><div class="cgq">${CG_Q.map(q=>`<button data-a="cgAsk" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div><form id="cgForm" class="cgin"><label class="sr" for="cg_in">日程で変えたいこと</label><input type="text" id="cg_in" maxlength="300" placeholder="例：2日目をゆっくりにしたい" autocomplete="off"><button type="submit" aria-label="AIに頼む文を作る">頼む文を作る</button></form></div>`;
+  return `<section class="cgflow">${(()=>{const p=tripPhoto(t);return p?`<figure class="ios-ai-photo"><img src="${esc(phSrc(p.photo.u))}" alt="" loading="lazy" onerror="this.closest('figure').remove()">${p.photo.own?"":`<figcaption>写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</figcaption>`}</figure>`:""})()}<div class="cgh"><span class="cgav">${li("spark")}</span><div class="cgn"><b>AI相談</b><small>自分のAIに文を貼り、答えを持ち帰ります</small></div>${hist.length?moreMenu("cg",[["cgClear","会話を消す",""]]):""}</div><div id="cgmsgs">${body}</div>${hist.length?`<details class="flowhistory"><summary>これまでの依頼と変更履歴</summary>${hist.map(m=>`<p><b>${m.r==="u"?"依頼":"変更記録"}</b><br>${esc(Array.isArray(m.x)?m.x.join("\n"):m.x)}</p>`).join("")}</details>`:""}</section>`}
+/* Shared external-AI workflow: only the current action is expanded. */
+function aiFlowBox(A,prefix,prompt){const cg=prefix==="cg",last=DB.lastAI||"chatgpt",ai=(cg?A.ai:A.sent)||last;
+ const act=n=>prefix+n,manual=!!A.manual||!!A.paste;
+ const phase=A.copyText?1:(cg?A.ai:A.sent)||A.back?2:1;
+ const fallback=A.copyText?`<div class="field"><label for="${prefix}_prompt">この文を選択してコピー</label><textarea id="${prefix}_prompt" readonly>${esc(A.copyText)}</textarea><button class="btn" data-a="${act("Copied")}">コピーできた → 次へ</button></div>`:"";
+ const order=[...AIS].sort((a,b)=>(b[0]===ai)-(a[0]===ai));
+ let content=phase===1?`<h3>${cg?2:1} AIに聞く</h3><p>${AI_NAME[order[0][0]]}が、お願いの文が入った状態で開きます。送信して答えを待ってください。</p><button class="btn fill big" data-a="${act("Go")}" data-ai="${order[0][0]}">${order[0][1]}で聞く</button>${fallback}<details><summary>ほかのAIを使う・文だけコピー</summary><div class="row">${order.slice(1).map(([k,l])=>`<button class="btn" data-a="${act("Go")}" data-ai="${k}">${l}で聞く</button>`).join("")}<button class="btn" data-a="${act("Copy")}">指示文だけコピー</button></div></details><button class="btn" data-a="${act("Ready")}">もう答えをコピーしてある → 読み込む</button>`:
+ `<h3>${cg?3:2} AIの答えを読み込む</h3><p>AIの答えの下にある「コピー」を押してから、下のボタンを押してください。読み込んでも、確認してOKを押すまで日程は変わりません。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details${manual?" open":""}><summary>うまく読み込めないときは、ここに貼る</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>AIをもう一度開く</summary><button class="btn" data-a="${act("Go")}" data-ai="${ai}">${AI_NAME[ai]}をもう一度開く</button><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
+ phase===2?`<h3>2 自分のAIを開いて貼る</h3><p>AIの入力欄に貼って送信し、返ってきた答えをコピーしてください。</p><div class="row">${AIS.map(([k,l])=>`<button class="btn ${k===ai?"fill":""}" data-a="${act("Go")}" data-ai="${k}">${l}を開く</button>`).join("")}</div><button class="btn fill big" data-a="${act("Ready")}">答えをコピーした → 読み込む</button>`:
+ `<h3>3 AIの答えを読み込む</h3><p>読み込んだ内容を確認してから反映できます。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details${manual?" open":""}><summary>答えを自分で貼る</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>AIの答えを取り直す</summary><button class="btn" data-a="${act("Go")}" data-ai="${ai}">${AI_NAME[ai]}を開く</button><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
+ return `<div class="flowcard" id="${cg?"cgFlow":"aiBox"}" aria-live="polite">${cg?`<p>依頼：${esc(A.req)}</p>`:""}${content}${cg?'<button class="btn" data-a="cgNo">やめて、入力に戻る</button>':'<button class="ib" data-a="aiEdit">← 条件を変える</button>'}</div>`}
+function aiOpen(pr,ai){const q=encodeURIComponent(pr),long=q.length>12000;
+ const url=ai==="chatgpt"&&!long?"https://chatgpt.com/?q="+q:ai==="claude"&&!long?"https://claude.ai/new?q="+q:{chatgpt:"https://chatgpt.com/",claude:"https://claude.ai/new",gemini:"https://gemini.google.com/app"}[ai];
+ try{navigator.clipboard.writeText(pr).catch(()=>{})}catch(e){}window.open(url,"_blank");
+ toast(ai==="gemini"||long?"指示文をコピーしました。AIの入力欄に貼って送ってください":"AIが開きます。答えが出たらコピーして戻ってきてください")}
+async function flowCopy(A,prefix,text){try{await navigator.clipboard.writeText(text);A.copyText=null;A.manual=false;A.back=false;if(prefix==="cg")A.ai=A.ai||DB.lastAI||"chatgpt";else A.sent=A.sent||DB.lastAI||"chatgpt";draw();toast("コピーしました。自分のAIに貼ってください")}catch(e){A.copyText=text;draw();const el=$(prefix+"_prompt");el?.focus();el?.select();toast("下の文を選択してコピーしてください")}}
+
 function cgPush(r,x){const t=T();if(!t)return;t.chat=(t.chat||[]).concat([{r,x}]).slice(-30);save()}
 function cgAsk(q){q=String(q||"").trim();if(!q)return;cgPush("u",q);S.cg={step:"wait",req:q};draw();cgScroll()}
 function cgScroll(){setTimeout(()=>{const m=$("cgmsgs");if(m)m.lastElementChild?.scrollIntoView({block:"end",behavior:"smooth"})},50)}
@@ -1377,7 +1491,7 @@ function planView(t){const ds=dates(t);setTimeout(()=>wxFetch(S.tid),0);
   ${S.codeOut&&!S.tripForm?`<div id="codeOutWrap">${codeOutBox()}</div>`:""}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
   ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><div class="dh1"><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span>${wxChip(t.wx?.[date])}</div><div class="dh2"><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${its.length>1&&!(S.ro&&S.ro.date===date)?`<button class="roopen" data-a="roOpen" data-date="${date}" aria-label="並べ替え" title="並べ替え">${li("sort")}<span class="rotx">並べ替え</span></button>`:""}</div>${dayStat(t,date)}</header>
-   ${!S.ro&&k===0&&its.filter(x=>!(x.kind==="move"&&x.arrive)).length>1&&!roHintSeen()?`<p class="rohint">${li("sort")}予定を<b>長押し</b>すると、指で順番を入れ替えられます</p>`:""}${rainPlan(t,date)}${S.ro&&S.ro.date===date?roView(t,date):`<ul class="tl">${(()=>{let lastTod="";return its.map((x,j)=>{const g=j?gapRow(t,its[j-1],x):"";const tod=x.kind==="move"?"":todOf(x.time);const show=tod&&tod!==lastTod;if(tod)lastTod=tod;
+   ${!S.ro&&k===0&&its.filter(x=>!(x.kind==="move"&&x.arrive)).length>1&&!roHintSeen()?`<p class="rohint">${li("sort")}<span>予定を<b>長押し</b>すると、指で順番を入れ替えられます</span></p>`:""}${rainPlan(t,date)}${S.ro&&S.ro.date===date?roView(t,date):`<ul class="tl">${(()=>{let lastTod="";return its.map((x,j)=>{const g=j?gapRow(t,its[j-1],x):"";const tod=x.kind==="move"?"":todOf(x.time);const show=tod&&tod!==lastTod;if(tod)lastTod=tod;
       return (g.includes('class="w"')?g:"")+(S.edit===x.id?`<li class="full">${itemForm(t,date,x)}</li>`:itemRow(t,x,{leg:j?legOf(t,its[j-1],x):null,tod:show?tod:""}))}).join("")})()}${S.edit==="new:"+date?`<li class="full">${itemForm(t,date,null)}</li>`:""}${!its.length&&S.edit!=="new:"+date?`<li class="full"><span class="sub">まだ予定がありません</span></li>`:""}</ul>`}
    ${S.edit==="new:"+date?"":`<div class="foot"><button class="btn" data-a="addItem" data-date="${date}">＋ 予定を書く（移動・食事など）</button></div>`}</section>`}).join("")}</div>${S.side?candPanel(t)+"</div>":""}${spots(t).length&&!S.side&&!S.edit&&!S.ro&&!dates(t).includes(ymd(new Date()))?`<button class="fab" id="fab" data-a="candOpen">次のスポットを追加する <span aria-hidden="true">＋</span>${spots(t).filter(x=>!spotDay(t,x.id)).length?`<i>${spots(t).filter(x=>!spotDay(t,x.id)).length}</i>`:""}</button>`:""}`}
 /* 日程を見ながら、行きたい場所の候補を入れる（スマホは下に出るパネル、広い画面は右の列） */
@@ -1510,7 +1624,7 @@ function spotsView(t){const ss=spots(t);
   if(S.detail&&t.spots?.[S.detail])return spotDetail(t,S.detail);
   const cats=[...new Set(ss.map(s=>s.cat).filter(c=>CATS[c]))];
   return `<div class="exh"><h2>行きたい場所</h2><span class="row" style="gap:4px"><button class="btn fill icon-only add" data-a="addSpot" aria-label="場所を追加">＋</button>${moreMenu("spots",[["aiOpen","AIで候補を増やす",' data-k="more"'],["aiOpen","文章から拾う",' data-k="text"'],...(photoOn()&&ss.some(s=>!s.photo)?[["findPhotos","写真を探す"]]:[])])}</span></div>
-  ${ss.length?`<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg><input type="search" id="sq" value="${esc(S.q||"")}" placeholder="行きたい場所・グルメ・体験をさがす" autocomplete="off"></label>
+  ${ss.length?`<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg><input type="search" id="sq" value="${esc(S.q||"")}" placeholder="登録した場所を検索" autocomplete="off"></label>
   ${cats.length>1?`<div class="catchips"><button data-a="cat" data-c="" aria-pressed="${!S.cat}">すべて</button>${cats.map(c=>`<button data-a="cat" data-c="${c}" aria-pressed="${S.cat===c}">${CATS[c]}</button>`).join("")}</div>`:""}`:""}
   ${S.phBusy>0?`<div class="phbar">写真を探しています…（あと<span id="phn">${S.phBusy}</span>件）</div>`:""}
   ${ss.length?`<div class="excards" id="excards">${exList(t)}</div><p class="sub" style="text-align:center">${ss.length}か所 ・ ＋を押すと、あいている日・時間に入ります</p>`:`<div class="empty exempty"><b>行きたい場所を集めましょう</b><span>行き先に合った候補を、ふだん使っているAI（ChatGPT など）にまとめて出してもらえます。行きたい場所が決まっているなら、名前で登録もできます。</span><button class="btn fill big" data-a="aiOpen" data-k="more">AIに候補を出してもらう</button><button class="btn" data-a="addSpot">名前で場所を登録する</button></div>`}`}
@@ -1569,8 +1683,8 @@ function spotForm(t){const id=S.edit.split(":")[1];const v=S.draft||(id?{...t.sp
    <div class="inbox form"><span class="lbl">写真</span><div id="sf_ph">${sfPhotoHtml(ph)}</div>
     <div class="row"><label class="btn" style="cursor:pointer">${ph?"写真を変える":"自分の写真を選ぶ"}<input type="file" id="sf_file" accept="image/*" hidden></label>${ph?`<button class="btn" type="button" data-a="sfNoPhoto">写真を外す</button>`:""}</div>
     <span class="sub">${ph?"写真はこの端末の中だけに保存されます。":"選ばなくても、追加したあと自動で写真を探します（有名な場所のみ）。"}</span></div>
-   <div class="inbox form"><span class="lbl">地図の位置</span><span id="sf_pos">${v.lat!=null?`<span class="tag">設定済み（${(+v.lat).toFixed(4)}, ${(+v.lon).toFixed(4)}）</span>`:`<span class="sub">まだ決まっていません</span>`}</span>
-    <div class="row"><button class="btn fill" type="button" data-a="geoFind">名前から探す</button><button class="btn" type="button" data-a="pickDraft">地図を押して決める</button></div><div id="sf_geo" class="geol"></div>
+   <div class="inbox form"><span class="lbl">地図の位置</span><span id="sf_pos" role="status" aria-live="polite">${v.lat!=null?`<span class="tag">設定済み（${(+v.lat).toFixed(4)}, ${(+v.lon).toFixed(4)}）</span>`:`<span class="sub">まだ決まっていません</span>`}</span>
+    <div class="row"><button class="btn fill" type="button" data-a="geoFind">名前から探す</button><button class="btn" type="button" data-a="pickDraft">地図を押して決める</button></div><div id="sf_geo" class="geol" aria-live="polite"></div>
     <div class="field"><label for="sf_ll">または Googleマップのリンク／「緯度, 経度」を貼る</label><input type="text" id="sf_ll" placeholder="例：https://www.google.com/maps/place/…/@35.7101,139.8107…"></div>
     <p class="sub">Googleマップで場所を長押しすると出る数字（例：35.7101, 139.8107）をコピーして貼ってもOKです。短いリンク（maps.app.goo.gl）は読めません。</p></div>
    <input type="hidden" id="sf_lat" value="${v.lat??""}"><input type="hidden" id="sf_lon" value="${v.lon??""}">
@@ -1581,16 +1695,26 @@ function sfPhotoHtml(ph){return ph?`<img class="sfimg" src="${esc(phSrc(ph.u))}"
 async function shrinkImg(file){const url=URL.createObjectURL(file);try{const img=new Image();await new Promise((ok,ng)=>{img.onload=ok;img.onerror=ng;img.src=url});
   const k=Math.min(1,720/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
   c.getContext("2d").drawImage(img,0,0,c.width,c.height);return c.toDataURL("image/jpeg",.72)}finally{URL.revokeObjectURL(url)}}
+function destinationCenter(t){if(!t)return null;const valid=p=>p&&Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&Math.abs(p.lat)<=90&&Math.abs(p.lon)<=180;
+ if(valid(t.geo))return t.geo;const q=String(t.dest||t.title||"");const city=CITIES.filter(c=>q.includes(c[0])).sort((a,b)=>b[0].length-a[0].length)[0];if(city)return {lat:city[1],lon:city[2]};
+ if(/沖縄/.test(q))return {lat:26.212,lon:127.681};if(/北海道/.test(q))return {lat:43.062,lon:141.354};return null}
+function pickCenter(t){return S.pick?.ll||destinationCenter(t)||tripCenter(t)}
 function tripCenter(t){const p=spots(t).filter(s=>s.lat!=null);if(!p.length)return null;return {lat:p.reduce((a,s)=>a+s.lat,0)/p.length,lon:p.reduce((a,s)=>a+s.lon,0)/p.length}}
 /* 名前から位置を探す：ウィキペディアの記事の位置 → 地図の地名検索（Photon / OpenStreetMap） */
 async function geoFind(){const box=$("sf_geo"),q=$("sf_name").value.trim();if(!box)return;if(!q){toast("先に名前を入れてください");return}
   if(navigator.onLine===false){box.innerHTML=`<span class="sub">電波がないので探せません</span>`;return}
-  box.innerHTML=`<span class="sub">探しています…</span>`;const t=T(),c=tripCenter(t),out=[];
-  try{for(const host of ["ja.wikipedia.org","en.wikipedia.org"]){const r=await wapi(host,{action:"query",titles:q,redirects:"1",prop:"coordinates|pageprops",ppprop:"disambiguation"});const pg=r.query?.pages?.[0];const co=pg&&!pg.missing&&!(pg.pageprops&&"disambiguation" in pg.pageprops)&&pg.coordinates?.[0];if(co){out.push({lat:co.lat,lon:co.lon,label:pg.title,src:"ウィキペディア"});break}}}catch(e){}
-  try{const r=await fetch("https://photon.komoot.io/api/?"+new URLSearchParams({q,limit:"6",...(c?{lat:c.lat.toFixed(3),lon:c.lon.toFixed(3)}:{})})).then(r=>r.json());
+  const request=Symbol();box._request=request;const form=$("spotForm"),t=T(),c=tripCenter(t)||destinationCenter(t),out=[];
+  const current=()=>box.isConnected&&box._request===request&&$("spotForm")===form&&$("sf_name")?.value.trim()===q;
+  const bounded=p=>new Promise((ok,no)=>{const timer=setTimeout(()=>no(new Error("timeout")),10000);Promise.resolve(p).then(v=>{clearTimeout(timer);ok(v)},e=>{clearTimeout(timer);no(e)})});
+  box.innerHTML=`<span class="sub" role="status">「${esc(q)}」の位置を探しています…</span>`;
+  $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置は残しています。新しい検索結果を確認してください。":"検索中・位置はまだ決まっていません";
+  try{for(const host of ["ja.wikipedia.org","en.wikipedia.org"]){const r=await bounded(wapi(host,{action:"query",titles:q,redirects:"1",prop:"coordinates|pageprops",ppprop:"disambiguation"}));const pg=r.query?.pages?.[0];const co=pg&&!pg.missing&&!(pg.pageprops&&"disambiguation" in pg.pageprops)&&pg.coordinates?.[0];if(co){out.push({lat:co.lat,lon:co.lon,label:pg.title,src:"ウィキペディア"});break}}}catch(e){}
+  try{const r=await bounded(fetch("https://photon.komoot.io/api/?"+new URLSearchParams({q,limit:"6",...(c?{lat:c.lat.toFixed(3),lon:c.lon.toFixed(3)}:{})})).then(r=>r.json()));
     (r.features||[]).forEach(f=>{const p=f.properties||{},g=f.geometry?.coordinates;if(!g)return;out.push({lat:+g[1],lon:+g[0],label:[p.name,p.street,p.city||p.county||p.district,p.state,p.country].filter((x,i,a)=>x&&a.indexOf(x)===i).join("・"),src:"地図"})})}catch(e){}
+  if(!current())return;
   const seen=[];const list=out.filter(o=>isFinite(o.lat)&&isFinite(o.lon)&&!seen.some(x=>distKm(x,o)<0.05)&&seen.push(o)).slice(0,6);
-  box.innerHTML=list.length?`<span class="sub">当てはまるものを押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">見つかりませんでした。「地図を押して決める」か、Googleマップのリンクを貼ってください。</span>`}
+  $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置があります。変更する場合は候補を選んでください。":list.length?"候補が見つかりました・まだ未設定":"位置が見つかりませんでした・未設定";
+  box.innerHTML=list.length?`<span class="sub">位置はまだ確定していません。正しい場所の「この位置に決める」を押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><span>この位置に決める</span><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">見つかりませんでした。「地図を押して決める」か、Googleマップのリンクを貼ってください。</span>`}
 function parseLL(s){s=(s||"").trim();let m=/@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(s)||/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(s)||/[?&](?:q|query|ll|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(s)||/^(-?\d{1,2}\.\d+)\s*[,、 ]\s*(-?\d{2,3}\.\d+)$/.exec(s);
   if(!m)return null;const lat=+m[1],lon=+m[2];if(Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat,lon}}
 function readSpotForm(){if($("sf_day"))S.sfDay=$("sf_day").value;return {cat:$("sf_cat").value,minutes:+$("sf_min").value,name:$("sf_name").value.trim(),area:$("sf_area").value.trim(),note:$("sf_note").value.trim(),fee:$("sf_fee").value.trim(),url:$("sf_url").value.trim(),lat:$("sf_lat").value===""?null:+$("sf_lat").value,lon:$("sf_lon").value===""?null:+$("sf_lon").value}}
@@ -1638,7 +1762,7 @@ async function initML(t){const ph=$("mlmap");if(!ph)return;
   try{await loadML()}catch(e){mlFail();return}
   if(!$("mlmap")||S.tab!=="map")return;
   ML.ok=false;ML.tid=S.tid;ML.el=$("mlmap");
-  let map;try{map=new maplibregl.Map({container:ML.el,style:ML_STYLE,center:[137.5,37.5],zoom:4.3,attributionControl:{compact:false},dragRotate:false,pitchWithRotate:false,cooperativeGestures:false})}catch(e){mlFail();return}
+  const initial=pickCenter(t)||destinationCenter(t);let map;try{map=new maplibregl.Map({container:ML.el,style:ML_STYLE,center:initial?[initial.lon,initial.lat]:[137.5,37.5],zoom:initial?11:4.3,attributionControl:{compact:false},dragRotate:false,pitchWithRotate:false,cooperativeGestures:false})}catch(e){mlFail();return}
   ML.map=map;map.touchZoomRotate.disableRotation();map.addControl(new maplibregl.NavigationControl({showCompass:false}),"bottom-right");
   const to=setTimeout(()=>{if(!ML.ok)mlFail()},15000);
   map.on("error",e=>{if(!ML.ok&&!e.sourceId)mlFail()});
@@ -1672,9 +1796,10 @@ function mlData(t){const map=ML.map;if(!map||!ML.ok||!t)return;
 function mlFit(t,instant){const map=ML.map;if(!map)return;const pts=spots(t).filter(s=>s.lat!=null&&(!S.mapDay||spotDay(t,s.id)===S.mapDay));
   if(!pts.length)return;if(pts.length===1){map.jumpTo({center:[pts[0].lon,pts[0].lat],zoom:14});return}
   const b=new maplibregl.LngLatBounds();pts.forEach(s=>b.extend([s.lon,s.lat]));map.fitBounds(b,{padding:{top:70,bottom:50,left:40,right:110},maxZoom:15,duration:instant?0:600})}
-function mlFocus(t){if(!S.focus||!ML.map||!ML.ok)return;const f=S.focus;S.focus=null;ML.map.jumpTo({center:[f.lon,f.lat],zoom:15})}
+function mlFocus(t){const center=S.focus||(S.pick&&pickCenter(t));if(!center||!ML.map||!ML.ok)return;const f=center;S.focus=null;ML.map.jumpTo({center:[f.lon,f.lat],zoom:15})}
 function fitVB(t){const pts=spots(t).filter(s=>s.lat!=null).map(s=>proj(s.lat,s.lon));
-  if(!pts.length)return [0,0,GEO.vw,GEO.vh];
+  if(S.pick){const c=pickCenter(t);if(c){const [x,y]=proj(c.lat,c.lon);return [x-3,y-3,6,6]}}
+  if(!pts.length){const c=destinationCenter(t);if(c){const [x,y]=proj(c.lat,c.lon);return [x-8,y-8,16,16]}return [0,0,GEO.vw,GEO.vh]}
   let x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));
   const w=Math.max(x1-x0,14)*1.35,h=Math.max(y1-y0,14)*1.35;return [(x0+x1)/2-w/2,(y0+y1)/2-h/2,w,h]}
 /* 表示範囲を枠の縦横比に合わせる */
@@ -1927,6 +2052,7 @@ function aiView(t){const A=S.ai,o=A.o;const more=A.kind==="more",txt=A.kind==="t
      <div class="tbl"><table><thead><tr><th>場所</th><th>エリア</th><th>種類</th><th>位置</th></tr></thead><tbody>${c.spots.map(s=>`<tr style="${s.dup?"opacity:.45":""}"><td>${esc(s.name)}${s.dup?"（追加しない）":""}</td><td>${esc(s.area)}</td><td>${CATS[s.cat]}</td><td>${s.lat!=null?"○":"—"}</td></tr>`).join("")}</tbody></table></div>
      ${c.nItems?Object.entries(c.days).map(([d,its])=>`<div><span class="lbl">${md(d)}（${wd(d)}）${esc(c.areas[d]||"")}</span><ul class="nlist">${its.map(x=>`<li><span class="when">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:""}</span><span${x.flag?' style="color:var(--warn)"':""}>${esc(x.title)}${x.flag?"（要確認）":""}</span></li>`).join("")}</ul></div>`).join(""):""}
      <div class="row"><button class="btn fill" data-a="aiApply">取り込む</button><button class="btn" data-a="aiBack">貼り直す</button></div></section>`}
+  if((A.sent||A.copyText)&&!A.busy)return `<section class="card form" id="aiForm">${head}${aiLinkBox(A)}</section>`;
   if(txt)return `<section class="card form" id="aiForm">${head}
    <p class="sub">旅行の記事・ブログ・友達からのおすすめメッセージなどを貼ると、出てくる場所をAIが行きたい場所の候補にまとめます。</p>
    <div class="field"><label for="ai_dest">行き先</label><input type="text" id="ai_dest" maxlength="40" value="${esc(o.dest)}" placeholder="例：沖縄本島"></div>
@@ -1951,23 +2077,10 @@ function aiView(t){const A=S.ai,o=A.o;const more=A.kind==="more",txt=A.kind==="t
    ${aiLinkBox(A)}</section>`}
 const AIS=[["chatgpt","ChatGPT"],["claude","Claude"],["gemini","Gemini"]];
 const AI_NAME={chatgpt:"ChatGPT",claude:"Claude",gemini:"Gemini"};
-function aiLinkBox(A){const last=DB.lastAI||"chatgpt";const order=[...AIS].sort((a,b)=>(b[0]===last)-(a[0]===last));const [k0,l0]=order[0];
-  const step=A.sent?2:1;
-  const others=`<div class="aigo">${order.slice(A.sent?0:1).map(([k,l])=>`<button class="btn" data-a="aiGo" data-ai="${k}">${l}で作る</button>`).join("")}<button class="btn" data-a="aiCopy">指示文だけコピー</button></div>`;
-  return `<div class="inbox form aiflow" id="aiBox">
-    <ol class="aisteps"><li class="${step>1?"done":"on"}"><i>1</i>AIで作る</li><li class="${step===2?"on":""}"><i>2</i>答えをコピー</li><li><i>3</i>読み込む</li></ol>
-    ${A.sent?`<div class="aiback${A.back?" back":""}"><b>${A.back?"おかえりなさい。":""}${AI_NAME[A.sent]}の答えをコピーしましたか？</b><span>答えの下にある「コピー」ボタン（四角が2つ重なったマーク）を押してから、下のボタンを押してください。</span>
-      <button class="btn fill big" data-a="aiClip" id="aiClip">コピーした答えを読み込む</button><button class="ib" data-a="aiGo" data-ai="${A.sent}">${AI_NAME[A.sent]}をもう一度開く</button></div>
-      <details class="aimore"><summary class="sub">ほかのAIで作る・指示文だけコピーする</summary>${others}</details>`
-    :`<button class="btn fill big" data-a="aiGo" data-ai="${k0}">${l0}で作る</button>
-      <span class="sub">${k0==="gemini"?"Gemini が開いたら、入力欄を長押しして「ペースト」してください（指示文はコピー済みです）。":`${l0}が指示文の入った状態で開きます。送信して、答えが出るまで待ってください。`}</span>
-      <details class="aimore"><summary class="sub">ほかのAIで作る・指示文だけコピーする</summary>${others}</details>
-      <button class="btn big" data-a="aiClip">もう答えをコピーしてある → 読み込む</button>`}
-    <details${A.paste||A.manual?" open":""}><summary class="sub" style="cursor:pointer">うまく読み込めないときは、ここに貼る</summary>
-     <div class="form" style="margin-top:8px"><textarea id="ai_paste" placeholder="ここにAIの答えを貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="aiRead" style="align-self:flex-start">貼った答えを読み込む</button></div></details></div>`}
+function aiLinkBox(A){return aiFlowBox(A,"ai",aiPrompt(T(),A.o,A.kind))}
 function aiReadForm(){const A=S.ai,o=A.o,v=id=>$(id)?$(id).value:undefined;
   ["dest","from","move","pace","people","budget","extra","theme","count","src"].forEach(k=>{const x=v("ai_"+k);if(x!==undefined)o[k]=x});
-  o.prefs=[...document.querySelectorAll("[name=ai_pref]:checked")].map(x=>x.value);A.paste=v("ai_paste")??A.paste;
+  if(document.querySelector("[name=ai_pref]"))o.prefs=[...document.querySelectorAll("[name=ai_pref]:checked")].map(x=>x.value);A.paste=v("ai_paste")??A.paste;
   const m=document.querySelector("[name=ai_mode]:checked");if(m)o.mode=m.value}
 function aiParse(text){const t=T();try{const raw=pickJSON(text);S.ai.c=aiCheck(t,raw,S.ai.kind);if(raw._cut)S.ai.c.cut=true;if(raw._cut)S.ai.c.warn.unshift("AIの答えが途中で切れていたので、最後まで読めたところまで入れます。足りない分は、取り込んだあと「AIで候補を増やす」で足せます");S.ai.step="preview";draw();window.scrollTo(0,0)}
   catch(e){toast(e.message==="empty"?"場所も予定も見つかりませんでした。AIの答えをまるごと貼ってください":"読み取れませんでした。AIの答えを { から } までまるごと貼ってください")}}
@@ -2033,7 +2146,8 @@ const SUBTAB={split:"予算と割り勘",notif:"持ち物と通知"};
 const ICON={more:"M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M4 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0",edit:"M12 20h9M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z",del:"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",plane:"M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"};
 const ico=(k,label)=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
 function draw(){setTimeout(()=>dispatchEvent(new Event("scroll")),0);const t=T();
-  if(!t){S.tid=null;$("bar").innerHTML=`<div class="ttl"><b>旅のノート</b><small>旅行をつくって、日程・場所・地図・割り勘・通知をまとめる</small></div>`;$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${tripsView()}</div>`;return}
+  document.body.dataset.ui=S.tripForm?"form":!t?"home":S.ai?"ai":S.ro?"reorder":S.tab;
+  if(!t){S.tid=null;$("bar").innerHTML=`<div class="ttl"><b>旅のノート</b><small>次の旅を、ここから。</small></div>`;$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${tripsView()}</div>`;return}
   if(S.tripForm){$("bar").innerHTML=`<button class="back" data-a="cancel">‹ 戻る</button><div class="ttl"><b>${esc(t.title)}</b></div>`;$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${tripForm()}</div>`;return}
   const ds=dates(t);
   const cur=SUBTAB[S.tab]?"plan":S.tab;const sub=SUBTAB[S.tab]&&!S.ai;
@@ -2075,16 +2189,16 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"aiOpen":S.ai={kind:b.dataset.k,step:"form",o:aiDefaults(t)};S.edit=null;draw();window.scrollTo(0,0);break;
    case"aiClose":{const first=S.ai&&S.ai.first;S.ai=null;if(first&&S.tab==="plan"){const d0=dates(t)[0];if(d0&&!items(t,d0).length){S.edit="new:"+d0;draw();setTimeout(()=>{$("day0")?.scrollIntoView({block:"start"});scrollBy(0,-140);toast("1日目の予定から入れていきましょう")},50);break}}draw();break}
    case"aiBack":S.ai.step="form";draw();break;
-   case"aiGo":{aiReadForm();const A=S.ai;if(A.kind==="text"&&!(A.o.src||"").trim()){toast("先に文章を貼ってください");break}
-     const pr=aiPrompt(t,A.o,A.kind),q=encodeURIComponent(pr),ai=b.dataset.ai;const long=q.length>12000;
-     const url=ai==="chatgpt"&&!long?"https://chatgpt.com/?q="+q:ai==="claude"&&!long?"https://claude.ai/new?q="+q:{chatgpt:"https://chatgpt.com/",claude:"https://claude.ai/new",gemini:"https://gemini.google.com/app"}[ai];
-     try{navigator.clipboard.writeText(pr).catch(()=>{})}catch(e){}
-     window.open(url,"_blank");A.sent=ai;A.back=false;if(DB.lastAI!==ai){DB.lastAI=ai;save()}draw();
-     toast(ai==="gemini"||long?"指示文をコピーしました。AIの入力欄に貼って送ってください":"AIが開きます。答えが出たらコピーして戻ってきてください");break}
+   case"aiGo":{aiReadForm();const A=S.ai;if(A.kind==="text"&&!(A.o.src||"").trim()){toast("先に文章を貼ってください");break}const ai=b.dataset.ai;aiOpen(aiPrompt(t,A.o,A.kind),ai);A.sent=ai;A.copyText=null;A.back=false;if(DB.lastAI!==ai){DB.lastAI=ai;save()}draw();break}
+   case"aiEdit":S.ai.sent=null;S.ai.copyText=null;S.ai.back=false;draw();break;
+   case"aiReady":S.ai.sent=S.ai.sent||DB.lastAI||"chatgpt";S.ai.back=true;draw();break;
+   case"aiCopied":S.ai.copyText=null;S.ai.sent=S.ai.sent||DB.lastAI||"chatgpt";S.ai.back=false;draw();break;
+
    case"aiClip":{let tx="";try{tx=await navigator.clipboard.readText()}catch(e){}
      if(!tx||!tx.includes("{")){S.ai.manual=true;draw();$("ai_paste")?.focus();toast("コピーした答えが見つかりませんでした。下の欄に貼ってください");break}
      S.ai.paste=tx;aiParse(tx);break}
-   case"aiCopy":{aiReadForm();if(S.ai.kind==="text"&&!(S.ai.o.src||"").trim()){toast("先に文章を貼ってください");$("ai_src")?.focus();break}const p=aiPrompt(t,S.ai.o,S.ai.kind);try{await navigator.clipboard.writeText(p);toast("指示文をコピーしました。AIのチャットに貼ってください")}catch(e){S.ai.paste="";const ta=$("ai_paste");ta.value=p;ta.select();toast("指示文を下の欄に出しました。コピーしてから、AIの答えに貼り替えてください")}break}
+   case"aiCopy":{aiReadForm();if(S.ai.kind==="text"&&!(S.ai.o.src||"").trim()){toast("先に文章を貼ってください");break}await flowCopy(S.ai,"ai",aiPrompt(t,S.ai.o,S.ai.kind));break}
+
    case"aiRead":aiReadForm();aiParse(S.ai.paste);break;
    case"aiCont":{const c=S.ai.c;const names=c.spots.map(x=>x.name).join("、");const pr=`さっきの答えは途中で切れてしまいました。まだ出していない「行きたい場所の候補」だけを、次の形の JSON で返してください。説明文・出典・リンクは付けないでください。
 すでに出した場所：${names}
@@ -2096,6 +2210,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"aiClaude":{if(!SAMPLE||S.ai.busy)break;aiReadForm();if(S.ai.kind==="text"&&!(S.ai.o.src||"").trim()){toast("先に文章を貼ってください");break}const A=S.ai;A.busy=true;A.live="";draw();
      try{const r=await SAMPLE(aiPrompt(t,A.o,A.kind),{modelTier:"complex",onText:({text})=>{A.live=`${text.length}文字…`;const el=$("ai_live");if(el)el.textContent=A.live}});A.busy=false;if(S.ai!==A)break;aiParse(r.text)}
      catch(e){A.busy=false;draw();toast(e&&e.code==="not_granted"?"Claudeを使う許可がありません。ほかのAIで作る方法を使ってください":e&&e.code==="rate_limited"?"混み合っています。少し待ってからもう一度":"Claudeで作れませんでした。ほかのAIで作る方法も使えます")}break}
+
    case"newTrip":S.tripForm="new";draw();$("tf_dest")?.focus();break;
    case"sample":openSample();break;
    case"open":S.tid=id;S.tab="plan";S.vb=null;S.sel=null;S.mapDay=0;draw();window.scrollTo(0,0);break;
@@ -2127,15 +2242,15 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"closeCopy":S.copy=null;draw();break;
    case"geoFind":geoFind();break;
    case"cgAsk":cgAsk(b.dataset.q);break;
-   case"cgGo":{const C=S.cg;if(!C)break;const pr=cgPrompt(t,C.req),q=encodeURIComponent(pr),ai=b.dataset.ai,long=q.length>12000;
-     const url=ai==="chatgpt"&&!long?"https://chatgpt.com/?q="+q:ai==="claude"&&!long?"https://claude.ai/new?q="+q:{chatgpt:"https://chatgpt.com/",claude:"https://claude.ai/new",gemini:"https://gemini.google.com/app"}[ai];
-     try{navigator.clipboard.writeText(pr).catch(()=>{})}catch(e){}window.open(url,"_blank");C.ai=ai;C.back=false;if(DB.lastAI!==ai){DB.lastAI=ai;save()}draw();cgScroll();
-     toast(ai==="gemini"||long?"指示文をコピーしました。AIの入力欄に貼って送ってください":"AIが開きます。答えが出たらコピーして戻ってきてください");break}
-   case"cgCopy":{const pr=cgPrompt(t,S.cg.req);try{await navigator.clipboard.writeText(pr);S.cg.ai=S.cg.ai||DB.lastAI||"chatgpt";draw();toast("指示文をコピーしました。AIのチャットに貼ってください")}catch(e){toast("コピーできませんでした")}break}
+   case"cgGo":{const C=S.cg;if(!C)break;const ai=b.dataset.ai;aiOpen(cgPrompt(t,C.req),ai);C.ai=ai;C.copyText=null;C.back=false;if(DB.lastAI!==ai){DB.lastAI=ai;save()}draw();cgScroll();break}
+   case"cgCopy":await flowCopy(S.cg,"cg",cgPrompt(t,S.cg.req));break;
+   case"cgReady":S.cg.ai=S.cg.ai||DB.lastAI||"chatgpt";S.cg.back=true;draw();cgScroll();break;
+   case"cgCopied":S.cg.copyText=null;S.cg.ai=S.cg.ai||DB.lastAI||"chatgpt";S.cg.back=false;draw();break;
+
    case"cgClip":{let tx="";try{tx=await navigator.clipboard.readText()}catch(e){}if(!tx||!tx.includes("{")){S.cg.manual=true;draw();toast("コピーした答えが見つかりませんでした。下の欄に貼ってください");break}cgParse(tx);break}
    case"cgRead":cgParse($("cg_paste")?.value||"");break;
    case"cgOk":{const c=S.cg.c;if(aiApply(c,"days")){cgPush("a",S.cg.msg&&S.cg.msg.length?S.cg.msg:["日程を更新しました"]);S.cg={step:"done"};draw();cgScroll();fillPhotos(S.tid)}break}
-   case"cgNo":cgPush("a","わかりました。ほかに変えたいところがあれば言ってください。");S.cg={step:"idle"};draw();cgScroll();break;
+   case"cgNo":S.cg={step:"idle"};draw();cgScroll();break;
    case"cgClear":if(change("会話を消しました",t=>{t.chat=[]},true)){S.cg={step:"idle"};draw()}break;
    case"roOpen":{const ds=dates(t),td=ymd(new Date());const dd=b.dataset.date||(ds.includes(td)?td:ds[Math.min(S.sday||0,ds.length-1)]);if(!dd)break;S.ro={date:dd,ids:items(t,dd).map(x=>x.id)};S.ro.orig=[...S.ro.ids];S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
    case"roCancel":S.ro=null;draw();break;
@@ -2148,14 +2263,14 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"bkImgDel":S.bkImg=null;toast("画像を外します（保存を押すと反映）");b.previousElementSibling?.remove();b.remove();break;
    case"rainAdd":{const s=t.spots[id],date=b.dataset.date;const sl=suggestSlot(t,date,s);const tm=hm(sl.k);if(conflict(t,date,tm)){toast("あいている時間が見つかりませんでした");break}const nid=uid();const dur=DURS.includes(+s.minutes)?+s.minutes:0;
      if(change(`${s.name}を${dates(t).indexOf(date)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind:s.cat==="food"||s.cat==="cafe"?"food":"see",title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;draw()}break}
-   case"roMv":{const k=+b.dataset.k,d=+b.dataset.d,ids=S.ro.ids,j=k+d;const plan=roPlan(t,S.ro.date,ids);if(j<0||j>=ids.length||plan[j].fixed)break;[ids[k],ids[j]]=[ids[j],ids[k]];Native.haptic("light");roRender();break}
+   case"roMv":{if(!S.ro||b.disabled)break;const k=+b.dataset.k,d=+b.dataset.d,ids=S.ro.ids,j=k+d;if(!Number.isInteger(k)||![-1,1].includes(d)||k<0||k>=ids.length)break;const plan=roPlan(t,S.ro.date,ids);if(j<0||j>=ids.length||plan[k].fixed||plan[j].fixed)break;[ids[k],ids[j]]=[ids[j],ids[k]];Native.haptic("light");roRender();break}
    case"roDone":if(!roDirty()){S.ro=null;draw();break}if(roSave(t))draw();break;
    case"detail":S.detail=id;S.dtab="info";S.confirm=null;S.assign=null;if(S.tab!=="spots"){S.tab="spots"}draw();window.scrollTo(0,0);break;
    case"detailBack":S.detail=null;S.confirm=null;S.assign=null;draw();break;
    case"dtab":S.dtab=b.dataset.k;draw();break;
    case"cat":S.cat=b.dataset.c||"";draw();break;
    case"quickAdd":{const s=t.spots[id];const bd=bestDay(t,s);if(!bd){toast("日程がありません");break}qaSheet(id,bd.d,hm(bd.sl.k));break}
-   case"geoPick":{const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
+   case"geoPick":{if($("sf_geo"))$("sf_geo")._request=null;const lat=+b.dataset.lat,lon=+b.dataset.lon;$("sf_lat").value=lat;$("sf_lon").value=lon;$("sf_ll").value="";$("sf_pos").innerHTML=`<span class="tag">設定済み（${lat.toFixed(4)}, ${lon.toFixed(4)}）</span>`;$("sf_geo").innerHTML=`<span class="sub" style="color:var(--ok,#1F7A4D)">✓ 位置を決めました</span>`;break}
    case"sfNoPhoto":S.draft=readSpotForm();S.sfPhoto=null;draw();break;
    case"addSpot":S.edit="spot:";S.draft=null;S.sfPhoto=undefined;S.sfDay="";draw();$("sf_name")?.focus();break;
    case"editSpot":S.edit="spot:"+id;S.draft=null;S.sfPhoto=undefined;draw();break;
@@ -2167,7 +2282,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"unassign":if(change(`${t.spots[id].name}を日程から外しました`,t=>{Object.keys(t.items||{}).forEach(k=>{if(t.items[k].spot===id)delete t.items[k]})}))S.tab==="map"?redrawMap():draw();break;
    case"showSpot":S.sel=id;S.mapDay=0;S.tab="map";S.edit=null;S.vb=null;{const s0=t.spots[id];S.focus={lat:s0.lat,lon:s0.lon}}draw();{const s=t.spots[id];const [x,y]=proj(s.lat,s.lon);setVB([x-8,y-8,16,16])}window.scrollTo(0,0);break;
    case"pickDraft":S.draft=readSpotForm();S.pick={name:S.draft.name,back:true,ll:S.draft.lat!=null?{lat:S.draft.lat,lon:S.draft.lon}:null};S.tab="map";S.vb=null;if(S.pick.ll)S.focus={...S.pick.ll};draw();if(S.pick.ll){const [x,y]=proj(S.pick.ll.lat,S.pick.ll.lon);setVB([x-8,y-8,16,16])}window.scrollTo(0,0);break;
-   case"pickFor":S.pick={name:t.spots[id].name,id,ll:null};S.tab="map";S.edit=null;S.vb=null;draw();window.scrollTo(0,0);break;
+   case"pickFor":S.pick={name:t.spots[id].name,id,ll:t.spots[id].lat!=null?{lat:t.spots[id].lat,lon:t.spots[id].lon}:null};S.tab="map";S.edit=null;S.vb=null;draw();window.scrollTo(0,0);break;
    case"pickOk":{const p=S.pick;S.pick=null;if(p.back){S.draft.lat=p.ll.lat;S.draft.lon=p.ll.lon;S.tab="spots";draw();window.scrollTo(0,0)}
      else if(change(`${p.name}の位置を決めました`,t=>{t.spots[p.id].lat=p.ll.lat;t.spots[p.id].lon=p.ll.lon})){S.sel=p.id;redrawMap()}break}
    case"pickCancel":{const p=S.pick;S.pick=null;if(p.back){S.tab="spots";draw()}else redrawMap();break}
@@ -2210,7 +2325,7 @@ function roEndDrag(){const d=LP.drag;if(!d)return;LP.drag=null;d.rows.forEach(r=
   if(d.to!==d.from&&S.ro){const t=T(),plan=roPlan(t,S.ro.date,S.ro.ids);if(plan[d.to]&&!plan[d.to].fixed){const ids=S.ro.ids;const [x]=ids.splice(d.from,1);ids.splice(d.to,0,x);Native.haptic("light")}else toast("時間が決まっている移動の位置には置けません")}
   roRender()}
 function lpCancel(){clearTimeout(LP.timer);LP.timer=null}
-document.addEventListener("pointerdown",e=>{LP.swallow=false;if(LP.drag)roEndDrag();if(e.button)return;
+document.addEventListener("pointerdown",e=>{LP.swallow=false;if(LP.drag)roEndDrag();if(e.button)return;if(e.target.closest("[data-a=roMv],[data-a=roDel]")){lpCancel();return}
   const h=e.target.closest(".rol .roh");
   if(h&&S.ro){const li=h.closest("li");if(li.classList.contains("fixed"))return;e.preventDefault();roStartDrag(li,e.clientY);return}
   const row=S.ro&&e.target.closest(".rol li:not(.fixed)");
@@ -2237,6 +2352,9 @@ document.addEventListener("contextmenu",e=>{if(LP.drag||LP.timer||LP.swallow)e.p
 document.addEventListener("click",e=>{if(LP.swallow){LP.swallow=false;e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.tab==="ai"&&S.cg&&S.cg.step==="wait"&&S.cg.ai&&!S.cg.back){S.cg.back=true;draw();cgScroll()}});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.ai&&S.ai.sent&&S.ai.step!=="preview"&&!S.ai.back){S.ai.back=true;draw();const b=$("aiBox");if(b)b.scrollIntoView({block:"start",behavior:"smooth"})}});
+/* iOS large-title presentation; reduced-motion behavior is controlled in CSS. */
+function iosNav(){document.body.classList.toggle("ios-scrolled",scrollY>48)}
+addEventListener("scroll",iosNav,{passive:true});
 /* 日程の「次のスポットを追加する」は、トップの写真を過ぎてから出す */
 addEventListener("scroll",()=>{const f=$("fab"),h=document.querySelector(".hero2");document.body.classList.toggle("onhero",!!h&&S.tab==="plan"&&!S.ai&&h.getBoundingClientRect().bottom>90);if(!f)return;f.classList.toggle("show",!h||h.getBoundingClientRect().bottom<innerHeight*.45)},{passive:true});
 document.addEventListener("input",e=>{if(e.target.id==="ex_amount"){exConv();return}if(e.target.id==="sq"){S.q=e.target.value;const t=T(),el=$("excards");if(t&&el)el.innerHTML=exList(t)}});
@@ -2247,7 +2365,7 @@ document.addEventListener("change",async e=>{if(e.target.id==="f_bimg"){const f=
   if(e.target.id==="f_spot"&&$("f_dur")&&+$("f_dur").value===0){const m=t.spots[e.target.value]?.minutes;if(m){const n=DURS.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a,0);$("f_dur").value=n}}
   if(e.target.closest("#itemForm"))itemWarn();
   if(/^as_t_/.test(e.target.id)){S.atime=readTime("as_t");const s=t.spots[S.assign];if(s&&$("as_days"))$("as_days").innerHTML=asDays(t,{id:S.assign,...s})}
-  if(e.target.id==="sf_ll"){const ll=parseLL(e.target.value);if(ll){$("sf_lat").value=ll.lat;$("sf_lon").value=ll.lon;$("sf_pos").innerHTML=`<span class="tag">設定済み（${ll.lat.toFixed(4)}, ${ll.lon.toFixed(4)}）</span>`;if(ll.lat<20||ll.lat>46||ll.lon<122||ll.lon>154)toast("日本の外の場所は、いまは地図に表示されません")}else if(e.target.value.trim())toast("位置を読み取れませんでした。「35.71, 139.81」の形か、@の入ったリンクを貼ってください")}
+  if(e.target.id==="sf_ll"){if($("sf_geo"))$("sf_geo")._request=null;const ll=parseLL(e.target.value);if(ll){$("sf_lat").value=ll.lat;$("sf_lon").value=ll.lon;$("sf_pos").innerHTML=`<span class="tag">設定済み（${ll.lat.toFixed(4)}, ${ll.lon.toFixed(4)}）</span>`;if(ll.lat<20||ll.lat>46||ll.lon<122||ll.lon>154)toast("日本の外の場所は、いまは地図に表示されません")}else if(e.target.value.trim())toast("位置を読み取れませんでした。「35.71, 139.81」の形か、@の入ったリンクを貼ってください")}
   if(/^n_/.test(e.target.id)){const n=nset(t);const v=id=>$(id)?.value;
     const nn={before:+(v("n_before")??n.before),eve:{on:$("n_eve_on").checked,time:$("n_eve_h")?pad(v("n_eve_h"))+":"+v("n_eve_m"):n.eve.time},morn:{on:$("n_morn_on").checked,time:$("n_morn_h")?pad(v("n_morn_h"))+":"+v("n_morn_m"):n.morn.time},pre:{on:$("n_pre_on").checked,days:$("n_pre_days")?+v("n_pre_days"):n.pre.days}};
     if(change("通知の設定を変えました",t=>{t.notif=nn},true)){draw();const on=nn.before>0||nn.eve.on||nn.morn.on||nn.pre.on;
