@@ -2,6 +2,8 @@ import worker from './worker-bundle.js';
 import canonical from './worker.js';
 import {DatabaseSync} from 'node:sqlite';
 import fs from 'node:fs';
+import vm from 'node:vm';
+import {TEST_HTML} from './test-assets.js';
 import assert from 'node:assert/strict';
 import {createECDH, hkdfSync, createDecipheriv, randomBytes} from 'node:crypto';
 const origin='https://tabinote-notify-test.hourensou2048.workers.dev';
@@ -41,4 +43,12 @@ globalThis.fetch=async()=>new Response(JSON.stringify({reason:'BadJwtToken'}),{s
 const sub2={...subscription,endpoint:'https://web.push.apple.com/demo2'};assert.equal((await worker.fetch(req('/schedule',{subscription:sub2,notifications:[]}),env)).status,200);
 const rejected=await worker.fetch(req('/test',{subscription:{endpoint:'https://web.push.apple.com/demo2',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}}}),env);
 assert.equal((await rejected.json()).reason,'BadJwtToken');
+const unavailable={...env,NOTIFY_DB:{prepare(){throw Error('database unavailable')}}};const outage=await worker.fetch(req('/test',{subscription}),unavailable);assert.equal(outage.status,503);assert.deepEqual(await outage.json(),{error:'storage_failed'});
+// Execute the real test-page script with an expired saved registration and click Send.
+const sub3={...subscription,endpoint:'https://web.push.apple.com/demo3'},thirdToken='c'.repeat(64);
+assert.equal((await worker.fetch(req('/schedule',{subscription:sub3,notifications:[]},origin,thirdToken),env)).status,200);sql.prepare('UPDATE devices SET expires=0 WHERE subscription LIKE ?').run('%demo3%');
+const storage=new Map([['notify-test-on','1'],['notify-test-token',thirdToken]]),elements=new Map();const get=id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id)};
+const reg={pushManager:{getSubscription:async()=>({toJSON:()=>sub3})}};let deliveries=0;globalThis.fetch=async()=>{deliveries++;return new Response(null,{status:201})};
+const context={crypto,Uint8Array,atob,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},document:{getElementById:get},navigator:{userAgent:'test',platform:'test',maxTouchPoints:0,serviceWorker:{register:async()=>reg,ready:Promise.resolve(reg)}},window:{matchMedia:()=>({matches:false}),PushManager:{},Notification:{}},fetch:(path,options={})=>worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
+vm.createContext(context);const script=TEST_HTML.match(/<script>([\s\S]*?)<\/script>/)[1].replace(';init();',';globalThis.ready=init();');vm.runInContext(script,context);await context.ready;assert.equal(get('send').disabled,false);await get('send').onclick();assert.equal(deliveries,1);assert.match(get('state').textContent,/送信を受け付け/);assert(sql.prepare('SELECT expires FROM devices WHERE subscription LIKE ?').get('%demo3%').expires>Date.now());
 console.log('PASS: canonical/bundle routes, device authorization, VAPID signature, independent payload decryption, cooldown, provider error');

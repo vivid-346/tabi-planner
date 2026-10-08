@@ -75,7 +75,7 @@ export default {
     if (endpoint.protocol!=='https:' || endpoint.username || endpoint.password || endpoint.port || !(
       host==='web.push.apple.com' || host.endsWith('.push.apple.com') || host==='fcm.googleapis.com' || host==='updates.push.services.mozilla.com')) return reply({error:'invalid_endpoint'},400);
     if (!sub.keys || typeof sub.keys.p256dh!=='string' || typeof sub.keys.auth!=='string') return reply({error:'invalid_keys'},400);
-    if(!await authorizedDevice(request,env,sub))return reply({error:'authorization'},403);
+    try{if(!await authorizedDevice(request,env,sub))return reply({error:'authorization'},403)}catch(_){return reply({error:'storage_failed'},503)}
     const now=Date.now();
     for(const [key,at] of recentTests)if(now-at>=60000)recentTests.delete(key);
     if(recentTests.size>=1000||now-(recentTests.get(endpoint.href)||0)<10000)return reply({error:'try_later'},429);
