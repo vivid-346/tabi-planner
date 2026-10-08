@@ -1100,6 +1100,10 @@ body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-bac
 
 /* R18: day labels keep full date; only the rail scrolls. */
 .daypills{min-width:0;scroll-padding-inline:4px}.daypills button{width:max-content!important;min-width:104px!important;flex-shrink:0!important}.daypills button b,.daypills button small{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}.dprow>button,.dprow>.planmenu{flex-shrink:0}
+
+/* R18 follow-up: reserve a full row for dates; action borders override base styles. */
+@media(max-width:699px){.dprow{flex-wrap:wrap}.dprow .daypills{flex:1 0 100%;width:100%;box-sizing:border-box}.dprow>.btn{margin-left:auto}.daypills button{min-width:112px!important;padding-inline:12px!important}}
+.btn[data-a="moneySet"],.btn[data-a="tab"][data-t="split"],#aiForm .btn[data-a="aiClose"]{background:#fff!important;border:2px solid #7354CB!important;color:#34265F!important;box-shadow:0 1px 2px rgba(0,0,0,.08)!important;text-align:center;justify-content:center}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
