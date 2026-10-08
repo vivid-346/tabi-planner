@@ -1,6 +1,6 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert');
 for(const file of ['app.html','index.html']){
- const s=fs.readFileSync(require('path').join(__dirname,file==='app.html'?'src/app.html':'index.html'),'utf8');for(const m of s.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
+ const s=fs.readFileSync(path.join(__dirname,file==='app.html'?'src/app.html':'index.html'),'utf8');for(const m of s.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
  const c={S:{ai:{o:{from:''}}},DB:{},dates:t=>[t.start,t.end].filter((x,i,a)=>a.indexOf(x)===i),items:(t,d)=>Object.values(t.items||{}).filter(x=>!d||x.date===d),normName:x=>String(x||'').replace(/\s/g,'').toLowerCase(),timeKey:x=>/^\d\d:\d\d$/.test(x||'')?Number(x.slice(0,2))*60+Number(x.slice(3)):null,hm:x=>String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'),distKm:()=>1,legMin:()=>7,mainMove:()=> 'car',yen:x=>x+'円',esc:x=>String(x??''),md:x=>x};vm.createContext(c);vm.runInContext(s.slice(s.indexOf('function planFee('),s.indexOf('function moneyStats(')),c);
  for(const [text,lo,hi] of [['無料',0,0],['1,000円前後',1000,1000],['2,000〜3,000円',2000,3000],['1人1000円',1000,1000],['15000円〜',15000,null]]){const f=c.planFee(text);assert(f,text);assert.equal(f.lo,lo);assert.equal(f.hi,hi)}
  for(const text of ['未確認','1500円/泊','1室15000円','$20','700円・大人300円','1000ドル','1000','1万円','無料（特別展700円）','無料・駐車場500円'])assert.equal(c.planFee(text),null,text);
@@ -12,10 +12,10 @@ for(const file of ['app.html','index.html']){
  const constrained={...t,items:{fixed:{date:t.end,time:'14:00',kind:'move',title:'帰りの飛行機',arrive:'16:00'}}};
  const tight={warn:[],nItems:1,spots:[{name:'神社',minutes:90,lat:33,lon:130}],days:{[t.end]:[{time:'13:00',kind:'see',title:'神社',spotName:'神社',note:''}]}};const flagged=c.aiPrepare(constrained,tight,'add');assert(flagged.days[t.end][0].flag);assert(flagged.warn.some(x=>x.includes('時間の確認')));assert.equal(constrained.items.fixed.time,'14:00');
  assert(!c.aiSameItem(t,{date:t.end,kind:'move',title:'電車で移動',time:'10:00'},{date:t.end,kind:'move',title:'電車で移動',time:'14:00'}));
- assert(c.aiSameItem(t,{date:t.end,kind:'see',title:'博多駅',time:'12:00'},{date:t.end,kind:'other',title:'博多駅',time:'11:00',spot:'station'}));c.S.ai.o.from='';assert.equal(c.aiPrepare(t,raw,'add').days[t.start][0].time,'');
+ assert(c.aiSameItem(t,{date:t.end,kind:'see',title:'博多駅',time:'12:00'},{date:t.end,kind:'other',title:'博多駅',time:'11:00',spot:'station'}));assert(c.aiSameItem(t,{date:t.end,kind:'see',title:'博多駅を見学',time:'12:00'},{date:t.end,kind:'see',title:'博多駅',spotName:'博多駅',time:'11:00'}));c.S.ai.o.from='';assert.equal(c.aiPrepare(t,raw,'add').days[t.start][0].time,'');
+ const savedDist=c.distKm;c.distKm=()=>0;const samePlace={warn:[],nItems:2,spots:[{name:'博多駅',lat:33,lon:130,minutes:60}],days:{[t.end]:[{time:'11:00',kind:'see',title:'駅を見る',spotName:'博多駅',note:''},{time:'12:00',arrive:'13:00',kind:'move',title:'電車で移動',spotName:'博多駅',note:''}]}};assert(!c.aiPrepare({...t,items:{}},samePlace,'replace').days[t.end][0].flag);c.distKm=savedDist;
  if(file==='index.html'){assert(s.startsWith('<!doctype html>'));assert(s.includes('name="viewport"'));assert(s.includes('const GEO={"d":'));assert(!s.includes('const GEO=__GEO__'));}
  c.tripPhoto=()=>null;c.li=()=>'';c.wd=()=>'';c.S.ai=null;const chatRaw=JSON.parse(JSON.stringify(tight));chatRaw.days[t.end].push({...constrained.items.fixed});c.S.cg={step:'preview',c:chatRaw};vm.runInContext(s.slice(s.indexOf('function cgView('),s.indexOf('function aiFlowBox(')),c);const preview=c.cgView(constrained);assert(preview.includes('時間の確認が必要'));assert(preview.includes('固定予定までに'));
  assert(s.includes('if(!S.mapAdding)'));assert(s.includes('else if(S.mapAdding)'));assert(s.includes('data-a="mapAddMode"'));assert(s.includes('しおり・書き出し'));console.log('PASS '+file+': cost ranges/unknowns/people; AI duplicate exclusion/time adjustment/origin safety/fixed return boundary; map explicit add mode; source syntax');
 }
-
 
