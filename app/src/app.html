@@ -1118,6 +1118,8 @@ body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-bac
 .memcard{display:grid;gap:8px;margin:12px 0}.memcard b{font-size:18px}.memcard p{margin:0;color:#475467;font-size:14px}
 .memmini{margin:10px 0;min-height:44px;gap:6px;background:#fff!important;border:1px solid #D0D5DD!important}
 .memov img{max-height:52vh;width:100%;object-fit:contain;border-radius:10px;background:#F2F4F7}.memdel{margin:0;font-size:14px;color:#475467;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.vote-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.vote-tools .btn{min-height:44px}.vote-tools p{margin:0;width:100%;color:#344054;font-size:14px}.vote-row{border:1px solid #D0D5DD;border-radius:16px;padding:12px;margin:8px 0;background:#fff;min-width:0}.vote-row legend{font-weight:700;font-size:17px;padding:0 4px}.vote-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.vote-choices .btn{min-height:44px;padding:8px 4px;font-size:14px;justify-content:center}.exc .exo .vote-count{font-weight:600;color:#1D2939!important;background:rgba(255,255,255,.94);border-radius:8px;padding:3px 7px;align-self:flex-start}.vote-form h2{font-size:28px}.vote-form p{color:#344054}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -1757,22 +1759,107 @@ function printView(t){const ds=dates(t);const ss=spots(t);
   ${ss.length?`<h2>行きたい場所メモ</h2><table>${ss.map(s=>`<tr><td><b>${esc(s.name)}</b>${s.area?` <span class="nt">${esc(s.area)}</span>`:""}${s.note?`<div class="nt">${esc(s.note)}</div>`:""}</td><td class="nt" style="width:110px">${esc(s.fee||"")}${s.book?"<br>要予約":""}</td></tr>`).join("")}</table>`:""}
   <p class="nt" style="margin-top:16px">旅のノートで作成 ・ 移動時間や料金は目安です</p></article>`}
 
+/* 行きたい投票：共有コードに写真や位置を入れない。既存アプリへ組み込む純粋関数。 */
+const VOTE_VALUES=[1,0,-1];
+const voteSafeId=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,60}$/.test(v)&&!['__proto__','constructor','prototype'].includes(v);
+const voteName=v=>typeof v==='string'?v.trim().slice(0,20):'';
+function voteInviteData(t){
+ if(!voteSafeId(t.sid))throw new Error('trip');
+ const c=Object.entries(t.spots||{}).filter(([id,s])=>voteSafeId(id)&&s&&typeof s.name==='string'&&s.name.trim()).map(([id,s])=>[id,s.name.slice(0,60)]);
+ if(!c.length)throw new Error('empty');if(c.length>500)throw new Error('limit');
+ return {v:1,t:t.sid,n:String(t.title||'旅行').slice(0,40),c};
+}
+function voteCleanInvite(o){
+ if(!o||o.v!==1||!voteSafeId(o.t)||!Array.isArray(o.c)||o.c.length>500)throw new Error('vote');
+ const ids=new Set(),c=[];
+ for(const x of o.c){if(!Array.isArray(x)||x.length!==2||!voteSafeId(x[0])||typeof x[1]!=='string'||!x[1].trim()||ids.has(x[0]))throw new Error('vote');ids.add(x[0]);c.push([x[0],x[1].slice(0,60)])}
+ if(!c.length)throw new Error('empty');if(c.length>500)throw new Error('limit');
+ return {v:1,t:o.t,n:typeof o.n==='string'?o.n.slice(0,40):'旅行',c};
+}
+function voteResponseData(invite,rid,name,answers){
+ const i=voteCleanInvite(invite),n=voteName(name);
+ if(!n||!voteSafeId(rid))throw new Error('name');
+ const a=i.c.map(([id])=>{const value=answers[id];if(!VOTE_VALUES.includes(value))throw new Error('unanswered');return [id,value]});
+ return {v:1,t:i.t,r:rid,n,a};
+}
+function voteCleanResponse(o){
+ if(!o||o.v!==1||!voteSafeId(o.t)||!voteSafeId(o.r)||!voteName(o.n)||!Array.isArray(o.a)||!o.a.length||o.a.length>500)throw new Error('vote');
+ const ids=new Set(),a=[];
+ for(const x of o.a){if(!Array.isArray(x)||x.length!==2||!voteSafeId(x[0])||!VOTE_VALUES.includes(x[1])||ids.has(x[0]))throw new Error('vote');ids.add(x[0]);a.push([x[0],x[1]])}
+ return {v:1,t:o.t,r:o.r,n:voteName(o.n),a};
+}
+function voteResponseTarget(trips,response,currentTid){
+ const r=voteCleanResponse(response);
+ const matches=Object.entries(trips||{}).filter(([,t])=>t.sid===r.t);
+ if(!matches.length)return {kind:'missing'};
+ // 同じ旅行を複製した場合も勝手に他のコピーへ反映しない。
+ const current=matches.find(([id])=>id===currentTid);
+ if(current)return {kind:'current',tid:current[0]};
+ return {kind:'confirm',choices:matches.map(([id,t])=>({id,title:String(t.title||'旅行')}))};
+}
+function voteApplyResponse(t,response,replaceRid){
+ const r=voteCleanResponse(response);if(t.sid!==r.t)throw new Error('trip');
+ const old=t.votes||{};
+ const sameName=Object.entries(old).find(([id,x])=>id!==r.r&&x&&voteName(x.n)===r.n);
+ if(sameName&&replaceRid!==sameName[0])return {confirm:sameName[0],name:r.n};
+ let missing=0;const a=r.a.filter(([id])=>{if(Object.hasOwn(t.spots||{},id))return true;missing++;return false});
+ // 戻り値だけを作り、保存成功まで元の旅行を変更しない。
+ const votes={...old};if(sameName)delete votes[sameName[0]];
+ votes[r.r]={n:r.n,a};return {votes,missing,replaced:!!old[r.r]||!!sameName};
+}
+function voteCounts(t){
+ const counts=Object.create(null);for(const id of Object.keys(t.spots||{}))counts[id]=0;
+ for(const [rid,x] of Object.entries(t.votes||{})){if(!voteSafeId(rid)||!x||!Array.isArray(x.a))continue;const seen=new Set();for(const pair of x.a){if(!Array.isArray(pair))continue;const [id,v]=pair;if(seen.has(id))continue;seen.add(id);if(v===1&&Object.hasOwn(counts,id))counts[id]++}}
+ return counts;
+}
+
+/* 投票の画面と操作。新しいタブは作らず、受け取り画面と候補一覧を使用。 */
+function votePerson(){
+ const key=KEY+'-voter';try{let p=JSON.parse(localStorage.getItem(key)||'null');if(p&&voteSafeId(p.id))return p;p={id:uid(),name:''};localStorage.setItem(key,JSON.stringify(p));return p}catch(e){if(!S.votePerson)S.votePerson={id:uid(),name:''};return S.votePerson}
+}
+function voteRemember(name){const p=votePerson();p.name=voteName(name);S.votePerson=p;try{localStorage.setItem(KEY+'-voter',JSON.stringify(p))}catch(e){}return p}
+function voteControls(t){const n=Object.keys(t.votes||{}).length;return `<div class="vote-tools"><button class="btn fill" data-a="voteInvite" ${Object.keys(t.spots||{}).length?'':'disabled'}>みんなに聞く</button><button class="btn" data-a="voteImport">回答コードを読み込む</button>${n?`<button class="btn" data-a="voteSort" aria-pressed="${!!S.voteSort}">${S.voteSort?'登録順に戻す':'人気順に並べる'}</button><p role="status">${n}人の回答を受け取りました</p>`:''}</div>`}
+function voteFriendView(){const f=S.voteFriend,i=f.invite,p=votePerson();return `<section class="card form vote-form"><h2>どこに行きたい？</h2><p>${esc(i.n)} ・ 場所ごとに選んで、幹事に返しましょう。</p><div class="field"><label for="vote_name">あなたの名前（ニックネーム）</label><input id="vote_name" maxlength="20" value="${esc(f.name??p.name)}" autocomplete="nickname"></div>${i.c.map(([id,name])=>`<fieldset class="vote-row"><legend>${esc(name)}</legend><div class="vote-choices">${[[1,'行きたい'],[0,'どっちでも'],[-1,'パス']].map(([value,label])=>`<button type="button" class="btn ${f.answers[id]===value?'fill':''}" data-a="voteChoose" data-id="${id}" data-value="${value}" aria-pressed="${f.answers[id]===value}">${label}</button>`).join('')}</div></fieldset>`).join('')}<button class="btn fill big" data-a="voteAnswer">回答コードを作る</button><button class="btn" data-a="voteCancel">閉じる</button>${codeOutBox()}</section>`}
+function voteImportView(){const v=S.voteImport;
+ if(v.response){const target=voteResponseTarget(DB.trips,v.response,S.tid);if(target.kind==='missing')return `<section class="card form"><h2>この旅行が見つかりません</h2><p>この回答の旅行を作った端末で読み込んでください。</p><button class="btn" data-a="voteCancel">閉じる</button></section>`;
+ const choices=target.kind==='current'?[{id:target.tid,title:DB.trips[target.tid].title}]:target.choices;
+ return `<section class="card form"><h2>${target.kind==='confirm'?'別の旅行への回答です':'回答を取り込む'}</h2><p>${esc(v.response.n)}さんの回答です。${target.kind==='confirm'?'次の旅行に切り替えて取り込みます。':'以前の回答があれば新しい回答に置き換えます。'}</p>${v.replace?`<p>同じ名前の回答が既にあります。別の端末からの回答です。以前の回答を置き換えてよいですか？</p>`:''}${choices.map(x=>`<button class="btn fill" data-a="voteApply" data-id="${esc(x.id)}">${esc(x.title)}に${v.replace?'置き換えて':'取り込む'}</button>`).join('')}<button class="btn" data-a="voteCancel">やめる</button></section>`}
+ return `<section class="card form"><h2>投票コードを読み込む</h2><p>友達から届いたメッセージを、そのまま貼ってください。</p><label class="sr" for="vote_text">投票コード</label><textarea id="vote_text" class="copybox">${esc(v.text||'')}</textarea><button class="btn fill" data-a="voteRead">読み込む</button><button class="btn" data-a="voteCancel">やめる</button></section>`
+}
+async function voteSend(title,message){S.codeOut=message;draw();const r=await Native.share(title,message);if(r==='copied')toast('コピーしました。LINEなどに貼って送れます');else if(!r)toast('下のコードをコピーして送ってください')}
+async function voteReceive(code){const r=await unpackCode(code);if(r.kind==='VOTE'){const invite=voteCleanInvite(r.data);S.voteFriend={invite,answers:{},name:votePerson().name};S.voteImport=null;S.imp=null;S.codeOut=null;draw();window.scrollTo(0,0);return true}
+ if(r.kind==='ANSWER'){S.voteImport={response:voteCleanResponse(r.data)};S.voteFriend=null;S.imp=null;S.codeOut=null;draw();window.scrollTo(0,0);return true}return false}
+async function voteAction(a,b){const id=b.dataset.id;
+ switch(a){
+ case 'voteInvite':{const t=T();if(!t.sid&&!change('',x=>x.sid=uid(),true))return true;try{const data=voteInviteData(T());const code=await packCode('VOTE',data);await voteSend('みんなに聞く',`「${data.n}」の行きたい場所を選んでください。旅のノートの「受け取った旅行を取り込む」に、このメッセージを貼ってください。\n\n${code}`)}catch(e){toast(e.message==='limit'?'一度に聞ける候補は500件までです。候補を整理してから、もう一度押してください':'候補を追加してから、みんなに聞いてください')}return true}
+ case 'voteImport':S.voteImport={text:''};S.codeOut=null;draw();window.scrollTo(0,0);return true;
+ case 'voteRead':{const text=$('vote_text').value;S.voteImport.text=text;try{if(!await voteReceive(text))toast('投票お願いコードか回答コードを貼ってください')}catch(e){toast('投票コードを読めませんでした。メッセージをまるごと貼り直してください')}return true}
+ case 'voteChoose':if(S.voteFriend){S.voteFriend.name=$('vote_name').value;S.voteFriend.answers[id]=+b.dataset.value;S.codeOut=null;draw()}return true;
+ case 'voteAnswer':{const f=S.voteFriend;if(!f)return true;f.name=$('vote_name').value;try{const p=voteRemember(f.name),r=voteResponseData(f.invite,p.id,f.name,f.answers);await voteSend('行きたい場所の回答',`${r.n}の回答です。旅のノートの「回答コードを読み込む」に貼ってください。\n\n${await packCode('ANSWER',r)}`)}catch(e){toast(e.message==='unanswered'?'すべての場所で、行きたい・どっちでも・パスを選んでください':'ニックネームを入れてください')}return true}
+ case 'voteApply':{const v=S.voteImport;if(!v?.response)return true;const target=voteResponseTarget(DB.trips,v.response,S.tid);const allowed=target.kind==='current'?target.tid===id:target.kind==='confirm'&&target.choices.some(x=>x.id===id);if(!allowed){toast('この回答の旅行が見つかりません');return true}
+ const x=voteApplyResponse(DB.trips[id],v.response,v.replace);if(x.confirm){v.replace=x.confirm;draw();return true}const previous=S.tid;S.tid=id;if(!change('回答を取り込みました',t=>t.votes=x.votes,true)){S.tid=previous;return true}S.voteImport=null;S.imp=null;S.tab='spots';S.q='';S.cat='';S.detail=null;S.ai=null;draw();toast(x.missing?`回答を取り込みました。${x.missing}件は候補が見つかりませんでした`:x.replaced?'新しい回答に置き換えました':'回答を取り込みました',true);return true}
+ case 'voteSort':S.voteSort=!S.voteSort;draw();return true;
+ case 'voteCancel':S.voteFriend=null;S.voteImport=null;S.codeOut=null;draw();return true;
+ }return false;
+}
+
 /* ================= 画面：行きたい場所 ================= */
 function spotsView(t){const ss=spots(t);
   if(S.edit&&S.edit.startsWith("spot"))return spotForm(t);
   if(S.detail&&t.spots?.[S.detail])return spotDetail(t,S.detail);
   const cats=[...new Set(ss.map(s=>s.cat).filter(c=>CATS[c]))];
   return `<div class="exh"><h2>行きたい場所</h2><span class="row" style="gap:4px"><button class="btn fill icon-only add" data-a="addSpot" aria-label="場所を追加">＋</button>${moreMenu("spots",[["aiOpen","文章から拾う",' data-k="text"'],...(photoOn()&&ss.some(s=>!s.photo)?[["findPhotos","写真を探す"]]:[])])}</span></div>
-  <div class="place-actions"><button class="btn fill" data-a="aiOpen" data-k="more">${li("spark")} AIで候補を探す</button><button class="btn" data-a="addSpot">＋ 名前で場所を追加</button></div><p class="place-hint">行きたい場所を集めて、「日程に入れる」で日にちと時間を選びます。</p>${ss.length?`<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg><input type="search" id="sq" value="${esc(S.q||"")}" placeholder="この旅行に登録した場所を絞り込む" autocomplete="off"></label>
+  ${voteControls(t)}${S.codeOut?codeOutBox():""}<div class="place-actions"><button class="btn fill" data-a="aiOpen" data-k="more">${li("spark")} AIで候補を探す</button><button class="btn" data-a="addSpot">＋ 名前で場所を追加</button></div><p class="place-hint">行きたい場所を集めて、「日程に入れる」で日にちと時間を選びます。</p>${ss.length?`<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg><input type="search" id="sq" value="${esc(S.q||"")}" placeholder="この旅行に登録した場所を絞り込む" autocomplete="off"></label>
   ${cats.length>1?`<div class="catchips"><button data-a="cat" data-c="" aria-pressed="${!S.cat}">すべて</button>${cats.map(c=>`<button data-a="cat" data-c="${c}" aria-pressed="${S.cat===c}">${CATS[c]}</button>`).join("")}</div>`:""}`:""}
   ${S.phBusy>0?`<div class="phbar">写真を探しています…（あと<span id="phn">${S.phBusy}</span>件）</div>`:""}
   ${ss.length?`<div class="excards" id="excards">${exList(t)}</div><p class="sub" style="text-align:center">${ss.length}か所 ・ 「日程に入れる」で日にちと時間を選べます</p>`:`<div class="empty exempty"><b>行きたい場所を集めましょう</b><span>行き先に合った候補を、ふだん使っているAI（ChatGPT など）にまとめて出してもらえます。行きたい場所が決まっているなら、名前で登録もできます。</span><button class="btn fill big" data-a="aiOpen" data-k="more">AIに候補を出してもらう</button><button class="btn" data-a="addSpot">名前で場所を登録する</button></div>`}`}
-function exList(t){const q=normName(S.q||"");const ss=spots(t).filter(s=>(!S.cat||s.cat===S.cat)&&(!q||normName(`${s.name}${s.area||""}${s.note||""}${CATS[s.cat]||""}`).includes(q)));
+function exList(t){const counts=voteCounts(t);const q=normName(S.q||"");const ss=spots(t).filter(s=>(!S.cat||s.cat===S.cat)&&(!q||normName(`${s.name}${s.area||""}${s.note||""}${CATS[s.cat]||""}`).includes(q)));
+  if(S.voteSort)ss.sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0));
   if(!ss.length)return `<p class="sub" style="text-align:center;padding:24px 0">見つかりませんでした</p>`;
   return ss.map(s=>{const ph=spotPhoto(s);const d=spotDay(t,s.id);
     return `<article class="exc" data-a="detail" data-id="${s.id}"><figure>${ph?`<img src="${esc(phSrc(ph.u))}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="exni"><svg viewBox="0 0 24 24"><path d="${CAT_ICON[s.cat]||CAT_ICON.see}"/></svg></span>`}</figure>
      ${d?`<span class="exday" style="--dc:${dayColor(d)}">${d}日目</span>`:""}${s.book?`<span class="exbk">要予約</span>`:""}
-     <div class="exo"><b>${esc(s.name)}</b><span>${CATS[s.cat]||"観光"}${s.minutes?` ・ 約${fmtMin(s.minutes)}`:""}${s.area?` ・ ${esc(s.area)}`:""}</span></div>
+     <div class="exo"><b>${esc(s.name)}</b>${Object.keys(t.votes||{}).length?`<span class="vote-count">行きたい ${counts[s.id]||0}人</span>`:""}<span>${CATS[s.cat]||"観光"}${s.minutes?` ・ 約${fmtMin(s.minutes)}`:""}${s.area?` ・ ${esc(s.area)}`:""}</span></div>
      ${d?"":`<button class="exadd" data-a="quickAdd" data-id="${s.id}" aria-label="${esc(s.name)}を日程に入れる">日程に入れる</button>`}</article>`}).join("")}
 /* ＋：入れやすい日（その日の予定に近くて、あいている時間がある日）を選んで入れる */
 function bestDay(t,s){const ds=dates(t);let best=null;ds.forEach((d,k)=>{const sl=suggestSlot(t,d,s);const pts=items(t,d).map(x=>x.spot&&t.spots?.[x.spot]).filter(p=>p&&p.lat!=null);
@@ -2313,9 +2400,9 @@ const unb64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");const b=atob(s);return 
 async function packCode(kind,obj){const raw=new TextEncoder().encode(JSON.stringify(obj,(k,v)=>(k==="photo"&&v&&v.own)||k==="mem"?undefined:v));
   if(window.CompressionStream){try{const cs=new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"));return `TABI${kind}1:`+b64u(new Uint8Array(await new Response(cs).arrayBuffer()))}catch(e){}}
   return `TABI${kind}0:`+b64u(raw)}
-async function unpackCode(text){const m=/TABI(ALL)?([01]):([A-Za-z0-9_-]{8,})/.exec(String(text||"").replace(/\s+/g,""));if(!m)throw new Error("nocode");
+async function unpackCode(text){const m=/TABI(ALL|VOTE|ANSWER)?([01]):([A-Za-z0-9_-]{8,})/.exec(String(text||"").replace(/\s+/g,""));if(!m)throw new Error("nocode");
   let u8=unb64u(m[3]);if(m[2]==="1"){if(!window.DecompressionStream)throw new Error("old");u8=new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer())}
-  return {all:!!m[1],data:JSON.parse(new TextDecoder().decode(u8))}}
+  return {all:m[1]==="ALL",kind:m[1]||"",data:JSON.parse(new TextDecoder().decode(u8))}}
 /* 受け取ったデータは決まった形だけ通す（変な値やHTMLを入れさせない） */
 const cs_=(v,n)=>typeof v==="string"?v.slice(0,n):"";
 const cd_=v=>typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)?v:"";
@@ -2334,7 +2421,7 @@ function cleanTrip(o){if(!o||typeof o!=="object")return null;const start=cd_(o.s
     checks:cleanMap(o.checks,v=>{const title=cs_(v.title,60);return title?{title,group:cs_(v.group,20),done:!!v.done,order:cn_(v.order,0,1e6)||0}:null}),
     dayInfo:cleanMap(o.dayInfo,v=>({area:cs_(v.area,30)})),
     notif:o.notif&&typeof o.notif==="object"?{before:cn_(o.notif.before,0,1440)??NDEF.before,eve:{on:!!o.notif.eve?.on,time:ct_(o.notif.eve?.time)||"20:00"},morn:{on:!!o.notif.morn?.on,time:ct_(o.notif.morn?.time)||"07:00"},pre:{on:!!o.notif.pre?.on,days:cn_(o.notif.pre?.days,1,60)||7}}:{...NDEF}};
-  if(dates(t).length>31)return null;return t}
+  if(dates(t).length>31)return null;const votes={};for(const [rid,x] of Object.entries(o.votes||{}).slice(0,500)){try{const r=voteCleanResponse({v:1,t:t.sid,r:rid,n:x.n,a:x.a});votes[rid]={n:r.n,a:r.a}}catch(e){}}t.votes=votes;return t}
 async function shareTrip(t){if(!t.sid){change("",x=>{x.sid=uid()},true)}const code=await packCode("",{...T(),v:1});
   const msg=`旅のノートの旅行「${t.title}」です。\nアプリの「受け取った旅行を取り込む」に、このメッセージをまるごと貼ってください。\n\n${code}`;
   const r=await Native.share(t.title,msg);if(r==="copied")toast("コードをコピーしました。LINEなどに貼って送れます");else if(!r){S.codeOut=msg;draw();setTimeout(()=>$("codeOutWrap")?.scrollIntoView({block:"center"}),50)}}
@@ -2367,6 +2454,7 @@ const SUBTAB={split:"予算と割り勘",notif:"持ち物と通知",mem:"思い�
 const ICON={more:"M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M4 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0",edit:"M12 20h9M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z",del:"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",plane:"M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"};
 const ico=(k,label)=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
 function draw(){setTimeout(()=>dispatchEvent(new Event("scroll")),0);const t=T();
+  if(S.voteFriend||S.voteImport){document.body.dataset.ui="vote";$("bar").innerHTML='<button class="back" data-a="voteCancel">‹ 戻る</button><div class="ttl"><b>みんなに聞く</b></div>';$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${S.voteFriend?voteFriendView():voteImportView()}</div>`;return}
   document.body.dataset.ui=S.tripForm?"form":!t?"home":S.ai?"ai":S.ro?"reorder":S.tab;
   if(!t){S.tid=null;$("bar").innerHTML=`<div class="ttl"><b>旅のノート</b><small>次の旅を、ここから。</small></div>`;$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${tripsView()}</div>`;return}
   if(S.tripForm){$("bar").innerHTML=`<button class="back" data-a="cancel">‹ 戻る</button><div class="ttl"><b>${esc(t.title)}</b></div>`;$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${tripForm()}</div>`;return}
@@ -2386,12 +2474,13 @@ function go(tab){const ch=tab!==S.tab;if(tab==="split"&&S.tid)setTimeout(()=>fet
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b){if(S.menu){S.menu=null;draw()}return}const a=b.dataset.a,id=b.dataset.id;const t=T();
   if(a==="more"){S.menu=S.menu===id?null:id;draw();return}if(S.menu)S.menu=null;
   if(a==="openUrl"){draw();window.open(b.dataset.url,"_blank","noopener");return}
+  if(a.startsWith("vote")&&await voteAction(a,b))return;
   switch(a){
    case"undo":$("toast").hidden=true;undo();break;
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
@@ -2402,7 +2491,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"codeClose":S.codeOut=null;draw();break;
    case"impOpen":S.imp={text:""};S.codeOut=null;draw();window.scrollTo(0,0);break;
    case"impCancel":S.imp=null;draw();break;
-   case"impRead":{const text=$("imp_text").value;S.imp.text=text;try{const r=await unpackCode(text);const raw=r.all?Object.values(r.data.trips||{}):[r.data];const list=raw.map(cleanTrip).filter(Boolean);if(!list.length)throw new Error("empty");S.imp.list=list;draw()}
+   case"impRead":{const text=$("imp_text").value;S.imp.text=text;try{const r=await unpackCode(text);if(r.kind==="VOTE"||r.kind==="ANSWER"){await voteReceive(text);break}const raw=r.all?Object.values(r.data.trips||{}):[r.data];const list=raw.map(cleanTrip).filter(Boolean);if(!list.length)throw new Error("empty");S.imp.list=list;draw()}
      catch(e){toast(e.message==="old"?"この端末では読めない形式です。アプリを最新にしてください":e.message==="nocode"?"コードが見つかりませんでした。TABI1: から始まる部分を含めて貼ってください":"読み取れませんでした。メッセージをまるごと貼り直してください")}break}
    case"impOk":{const I=S.imp;const backup=JSON.stringify(DB.trips);let n=0;I.list.forEach((x,i)=>{const r=document.querySelector(`[name=imp_${i}]:checked`);const same=Object.entries(DB.trips).find(([k,v])=>v.sid&&v.sid===x.sid);
        if(same&&(!r||r.value==="replace")){const keep=DB.trips[same[0]].mem;if(keep&&Object.keys(keep).length)x.mem=keep;DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});

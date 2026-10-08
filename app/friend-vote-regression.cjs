@@ -1,0 +1,23 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const source=fs.readFileSync(path.join(__dirname,'src/app.html'),'utf8');
+const c={TextEncoder,TextDecoder,Blob,Response,CompressionStream,DecompressionStream,btoa,atob,window:{CompressionStream,DecompressionStream},uid:()=> 'test-id',KEY:'tabinote-v1',localStorage:{getItem:()=>null,setItem:()=>{}},S:{},esc:x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'),codeOutBox:()=>'',Object};vm.createContext(c);
+vm.runInContext(source.slice(source.indexOf('/* 行きたい投票：'),source.indexOf('/* ================= 画面：行きたい場所')),c);
+vm.runInContext(source.slice(source.indexOf('const b64u='),source.indexOf('/* 受け取ったデータは')),c);
+(async()=>{
+ const t={sid:'trip1',title:'福岡',spots:{a:{name:'公園',photo:{u:'SECRET'}},b:{name:'カフェ'}}};
+ const large={sid:'trip1',spots:Object.fromEntries(Array.from({length:501},(_,k)=>['s'+k,{name:'候補'+k}]))};assert.throws(()=>c.voteInviteData(large),/limit/);delete large.spots.s500;assert.equal(c.voteInviteData(large).c.length,500);
+ const i=c.voteInviteData(t),code=await c.packCode('VOTE',i),decoded=await c.unpackCode('招待です\n'+code);assert.equal(decoded.kind,'VOTE');assert.equal(decoded.all,false);assert.equal(decoded.data.c.length,2);assert(!JSON.stringify(decoded.data).includes('SECRET'));
+ const r=c.voteResponseData(decoded.data,'friend1','とも',{a:1,b:0});const rcode=await c.packCode('ANSWER',r),read=await c.unpackCode(rcode);assert.equal(read.kind,'ANSWER');
+ t.votes=c.voteApplyResponse(t,read.data).votes;assert.equal(c.voteCounts(t).a,1);t.votes=c.voteApplyResponse(t,read.data).votes;assert.equal(c.voteCounts(t).a,1);
+ const changed=c.voteResponseData(i,'friend1','とも',{a:-1,b:1});t.votes=c.voteApplyResponse(t,changed).votes;assert.equal(c.voteCounts(t).a,0);assert.equal(c.voteCounts(t).b,1);
+ delete t.spots.b;assert.equal(c.voteApplyResponse(t,changed).missing,1);
+ assert.equal(c.voteResponseTarget({x:t},r,'other').kind,'confirm');assert.equal(c.voteResponseTarget({x:t},r,'x').kind,'current');assert.equal(c.voteResponseTarget({},r,'x').kind,'missing');assert.throws(()=>c.voteApplyResponse({...t,sid:'wrong'},r),/trip/);
+ c.S.voteFriend={invite:i,answers:{a:1},name:'<script>'};const html=c.voteFriendView();assert(html.includes('&lt;script>'));assert(html.includes('どっちでも'));assert(html.includes('回答コードを作る'));assert(!html.includes('リアルタイム'));
+ const tripCode=await c.packCode('',{start:'2026-11-21'});assert.equal((await c.unpackCode(tripCode)).kind,'');assert.equal((await c.unpackCode(await c.packCode('ALL',{trips:{}}))).all,true);
+ assert(source.includes('await voteAction(a,b)'));assert(source.includes('r.kind==="VOTE"||r.kind==="ANSWER"'));assert(source.includes('行きたい ${counts[s.id]||0}人'));
+ c.DB={trips:{x:t}};c.S.tid='x';c.S.voteImport={response:r};c.draw=()=>{};c.toast=()=>{};c.change=()=>false;
+ await c.voteAction('voteApply',{dataset:{id:'x'}});assert(c.S.voteImport,'failed save must keep confirmation');assert.equal(c.S.tid,'x');
+ const before=JSON.stringify(t.votes);c.S.voteImport={response:{...r,t:'different'}};await c.voteAction('voteApply',{dataset:{id:'x'}});assert.equal(JSON.stringify(t.votes),before);
+ c.S.voteImport={response:r};c.change=(label,fn)=>{fn(t);return true};await c.voteAction('voteApply',{dataset:{id:'x'}});assert.equal(c.S.voteImport,null);assert.equal(c.S.tab,'spots');assert.equal(c.voteCounts(t).a,1);
+ console.log('PASS source-integrated invite/response codec, replacement, deleted candidates, different-trip routing, escaped vote UI, legacy code compatibility');
+})().catch(e=>{console.error(e);process.exitCode=1});
