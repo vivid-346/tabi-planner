@@ -22,3 +22,4 @@ for(const file of ['app.html','index.html']){
  console.log('PASS '+file+': forecast ranges, party units, booking replacement/zero/reset, stale conditions, safe AI-only import, real booking submit, syntax');
 }
 
+
