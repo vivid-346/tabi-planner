@@ -2213,11 +2213,11 @@ function costAiView(t,A){const o=A.o;return `<section class="card form" id="aiFo
 
 
 /* AIが既存予定を再出力しても、追加モードでは重複を入れない。 */
-function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time&&(!a.arrive||!b.arrive||a.arrive===b.arrive);const an=name(a),bn=name(b);return an||bn?(an||title(a))===(bn||title(b))&&a.time===b.time:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
-function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date));let dup=0,adjusted=0,unknown=0,unresolved=0;
+function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time&&(a.arrive||'')===(b.arrive||'');const an=name(a),bn=name(b);return an||bn?(an||title(a))===(bn||title(b))&&a.time===b.time:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
+function aiPrepare(t,c,mode){const out={...c,days:{},updates:[],warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date)).map(x=>({...x}));let dup=0,adjusted=0,unknown=0,unresolved=0;
   const origin=String(S.ai?.o&&Object.hasOwn(S.ai.o,'from')?S.ai.o.from:t.from||DB.home||'').trim();const hasOrigin=!!origin&&!/^(未定|不明|わからない|あとで)$/.test(origin);const ds=dates(t);
   Object.entries(c.days).forEach(([date,list])=>{const seen=kept.filter(x=>x.date===date);const fresh=[];
-    list.forEach((v,i)=>{const x={...v,date};if([...seen,...fresh].some(y=>aiSameItem(t,x,y))){dup++;return}
+    list.forEach((v,i)=>{const x={...v,date};let same=[...seen,...fresh].find(y=>aiSameItem(t,x,y));if(!same&&x.kind==='move')same=[...seen,...fresh].find(y=>y.kind==='move'&&y.time===x.time&&normName(y.title)===normName(x.title)&&(!x.arrive||!y.arrive));if(same){if(!same.arrive&&x.arrive){same.arrive=x.arrive;if(same.id)out.updates.push({id:same.id,arrive:x.arrive})}dup++;return}
       if(!hasOrigin&&x.kind==='move'&&((date===ds[0]&&i===0)||(date===ds[ds.length-1]&&i===list.length-1)||/帰路|帰宅|帰り|出発地|自家用車で.*(?:へ移動|出発)/.test(x.title))){x.note=[x.note,'出発地を入れると移動時間が分かります（時刻はAIの案です）'].filter(Boolean).join('。');unknown++}fresh.push(x)});
     const all=[...seen,...fresh].sort((a,b)=>(timeKey(a.time)??1440)-(timeKey(b.time)??1440));
     let prev=null;all.forEach(x=>{const k=timeKey(x.time);if(k==null)return;const getSpot=v=>t.spots?.[v.spot]||(v.spotName?Object.values(t.spots||{}).find(z=>normName(z.name)===normName(v.spotName))||c.spots.find(z=>normName(z.name)===normName(v.spotName)):null);const boundary=y=>y.kind==='move'&&/帰路|帰宅|帰り|飛行機|新幹線|出発地|空港|レンタカー.*(?:受取|受け取|返却)/.test(y.title);
@@ -2228,6 +2228,7 @@ function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kep
           if(need<1440&&(!next||end<=timeKey(next.time))&&x.kind!=='move'){x.time=hm(need);x.note='【移動・滞在時間を確保して変更】'+x.note;adjusted++}else{x.flag=true;x.note='【この時間では移動・滞在が足りません。時間を変更してください】'+x.note}}}
       if(fresh.includes(x)&&x.kind!=='move'){const sp=getSpot(x);const next=[...seen,...fresh.filter(boundary)].filter(y=>y!==x&&(timeKey(y.time)??-1)>timeKey(x.time)).sort((a,b)=>timeKey(a.time)-timeKey(b.time))[0];if(next&&timeKey(x.time)+(x.kind==='stay'?30:x.dur||sp?.minutes||60)+gap(x,next)>timeKey(next.time)){x.flag=true;x.note='【次の固定予定までに収まりません。時間か場所を変更してください】'+x.note}}
       if(x.flag&&fresh.includes(x))unresolved++;prev=x});out.days[date]=fresh});
+  if(out.updates.length)out.warn.push('既存の移動'+out.updates.length+'件に到着時刻を補います');
   if(dup)out.warn.push('同じ日の同じ時刻・同じ場所への予定'+dup+'件は追加しません');
   if(adjusted)out.warn.push('移動・滞在時間が足りない予定'+adjusted+'件の開始時刻を調整しました。取り込む前に確認してください');
   if(unknown)out.originHint='出発地を入れると移動時間が分かります。時刻はAIの案です。';
@@ -2434,7 +2435,7 @@ function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[]
   if(clash)warn.push(`移動中・到着前などに入っている予定が${clash}件あります（取り込むと「要確認」が付きます）`);
   if(!out.spots.length&&!nItems)throw new Error("empty");
   return {...out,nItems,warn}}
-function aiApply(c,mode){if(S.ai?.kind==="cost"){const o=S.ai.o;return change("予測を更新しました",t=>{t.from=String(o.from||"").trim().slice(0,30);t.people=Number.isInteger(+o.people)&&+o.people>0&&+o.people<=50?+o.people:t.people;const cp=cleanCosts(t.costPlan);t.costPlan={...cp,forecast:costRanges(c.costs),method:String(o.move||'').slice(0,30),transportScope:costTransportScope(t),routeScope:costScope(t,true,false),scope:costScope(t,true)};})}c=aiPrepare(T(),c,mode);return change(`AIの${c.nItems?"プラン":"候補"}を取り込みました`,t=>{t.spots=t.spots||{};t.items=t.items||{};t.dayInfo=t.dayInfo||{};
+function aiApply(c,mode){if(S.ai?.kind==="cost"){const o=S.ai.o;return change("予測を更新しました",t=>{t.from=String(o.from||"").trim().slice(0,30);t.people=Number.isInteger(+o.people)&&+o.people>0&&+o.people<=50?+o.people:t.people;const cp=cleanCosts(t.costPlan);t.costPlan={...cp,forecast:costRanges(c.costs),method:String(o.move||'').slice(0,30),transportScope:costTransportScope(t),routeScope:costScope(t,true,false),scope:costScope(t,true)};})}c=aiPrepare(T(),c,mode);return change(`AIの${c.nItems?"プラン":"候補"}を取り込みました`,t=>{t.spots=t.spots||{};t.items=t.items||{};t.dayInfo=t.dayInfo||{};for(const u of c.updates||[])if(t.items[u.id]&&!t.items[u.id].arrive)t.items[u.id].arrive=u.arrive;
   const ids=new Map(spots(t).map(s=>[normName(s.name),s.id]));
   c.spots.forEach((s,i)=>{if(s.dup)return;const id=uid()+i;t.spots[id]={name:s.name,wiki:s.wiki||"",en:s.en||"",area:s.area,cat:s.cat,note:s.note+(s.rain?"（雨の日もOK）":""),rain:!!s.rain,fee:s.fee,url:"",lat:s.lat,lon:s.lon,book:s.book,minutes:s.minutes,ai:true,created:Date.now()+i};ids.set(normName(s.name),id)});
   /* 日程に出てくるのに候補の一覧にない場所は、候補として足す（写真を付けるため） */
