@@ -19,3 +19,5 @@ for(const [name,count] of [['actual-ai-answer.txt',39],['actual-ai-consult.txt',
 }
 for(const m of src.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(m[1]);
 console.log('PASS empty duplicates, complementary duplicates, same place at different times, full script syntax');
+
+const sameStart=src.indexOf('function aiSameItem('),sameEnd=src.indexOf('function aiPrepare(',sameStart);vm.runInContext(src.slice(sameStart,sameEnd),c);const transfer={kind:'move',title:'電車で移動',time:'10:00',arrive:'11:00'};assert(c.aiSameItem({},transfer,{...transfer,arrive:''}));assert(!c.aiSameItem({},transfer,{...transfer,arrive:'11:30'}));console.log('PASS missing arrivals reuse existing transfer; distinct arrivals remain separate');
