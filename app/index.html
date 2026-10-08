@@ -3,21 +3,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="format-detection" content="telephone=no">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
-/* R5: explicit AI choices and visible action colors. */
-.ai-services{display:grid;grid-template-columns:1fr;gap:10px}.ai-services .btn{width:100%;min-height:50px!important;text-align:center;justify-content:center}.ai-services .btn:not(.fill){background:#fff!important;border:1px solid #C9CAD2!important;color:#262631!important}
-.tools{background:#F5F5F7!important}.tools .tool:nth-child(1){--tool-bg:#EAF2FC;--tool-color:#225EA8}.tools .tool:nth-child(2){--tool-bg:#EAF5EE;--tool-color:#246C43}.tools .tool:nth-child(3){--tool-bg:#FFF1E5;--tool-color:#A64B00}.tools .tool:nth-child(4){--tool-bg:#F0EDFC;--tool-color:#5743C4}.tools .tool{background:var(--tool-bg)!important}.tools .tool .ti{color:var(--tool-color)!important}.tools .tool b{color:#262631!important}.tools .tool small{color:#484852!important}.tools .tool:hover{filter:brightness(.98)}.tools .tool:active{filter:brightness(.95)}
-.mhero button.h2chip{background:#A64B00!important;color:#fff!important;min-height:44px;min-width:44px;padding:10px 14px!important;border:0;border-radius:12px!important;font-family:var(--sans);font-size:15px;font-weight:600;opacity:1!important}
-@media(min-width:700px){.ai-services{grid-template-columns:repeat(3,minmax(0,1fr))}.ai-services .btn{padding-inline:10px}}
-
-.ai-copy-steps{padding-left:24px;margin:12px 0;color:#262631;line-height:1.65}.ai-copy-steps li+li{margin-top:8px}
-
-.ai-plan-add{margin:16px 0 20px}.ai-plan-add .btn{width:100%;min-height:50px;justify-content:center;gap:8px}.ai-plan-add p{margin:8px 4px 0;color:#484852;font-size:14px;line-height:1.5}
-
-.place-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 8px}.place-actions .btn{min-height:44px;flex:1 1 145px;justify-content:center;gap:6px}.place-hint{font-size:14px;line-height:1.6;color:#484852;margin:8px 0 16px}.excards .exadd{width:auto!important;min-width:110px!important;min-height:44px!important;padding:8px 12px!important;font-size:14px!important;white-space:nowrap;border-radius:12px!important}.tabbar button{white-space:nowrap}
-
-.spot-extra{margin:12px 0}.spot-extra>summary{min-height:44px;padding:12px 0;font-weight:600;color:var(--ink)}.foot{display:flex;gap:8px;flex-wrap:wrap}@media print{.dprow{display:none!important}}
-</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:0}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head><body><title>旅のノート アプリ版</title>
 <style>
 /* スマホアプリ想定：下にタブバー、上に旅行名。外部のフォントや地図は使わず、すべて端末の中で動く（オフライン対応）。
@@ -1097,6 +1083,20 @@ input::placeholder,textarea::placeholder{color:#55555F!important;opacity:1}.two{
 body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-backdrop-filter:blur(24px) saturate(150%)!important}.mapbox.rich{background:#E6EFF7!important}.mapbox .mapmode{min-height:44px!important;color:var(--ink2)!important;font-size:14px}.maplibregl-ctrl button{width:44px!important;height:44px!important}.maplibregl-ctrl-group{border-radius:14px!important;box-shadow:0 1px 6px rgba(0,0,0,.08)!important}.obart{background:#F5F5F7!important;box-shadow:none!important;border-radius:24px!important}.obq{background:#E4E6EB!important;color:var(--ink)!important}.obl b{color:var(--ink2)!important}.obr,.obl span{box-shadow:none!important}.oba.dark{background:#F0F1F4!important;color:var(--ink)!important;box-shadow:none!important}.oba.dark small,.oba.dark span{opacity:1!important}.oba.dark em{color:var(--ink2)!important;background:#fff!important}.obc h2{font-size:28px;font-weight:700}.obc p{font-size:16px;line-height:1.6}.rainalts i,.aihint,.cond{background:#F5F5F7!important;color:var(--ink2)!important;box-shadow:none!important}
 @media(max-width:699px){body[data-ui="map"] .page{padding-top:16px!important;gap:16px}body[data-ui="map"] #mapTop .chips{display:flex;gap:4px;background:#F5F5F7;border-radius:14px;padding:4px;overflow:auto}body[data-ui="map"] #mapTop .chip{flex:1;white-space:nowrap;font-size:14px;padding:8px 10px;min-width:65px}body[data-ui="map"] #mapTop .chip i{display:none}body[data-ui="map"] .mapbox{margin-inline:-20px;width:calc(100% + 40px);border-radius:0!important;border-inline:0!important;height:calc(100svh - 250px);min-height:380px}body[data-ui="map"] #mapBottom{border-radius:22px 22px 0 0;background:#fff;padding:20px 0 0}body[data-ui="map"] .mapnr .nroute{border-radius:20px!important;padding:18px!important}}
 @media(max-width:359px){body[data-ui="map"] .mapbox{margin-inline:-16px;width:calc(100% + 32px)}}
+
+/* R5: explicit AI choices and visible action colors. */
+.ai-services{display:grid;grid-template-columns:1fr;gap:10px}.ai-services .btn{width:100%;min-height:50px!important;text-align:center;justify-content:center}.ai-services .btn:not(.fill){background:#fff!important;border:1px solid #C9CAD2!important;color:#262631!important}
+.tools{background:#F5F5F7!important}.tools .tool:nth-child(1){--tool-bg:#EAF2FC;--tool-color:#225EA8}.tools .tool:nth-child(2){--tool-bg:#EAF5EE;--tool-color:#246C43}.tools .tool:nth-child(3){--tool-bg:#FFF1E5;--tool-color:#A64B00}.tools .tool:nth-child(4){--tool-bg:#F0EDFC;--tool-color:#5743C4}.tools .tool{background:var(--tool-bg)!important}.tools .tool .ti{color:var(--tool-color)!important}.tools .tool b{color:#262631!important}.tools .tool small{color:#484852!important}.tools .tool:hover{filter:brightness(.98)}.tools .tool:active{filter:brightness(.95)}
+.mhero button.h2chip{background:#A64B00!important;color:#fff!important;min-height:44px;min-width:44px;padding:10px 14px!important;border:0;border-radius:12px!important;font-family:var(--sans);font-size:15px;font-weight:600;opacity:1!important}
+@media(min-width:700px){.ai-services{grid-template-columns:repeat(3,minmax(0,1fr))}.ai-services .btn{padding-inline:10px}}
+
+.ai-copy-steps{padding-left:24px;margin:12px 0;color:#262631;line-height:1.65}.ai-copy-steps li+li{margin-top:8px}
+
+.ai-plan-add{margin:16px 0 20px}.ai-plan-add .btn{width:100%;min-height:50px;justify-content:center;gap:8px}.ai-plan-add p{margin:8px 4px 0;color:#484852;font-size:14px;line-height:1.5}
+
+.place-actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 8px}.place-actions .btn{min-height:44px;flex:1 1 145px;justify-content:center;gap:6px}.place-hint{font-size:14px;line-height:1.6;color:#484852;margin:8px 0 16px}.excards .exadd{width:auto!important;min-width:110px!important;min-height:44px!important;padding:8px 12px!important;font-size:14px!important;white-space:nowrap;border-radius:12px!important}.tabbar button{white-space:nowrap}
+
+.spot-extra{margin:12px 0}.spot-extra>summary{min-height:44px;padding:12px 0;font-weight:600;color:var(--ink)}.foot{display:flex;gap:8px;flex-wrap:wrap}@media print{.dprow{display:none!important}}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -1339,7 +1339,7 @@ function tripForm(){const ed=S.tripForm==="edit";const t=ed?T():{title:"",start:
    <div class="field"><label for="tf_dest">行き先</label><input type="text" id="tf_dest" maxlength="40" value="${esc(t.dest||"")}" placeholder="例：沖縄本島、京都、北海道の道東">${ed?"":`<span class="sub">入れると、作ったあとにAIで日程と行きたい場所の候補をまとめて作れます</span>`}</div>
    <div class="two"><div class="field"><label for="tf_start">出発日</label><input type="date" id="tf_start" required value="${esc(t.start)}"></div><div class="field"><label for="tf_end">帰る日</label><input type="date" id="tf_end" required value="${esc(t.end)}"></div></div>
    <div class="two"><div class="field"><label for="tf_people">人数（任意）</label><input type="number" id="tf_people" min="1" max="50" value="${esc(t.people)}"></div><div class="field"><label for="tf_move">おもな移動</label><select id="tf_move">${Object.entries(MOVES).map(([k,l])=>`<option value="${k}" ${(t.move||"train")===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
-   <div class="field"><label for="tf_budget">旅行の予算（全員分・円／任意）</label><input type="number" id="tf_budget" min="0" max="1000000000" step="1" inputmode="numeric" value="${t.budget||""}" placeholder="金額を入力、または下から選ぶ"><div class="row" style="gap:8px;flex-wrap:wrap">${[30000,50000,100000].map(v=>`<button class="btn" type="button" data-a="tripBudget" data-value="${v}">${v/10000}万円</button>`).join("")}<button class="btn" type="button" data-a="tripBudget" data-value="">あとで決める</button></div><span class="sub">1人分ではなく、旅行全体の合計です。予算管理であとから変更できます。</span></div>
+   <div class="field"><label for="tf_budget">旅行全体の予算（円／任意）</label><select id="tf_budget_scope" aria-label="予算の単位"><option value="all">全員分の合計</option><option value="person" ${!t.budget?"selected":""}>1人あたり</option></select><input type="number" id="tf_budget" min="0" max="1000000000" step="1" inputmode="numeric" value="${t.budget||""}" placeholder="金額を入力、または下から選ぶ"><div class="row" style="gap:8px;flex-wrap:wrap">${[30000,50000,100000].map(v=>`<button class="btn" type="button" data-a="tripBudget" data-value="${v}">${v/10000}万円</button>`).join("")}<button class="btn" type="button" data-a="tripBudget" data-value="">あとで決める</button></div><span class="sub">1人あたりを選ぶ場合は人数も入力してください。交通・宿・食事などを含む旅行全体の上限です。</span></div>
    <div class="two"><div class="field"><label for="tf_from">出発地（任意）</label><input type="text" id="tf_from" maxlength="30" value="${esc(t.from||"")}" placeholder="例：名古屋、東京"></div><div class="field"><label for="tf_title">旅行の名前（任意）</label><input type="text" id="tf_title" maxlength="40" value="${esc(t.title)}" placeholder="空なら「行き先＋泊数」"></div></div>
    <div class="row"><button class="btn fill" type="submit">${S.tripForm==="edit"?"保存":"作る"}</button><button class="btn" type="button" data-a="cancel">やめる</button></div>
    ${S.tripForm==="edit"?`<div class="inbox form" id="shareBox"><span class="lbl">友達に渡す・バックアップ</span><span class="sub">この旅行（予定・場所・割り勘・持ち物）をコードにして送れます。相手は「受け取った旅行を取り込む」に貼るだけ。同じ旅行を送り直すと、相手の手元のものを新しい内容に置き換えられます。</span><button class="btn" type="button" data-a="shareTrip" style="align-self:flex-start">LINEなどで送る（コードを作る）</button>${codeOutBox()}</div>`:""}
@@ -1373,13 +1373,14 @@ function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
     ${nx&&nx.s&&nx.s.lat!=null?`<a class="h2go" href="${esc(Native.dirUrl(nx.s))}" target="_blank" rel="noopener">ナビ開始 <span aria-hidden="true">→</span></a>${nx.cur&&!nx.cur.done?`<button class="h2done" data-a="doneItem" data-id="${nx.cur.id}">「${esc(nx.cur.title.slice(0,10))}」に行った</button>`:""}`:`<button class="h2go" data-a="jumpDay" data-k="${ti}">日程を見る <span aria-hidden="true">↓</span></button>`}</div>
    ${p&&!p.photo.own?`<span class="h2cr">写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</span>`:""}</section>
   ${tripTools(t)}
+  ${planCostBox(t)}
   <div class="dprow">${ds.length>1?`<nav class="daypills" aria-label="日にち"><button data-a="jumpDay" data-k="-1" aria-current="${selectedPlanDay(t)===-1}"><b>全日程</b><small>まとめて見る</small></button>${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}" aria-current="${k===selectedPlanDay(t)}"><b>${k+1}日目</b><small>${+d.slice(5,7)}.${+d.slice(8)}（${wd(d)}）</small></button>`).join("")}</nav>`:`<span style="flex:1"></span>`}<button class="btn" data-a="compactPlan" aria-pressed="${!!S.compact}">${S.compact?"写真表示":"コンパクト"}</button>${planMenu(t)}</div>`}
 /* 旅の道具（理想の8番）：ルート最適化・持ち物・予算・共有 */
 function tripTools(t){const cs=checks(t),cd=cs.filter(c=>c.done).length;const m=moneyStats(t);const ds=dates(t),today=ymd(new Date());const selected=selectedPlanDay(t);const d0=selected>=0?ds[selected]:ds.includes(today)?today:ds[Math.min(S.sday||0,ds.length-1)];
-  const T4=[["roOpen","route","ルート最適化","移動が短い順に並べ替え","#E6F6EE","#1E9E63",` data-date="${d0}"`],["tab","check","持ち物リスト",cs.length?`${cd} / ${cs.length} 準備済み`:"忘れ物を防ぐ","#E6F4F7","#138A9E",' data-t="notif"'],["tab","yen","予算管理",t.budget?`あと ${yen(m.left)}`:m.spent?`${yen(m.spent)} 使用`:"費用を自動で集計","#FCEBEB","#D64545",' data-t="split"'],["shareTrip","share","共有する","LINEなどで送る","#EEEBFC","#5B4BDB",""]];
+  const T4=[["roOpen","route","ルート最適化","移動が短い順に並べ替え","#E6F6EE","#1E9E63",` data-date="${d0}"`],["tab","check","持ち物リスト",cs.length?`${cd} / ${cs.length} 準備済み`:"忘れ物を防ぐ","#E6F4F7","#138A9E",' data-t="notif"'],["tab","yen","予算管理",t.budget?`使った分を引くと ${yen(m.left)}`:m.spent?`${yen(m.spent)} 使用`:"費用を自動で集計","#FCEBEB","#D64545",' data-t="split"'],["shareTrip","share","共有する","LINEなどで送る","#EEEBFC","#5B4BDB",""]];
   return `<div class="tools">${T4.map(([a,ic,h,sub,bg,fg,x])=>`<button class="tool" data-a="${a}"${x}><span class="ti" style="background:${bg};color:${fg}">${li(ic)}</span><span class="tt"><b>${h}</b><small>${sub}</small></span></button>`).join("")}</div>`}
 /* 「…」メニュー。items:[[action,label,extraAttrs?,danger?]] */
-function planMenu(t){return moreMenu("plan",[["aiOpen","AIで日程を作る",' data-k="plan"'],["roOpen","並べ替え・削除"],["candOpen","候補から入れる"],["copyPlan","日程を文章でコピー"],["print","しおりを印刷"],["shareTrip","旅行を渡す"],["editTrip","旅行の設定"]])}
+function planMenu(t){return moreMenu("plan",[["aiOpen","AIで日程を作り直す",' data-k="plan"'],["editTrip","旅行の設定"]])}
 function moreMenu(key,items,extra){return `<span class="mwrap"><button class="btn icon-only" type="button" data-a="more" data-id="${key}" aria-label="その他の操作" aria-expanded="${S.menu===key}">${ico("more")}</button>${S.menu===key?`<div class="menu" role="menu">${items.map(([a,l,x,d])=>`<button type="button" role="menuitem" data-a="${a}"${x||""}${d?' class="danger"':""}>${l}</button>`).join("")}</div>`:""}</span>`}
 /* 線のアイコン（Lucide と同じ形）。絵文字は使わない */
 const LI={sun:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41",
@@ -1421,7 +1422,7 @@ function rainPlan(t,date){const w=t.wx?.[date];if(!isRainy(w))return"";const its
   const inDay=new Set(its.map(x=>x.spot));const alts=spots(t).filter(s=>rainOk(s)&&!inDay.has(s.id)).slice(0,6);
   if(!outs.length&&!alts.length)return"";
   return `<div class="rainplan"><span class="rpi">${li("umbrella")}</span><div class="rpb"><b>${wxOf(w.c).lb||"雨"}の予報${w.p!=null?`・降水確率${w.p}%`:""}</b>${outs.length?`<span class="sub">屋外の予定：${outs.map(x=>esc(x.title)).join("・")}</span>`:""}
-   ${alts.length?`<span class="lbl">雨でも楽しめる候補</span><div class="rainalts">${alts.map(s=>`<button data-a="rainAdd" data-id="${s.id}" data-date="${date}"><span>${esc(s.name)}</span><i>＋</i></button>`).join("")}</div>`:`<span class="sub">雨の日向けの候補がまだありません。「場所」の「…」→「AIで候補を増やす」でテーマに「雨の日」と入れると探せます。</span>`}</div></div>`}
+   ${alts.length?`<span class="lbl">雨でも楽しめる候補</span><div class="rainalts">${alts.map(s=>`<button data-a="rainAdd" data-id="${s.id}" data-date="${date}"><span>${esc(s.name)}</span><i>＋</i></button>`).join("")}</div>`:`<span class="sub">雨の日向けの候補がまだありません。「場所を探す」の「AIで候補を探す」でテーマに「雨の日」と入れると探せます。</span>`}</div></div>`}
 /* ===== 並べ替え：順番を変えると、移動時間を考えて時間を入れ直す ===== */
 function roPlan(t,date,ids){const orig=items(t,date);const firstId=orig[0]?.id,lastId=orig[orig.length-1]?.id;
   const nonFixed=orig.filter(x=>!(x.kind==="move"&&x.arrive&&(x.id===firstId||x.id===lastId))&&timeKey(x.time)!=null);
@@ -1487,7 +1488,7 @@ function cgView(t){const C=S.cg||{step:"idle"},hist=t.chat||[];
   const active=C.step==="wait",preview=C.step==="preview";
   let body="";
   if(active)body=aiFlowBox(C,"cg",cgPrompt(t,C.req));
-  else if(preview){const c=C.c;body=`<div class="flowcard"><h3>4 日程の案を確認</h3><p>まだ日程は変更していません。</p>${C.msg?.length?`<ul>${C.msg.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}<p>予定 ${c.nItems}件 ・ 新しい場所 ${c.spots.filter(x=>!x.dup).length}か所</p>${c.warn.map(x=>`<p class="warn">${esc(x)}</p>`).join("")}${Object.entries(c.days).map(([d,its])=>`<details><summary>${md(d)}（${wd(d)}）・ ${its.length}件の予定</summary><ul>${its.map(x=>`<li>${esc(x.time||"—")} ${esc(x.title)}</li>`).join("")}</ul></details>`).join("")}<button class="btn fill big" data-a="cgOk">このプランでOK！</button><button class="btn" data-a="cgNo">やめる</button></div>`}
+  else if(preview){const c=aiPrepare(t,C.c,"days");body=`<div class="flowcard"><h3>4 日程の案を確認</h3><p>まだ日程は変更していません。</p>${C.msg?.length?`<ul>${C.msg.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}<p>予定 ${c.nItems}件 ・ 新しい場所 ${c.spots.filter(x=>!x.dup).length}か所</p>${c.warn.map(x=>`<p class="warn">${esc(x)}</p>`).join("")}${Object.entries(c.days).map(([d,its])=>`<details><summary>${md(d)}（${wd(d)}）・ ${its.length}件の予定</summary><ul>${its.map(x=>`<li>${esc(x.time||"時刻未定")} ${esc(x.title)}${x.flag?"（時間の確認が必要）":""}</li>`).join("")}</ul></details>`).join("")}<button class="btn fill big" data-a="cgOk">このプランでOK！</button><button class="btn" data-a="cgNo">やめる</button></div>`}
   else body=`${C.step==="done"?'<div class="flowcard" role="status"><b>日程を更新しました</b><button class="btn" data-a="tab" data-t="plan">日程を見る</button></div>':""}<div class="flowcard"><h3>1 変えたいことを選ぶ</h3><div class="cgq">${CG_Q.map(q=>`<button data-a="cgAsk" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div><form id="cgForm" class="cgin"><label class="sr" for="cg_in">日程で変えたいこと</label><input type="text" id="cg_in" maxlength="300" placeholder="例：2日目をゆっくりにしたい" autocomplete="off"><button type="submit" aria-label="AIに頼む文を作る">頼む文を作る</button></form></div>`;
   return `<section class="cgflow">${(()=>{const p=tripPhoto(t);return p?`<figure class="ios-ai-photo"><img src="${esc(phSrc(p.photo.u))}" alt="" loading="lazy" onerror="this.closest('figure').remove()">${p.photo.own?"":`<figcaption>写真：${esc(p.photo.by)} / ${esc(p.photo.lic)}</figcaption>`}</figure>`:""})()}<div class="cgh"><span class="cgav">${li("spark")}</span><div class="cgn"><b>AI相談</b><small>自分のAIに文を貼り、答えを持ち帰ります</small></div>${hist.length?moreMenu("cg",[["cgClear","会話を消す",""]]):""}</div><div id="cgmsgs">${body}</div>${hist.length?`<details class="flowhistory"><summary>これまでの依頼と変更履歴</summary>${hist.map(m=>`<p><b>${m.r==="u"?"依頼":"変更記録"}</b><br>${esc(Array.isArray(m.x)?m.x.join("\n"):m.x)}</p>`).join("")}</details>`:""}</section>`}
 /* Shared external-AI workflow: only the current action is expanded. */
@@ -1514,7 +1515,7 @@ function cgParse(text){const t=T();try{const raw=pickJSON(text);const c=aiCheck(
   const msg=Array.isArray(raw.message)?raw.message.map(x=>String(x).slice(0,80)).filter(Boolean).slice(0,6):raw.message?[String(raw.message).slice(0,160)]:[];
   S.cg={...S.cg,step:"preview",c,msg};draw();cgScroll()}catch(e){S.cg.manual=true;draw();toast(e.message==="noplan"?"答えに日程が見つかりませんでした。AIの答えをまるごとコピーしてください":"読み取れませんでした。AIの答えを { から } までまるごとコピーしてください")}}
 function planView(t){const ds=dates(t),selected=selectedPlanDay(t);setTimeout(()=>wxFetch(S.tid),0);
-  return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${Object.keys(t.items||{}).length?`<div class="ai-plan-add"><button class="btn fill big" data-a="aiOpen" data-k="plan" data-mode="add">${li("spark")} AIで予定を追加する</button><p>今の予定を残して、空いている時間に追加を考えてもらう</p></div>`:""}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${dates(t).includes(ymd(new Date()))&&nextStop(t)?"":nowCard(t)}
+  return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${Object.keys(t.items||{}).length?`<div class="ai-plan-add"><button class="btn fill big" data-a="aiOpen" data-k="plan" data-mode="add">${li("spark")} AIで予定を追加する</button><p>今の予定を残して、空いている時間に追加を考えてもらう</p></div>`:""}<details class="card form"><summary style="min-height:44px;padding:10px 0;font-weight:600">しおり・書き出し</summary><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" data-a="copyPlan">日程をコピー</button><button class="btn" data-a="print">しおりを印刷</button></div></details>${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${dates(t).includes(ymd(new Date()))&&nextStop(t)?"":nowCard(t)}
   ${S.codeOut&&!S.tripForm?`<div id="codeOutWrap">${codeOutBox()}</div>`:""}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
   ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{if(selected!==-1&&k!==selected)return "";const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><div class="dh1"><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span>${wxChip(t.wx?.[date])}</div><div class="dh2"><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${its.length>1&&!(S.ro&&S.ro.date===date)?`<button class="roopen" data-a="roOpen" data-date="${date}" aria-label="並べ替え" title="並べ替え">${li("sort")}<span class="rotx">並べ替え</span></button>`:""}</div>${dayStat(t,date)}</header>
@@ -1650,7 +1651,7 @@ function spotsView(t){const ss=spots(t);
   if(S.edit&&S.edit.startsWith("spot"))return spotForm(t);
   if(S.detail&&t.spots?.[S.detail])return spotDetail(t,S.detail);
   const cats=[...new Set(ss.map(s=>s.cat).filter(c=>CATS[c]))];
-  return `<div class="exh"><h2>行きたい場所</h2><span class="row" style="gap:4px"><button class="btn fill icon-only add" data-a="addSpot" aria-label="場所を追加">＋</button>${moreMenu("spots",[["aiOpen","AIで候補を増やす",' data-k="more"'],["aiOpen","文章から拾う",' data-k="text"'],...(photoOn()&&ss.some(s=>!s.photo)?[["findPhotos","写真を探す"]]:[])])}</span></div>
+  return `<div class="exh"><h2>行きたい場所</h2><span class="row" style="gap:4px"><button class="btn fill icon-only add" data-a="addSpot" aria-label="場所を追加">＋</button>${moreMenu("spots",[["aiOpen","文章から拾う",' data-k="text"'],...(photoOn()&&ss.some(s=>!s.photo)?[["findPhotos","写真を探す"]]:[])])}</span></div>
   <div class="place-actions"><button class="btn fill" data-a="aiOpen" data-k="more">${li("spark")} AIで候補を探す</button><button class="btn" data-a="addSpot">＋ 名前で場所を追加</button></div><p class="place-hint">行きたい場所を集めて、「日程に入れる」で日にちと時間を選びます。</p>${ss.length?`<label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM21 21l-4.3-4.3"/></svg><input type="search" id="sq" value="${esc(S.q||"")}" placeholder="この旅行に登録した場所を絞り込む" autocomplete="off"></label>
   ${cats.length>1?`<div class="catchips"><button data-a="cat" data-c="" aria-pressed="${!S.cat}">すべて</button>${cats.map(c=>`<button data-a="cat" data-c="${c}" aria-pressed="${S.cat===c}">${CATS[c]}</button>`).join("")}</div>`:""}`:""}
   ${S.phBusy>0?`<div class="phbar">写真を探しています…（あと<span id="phn">${S.phBusy}</span>件）</div>`:""}
@@ -1701,7 +1702,7 @@ function planBtns(t,s){const d=spotDay(t,s.id);
 function asDays(t,s){return dates(t).map((d,k)=>{const w=conflict(t,d,S.atime);return `<button class="btn" data-a="assignDay" data-id="${s.id}" data-date="${d}" ${w?`disabled title="${esc(w)}"`:""} style="border-color:${dayColor(k+1)}">${k+1}日目 ${md(d)}${w?`<small style="color:var(--warn)">${esc(w.replace(/（.*$/,""))}</small>`:""}</button>`}).join("")}
 function spotForm(t){const id=S.edit.split(":")[1];const v=S.draft||(id?{...t.spots[id]}:{name:"",area:"",note:"",fee:"",url:"",lat:null,lon:null,cat:"see",minutes:60});
   const ph=S.sfPhoto!==undefined?S.sfPhoto:(spotPhoto(v));const ds=dates(t);if(!id&&!ds.includes(S.sfDay))S.sfDay="";
-  return `<form class="card form" id="spotForm" data-id="${id||""}"><h2 style="font-size:19px">${id?"場所を編集":"行きたい場所を追加"}</h2>
+  return `<form class="card form" id="spotForm" data-id="${id||""}"><h2 style="font-size:19px">${id?"場所を編集":"行きたい場所を追加"}</h2>${!id?`<p>決まっている場所は名前で探して追加。AIを使う必要はありません。</p><details><summary style="min-height:44px;padding:10px 0">まだ決まっていない？</summary><p>AIで候補をまとめて取り込み、あとから好きな場所だけ日程に入れられます。</p><button type="button" class="btn" data-a="candOpen">保存した候補から選ぶ</button><button type="button" class="btn" data-a="aiOpen" data-k="more">AIで候補をまとめて探す</button></details>`:""}
    <div class="field"><label for="sf_name">名前</label><input type="text" id="sf_name" required maxlength="60" value="${esc(v.name)}" placeholder="店名・支店名（例：スタバ 富山環水公園）"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn fill" type="button" data-a="geoFind">この名前でお店・場所を探す</button><button class="btn" type="button" data-a="spotMapSearch">Googleマップで探す</button></div><div id="sf_geo" class="geol" aria-live="polite"></div></div>
    ${!id&&ds.length?`<div class="field"><label for="sf_day">追加先</label><select id="sf_day"><option value="">候補に保存（あとで日程に入れる）</option>${ds.map((d,k)=>`<option value="${d}" ${S.sfDay===d?"selected":""}>${k+1}日目 ${md(d)}（${wd(d)}）のあいている時間</option>`).join("")}</select></div>`:""}
    <details class="spot-extra"${id?" open":""}><summary>詳細を入力（種類・メモ・写真・地図）</summary>
@@ -1753,7 +1754,7 @@ function readSpotForm(){if($("sf_day"))S.sfDay=$("sf_day").value;return {cat:$("
 /* ================= 画面：地図 ================= */
 const proj=(lat,lon)=>[(lon-GEO.W0)*GEO.C*GEO.K,(GEO.N0-lat)*GEO.K];
 const unproj=(x,y)=>({lat:GEO.N0-y/GEO.K,lon:x/(GEO.C*GEO.K)+GEO.W0});
-function mapTopHtml(t){const ds=dates(t);return S.pick?"":`${spots(t).length?"":`<p class="note">地図の行きたい所やお店を押すと、そのまま「行きたい場所」に追加できます。</p>`}<div class="chips"><button class="chip" data-a="mapDay" data-d="0" aria-pressed="${!S.mapDay}">全部</button>${ds.map((d,k)=>`<button class="chip" data-a="mapDay" data-d="${k+1}" aria-pressed="${S.mapDay===k+1}"><i style="background:${dayColor(k+1)}"></i>${k+1}日目</button>`).join("")}</div>`}
+function mapTopHtml(t){const ds=dates(t);return S.pick?"":`<button class="btn ${S.mapAdding?"fill":""}" data-a="mapAddMode" aria-pressed="${!!S.mapAdding}">${S.mapAdding?"位置を選ぶのをやめる":"＋ 地図から場所を追加"}</button>${S.mapAdding?`<p>追加したい場所をタップしてください。地図はそのまま動かせます。</p>`:""}${spots(t).length?"":`<p class="note">「＋ 地図から場所を追加」を押すと、位置を選べます。</p>`}<div class="chips"><button class="chip" data-a="mapDay" data-d="0" aria-pressed="${!S.mapDay}">全部</button>${ds.map((d,k)=>`<button class="chip" data-a="mapDay" data-d="${k+1}" aria-pressed="${S.mapDay===k+1}"><i style="background:${dayColor(k+1)}"></i>${k+1}日目</button>`).join("")}</div>`}
 function mapOvHtml(t){const tl=S.tapLL;
   return `${S.pick?`<div class="pickbar"><b>${S.pick.ll?"この位置でよければ「決定」":`地図を押して「${esc(S.pick.name||"場所")}」の位置を決めてください`}</b>${S.pick.ll?`<button class="btn fill" data-a="pickOk">決定</button>`:""}<button class="btn" data-a="pickCancel">やめる</button></div>`:""}
    ${!S.pick&&tl?`<div class="pickbar"><b>${tl.name?`「${esc(tl.name)}」を行きたい場所に追加しますか？`:"この位置を行きたい場所に追加しますか？"}</b><button class="btn fill" data-a="tapAdd">追加する</button><button class="btn" data-a="tapCancel">やめる</button></div>`:""}`}
@@ -1765,19 +1766,19 @@ function nextRoute(t){const ds=dates(t),today=ymd(new Date());const d=S.mapDay?d
   return `<div class="card nroute"><div><span class="sub">次のルート${d!==today?`（${ds.indexOf(d)+1}日目）`:""}</span><b>${esc(sa.name)} → ${esc(sb.name)}</b><span class="sub">${MODE_L[mm]}で約${fmtMin(legMin(km,mm))}（${km.toFixed(1)}km）</span></div><a class="btn fill" href="${Native.dirUrl(sb)}" target="_blank" rel="noopener">ナビ開始</a></div>`}
 function mapBottomHtml(t){const nos=spots(t).filter(s=>s.lat==null);const sel=S.sel&&t.spots[S.sel]?{id:S.sel,...t.spots[S.sel]}:null;
   return S.pick?"":(sel?`<div class="card selcard">${spotPhoto(sel)?`<img class="selph" src="${esc(phSrc(sel.photo.u))}" alt="" onerror="this.remove()">`:""}<div class="row">${dayTag(t,sel.id)}${sel.area?`<span class="sub">${esc(sel.area)}</span>`:""}</div><h3 style="font-size:19px">${esc(sel.name)}</h3>${sel.note?`<p class="sub" style="color:var(--ink)">${esc(sel.note)}</p>`:""}${planBtns(t,sel)}<div class="row"><a class="btn fill" href="${Native.dirUrl(sel)}" target="_blank" rel="noopener">ここへ行く</a><a class="btn" href="${Native.mapUrl(sel)}" target="_blank" rel="noopener">Googleマップ</a></div></div>`
-   :(spots(t).some(s=>s.lat!=null)?`${richMap()?"":nextRoute(t)}<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。${richMap()?"地図のお店や観光地を押すと、候補に追加できます。":""}</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所を探す」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
+   :(spots(t).some(s=>s.lat!=null)?`${richMap()?"":nextRoute(t)}<p class="sub">ピンを押すと詳しい情報が出ます。線はその日に回る順番です。${richMap()?"「＋ 地図から場所を追加」から候補を追加できます。":""}</p>`:`<div class="empty"><b>まだピンがありません</b><span>「場所を探す」タブで行きたい場所を追加して、地図の位置を決めるとここに出ます。</span></div>`))
    +(nos.length?`<div class="card form"><span class="lbl">位置が決まっていない場所</span><div class="row">${nos.map(s=>`<button class="btn" data-a="pickFor" data-id="${s.id}">${esc(s.name)}を置く</button>`).join("")}</div></div>`:"")}
 function mapView(t){
   if(richMap())return `<div id="mapTop">${mapTopHtml(t)}</div>
   <div class="mapbox rich${S.pick?" pick":""}" id="mapbox"><div id="mlmap"></div><div id="mapOv">${mapOvHtml(t)}</div>${!S.pick&&!S.sel?`<div class="mapnr">${nextRoute(t)}</div>`:""}<button class="mapmode" data-a="mapSimple">簡易地図</button><div class="mlload" id="mlload">地図を読み込んでいます…</div></div>
   <div id="mapBottom" class="form" style="gap:12px">${mapBottomHtml(t)}</div>`;
   return `<div id="mapTop">${mapTopHtml(t)}</div>
-  <div class="mapbox${S.pick?" pick":""}" id="mapbox"><svg id="svg" role="img" aria-label="地図"><rect x="-99999" y="-99999" width="199999" height="199999" fill="var(--sea)"/><path class="land" d="${GEO.d}" vector-effect="non-scaling-stroke"/><g id="ov"></g></svg>
+  ${ML.failed?`<p role="status">${esc(ML.reason)}。簡易地図を表示しています。接続を確認して「詳しい地図を再試行」を押してください。</p>`:""}<div class="mapbox${S.pick?" pick":""}" id="mapbox"><svg id="svg" role="img" aria-label="地図"><rect x="-99999" y="-99999" width="199999" height="199999" fill="var(--sea)"/><path class="land" d="${GEO.d}" vector-effect="non-scaling-stroke"/><g id="ov"></g></svg>
    <div id="mapOv">${mapOvHtml(t)}</div>
-   <div class="zoom"><button data-a="zin" aria-label="拡大">＋</button><button data-a="zout" aria-label="縮小">－</button><button data-a="zfit" aria-label="全体" style="font-size:12px">全体</button></div><span class="attr">地図：地球地図日本（国土地理院）をもとに作成</span>${navigator.onLine!==false?`<button class="mapmode" data-a="mapRich">詳しい地図</button>`:""}</div>
+   <div class="zoom"><button data-a="zin" aria-label="拡大">＋</button><button data-a="zout" aria-label="縮小">－</button><button data-a="zfit" aria-label="全体" style="font-size:12px">全体</button></div><span class="attr">地図：地球地図日本（国土地理院）をもとに作成</span>${navigator.onLine!==false?`<button class="mapmode" data-a="mapRich">${ML.failed?"詳しい地図を再試行":"詳しい地図"}</button>`:""}</div>
   <div id="mapBottom" class="form" style="gap:12px">${mapBottomHtml(t)}</div>`}
 /* ===== 詳しい地図（MapLibre ＋ OpenFreeMap。無料・キー不要）。電波がないとき・読み込めないときは簡易地図 ===== */
-const ML={map:null,el:null,tid:null,ok:false,failed:false,markers:[],loading:null};
+const ML={reason:"",map:null,el:null,tid:null,ok:false,failed:false,markers:[],loading:null};
 const ML_STYLE="https://tiles.openfreemap.org/styles/liberty";
 const POI_LAYERS=["poi_r1","poi_r7","poi_r20","poi_transit","airport"];
 function richMap(){return S.mapMode!=="simple"&&!ML.failed&&navigator.onLine!==false}
@@ -1785,17 +1786,17 @@ function loadML(){if(window.maplibregl)return Promise.resolve();if(ML.loading)re
   ML.loading=new Promise((ok,ng)=>{const l=document.createElement("link");l.rel="stylesheet";l.href="vendor/maplibre-gl.css";document.head.appendChild(l);
     const sc=document.createElement("script");sc.src="vendor/maplibre-gl.js";sc.onload=()=>window.maplibregl?ok():ng(new Error("ml"));sc.onerror=()=>ng(new Error("ml"));document.head.appendChild(sc);setTimeout(()=>ng(new Error("timeout")),15000)});
   ML.loading.catch(()=>{ML.loading=null});return ML.loading}
-function mlFail(){if(ML.failed)return;ML.failed=true;try{ML.map&&ML.map.remove()}catch(e){}ML.map=null;ML.el=null;if(S.tab==="map"&&!S.ai){draw();toast("詳しい地図を読み込めなかったので、簡易地図にしました")}}
+function mlFail(reason="通信・地図の描画に失敗しました"){ML.reason=reason;if(ML.failed)return;ML.failed=true;try{ML.map&&ML.map.remove()}catch(e){}ML.map=null;ML.el=null;if(S.tab==="map"&&!S.ai){draw();toast("詳しい地図を読み込めなかったので、簡易地図にしました")}}
 const cssVar=v=>{const m=/var\((--[\w-]+)\)/.exec(v);return m?getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim()||"#888":v};
 async function initML(t){const ph=$("mlmap");if(!ph)return;
   if(ML.map&&ML.tid===S.tid&&ML.el){ph.replaceWith(ML.el);ML.map.resize();if(ML.ok){$("mlload")?.remove();mlData(t);mlFocus(t)}return}
   if(ML.map){try{ML.map.remove()}catch(e){}ML.map=null}
-  try{await loadML()}catch(e){mlFail();return}
+  try{await loadML()}catch(e){mlFail("地図の表示用ファイルを読み込めませんでした");return}
   if(!$("mlmap")||S.tab!=="map")return;
   ML.ok=false;ML.tid=S.tid;ML.el=$("mlmap");
   const initial=pickCenter(t)||destinationCenter(t);let map;try{map=new maplibregl.Map({container:ML.el,style:ML_STYLE,center:initial?[initial.lon,initial.lat]:[137.5,37.5],zoom:initial?11:4.3,attributionControl:{compact:false},dragRotate:false,pitchWithRotate:false,cooperativeGestures:false})}catch(e){mlFail();return}
   ML.map=map;map.touchZoomRotate.disableRotation();map.addControl(new maplibregl.NavigationControl({showCompass:false}),"bottom-right");
-  const to=setTimeout(()=>{if(!ML.ok)mlFail()},15000);
+  const to=setTimeout(()=>{if(!ML.ok)mlFail("読み込みに15秒以上かかりました")},15000);
   map.on("error",e=>{if(!ML.ok&&!e.sourceId)mlFail()});
   map.once("style.load",()=>{ML.ok=true;clearTimeout(to);$("mlload")?.remove();
     /* 地名は日本語で */
@@ -1806,6 +1807,7 @@ async function initML(t){const ph=$("mlmap");if(!ph)return;
     mlData(T());mlFit(T(),true);mlFocus(T())});
   map.on("click",e=>{const t=T();if(!t)return;
     if(S.pick){S.pick.ll={lat:e.lngLat.lat,lon:e.lngLat.lng};redrawMap();return}
+    if(!S.mapAdding){if(S.sel||S.tapLL){S.sel=null;S.tapLL=null;redrawMap()}return}
     const f=map.queryRenderedFeatures(e.point,{layers:POI_LAYERS.filter(id=>map.getLayer(id))})[0];
     if(f){const p=f.properties||{};const c=f.geometry.coordinates;S.tapLL={lat:c[1],lon:c[0],name:p["name:ja"]||p["name:nonlatin"]||p.name||"",cls:p.class||"",sub:p.subclass||""};S.sel=null;redrawMap();return}
     if(S.sel||S.tapLL){S.sel=null;S.tapLL=null;redrawMap();return}
@@ -1865,7 +1867,7 @@ function bindMap(){const svg=$("svg");if(!svg)return;const pts=new Map();let st=
       if(S.pick){const [x,y]=toSvg(e.clientX,e.clientY);S.pick.ll=unproj(x,y);redrawMap()}
       else if(pin){S.sel=pin.dataset.pin;S.assign=null;redrawMap()}
       else if(S.sel||S.tapLL){S.sel=null;S.tapLL=null;redrawMap()}
-      else{const [x,y]=toSvg(e.clientX,e.clientY);S.tapLL=unproj(x,y);redrawMap()}}};
+      else if(S.mapAdding){const [x,y]=toSvg(e.clientX,e.clientY);S.tapLL=unproj(x,y);redrawMap()}}};
   svg.addEventListener("pointerup",end);svg.addEventListener("pointercancel",end);
   svg.addEventListener("wheel",e=>{e.preventDefault();const [x,y]=toSvg(e.clientX,e.clientY);zoomAt(e.deltaY<0?1.25:1/1.25,x,y)},{passive:false});
   svg.addEventListener("keydown",e=>{const g=e.target.closest("[data-pin]");if(g&&(e.key==="Enter"||e.key===" ")){e.preventDefault();S.sel=g.dataset.pin;redrawMap()}});
@@ -1894,6 +1896,65 @@ async function fetchRate(tid,force){const t=DB.trips[tid];if(!t)return;const c=t
   try{const r=await fetch(`https://open.er-api.com/v6/latest/${c}`).then(r=>r.json());const v=+r?.rates?.JPY;if(!(v>0))throw 0;
     const tt=DB.trips[tid];if(!tt||(!force&&tt.rateMan)||tt.cur&&tt.cur!==c)return;tt.cur=c;tt.rate=Math.round(v*1e4)/1e4;tt.rateAt=Date.now();tt.rateMan=false;save();if(S.tid===tid&&S.tab==="split")draw();if(force)toast(`レートを更新しました：${fx(1,c)}＝${tt.rate.toLocaleString("ja-JP")}円`)}
   catch(e){if(force)toast("レートを取れませんでした。設定から手で入れられます")}}
+/* 日程の料金だけを集計。候補・支出・予算上限とは合算しない。 */
+function planFee(text){const v=String(text||'').normalize('NFKC').replace(/,/g,'').trim();
+  if(/^(無料|0円)(?:[（(]要確認[）)])?$/.test(v))return {lo:0,hi:0};
+  if(!v||/[$＄€£]|USD|EUR|ドル|ユーロ|万|子供|小学生|往復|片道|時間|泊|部屋|室|人.*人|円.*円.*円|円[・\s].*\d/i.test(v))return null;
+  const m=v.match(/^(?:約|大人|1人(?:あたり)?|一人(?:あたり)?)?\s*(\d+)\s*(?:円)?\s*(?:[〜～~－-]\s*(\d+)\s*)?円(?:前後|程度|目安|から|〜|～)?(?:$|[（(・\s])/);
+  if(!m)return null;const lo=+m[1],hi=m[2]?+m[2]:/[〜～]|から/.test(v)?null:lo;
+  return lo<=1e8&&(hi==null||hi>=lo&&hi<=1e8)?{lo,hi}:null}
+function planEstimate(t){const rows=[];const people=+t.people>0?+t.people:null;
+  dates(t).forEach(date=>items(t,date).forEach(x=>{const sp=x.spot&&t.spots?.[x.spot];const fee=planFee(sp?.fee);const shared=x.kind==='stay';
+    rows.push({date,title:x.title,fee:sp?.fee||'',lo:fee?.lo??null,hi:fee?.hi??null,shared,unknown:!fee||shared&&fee.lo>0||!people&&fee.lo>0});}));
+  const priced=rows.filter(x=>x.lo!=null&&!x.shared);let lo=0,hi=0,open=false;
+  priced.forEach(x=>{const n=people||1;lo+=x.lo*n;if(x.hi==null)open=true;else hi+=x.hi*n});
+  return {rows,lo,hi:open?null:hi,people,priced:priced.length,unknown:rows.filter(x=>x.unknown).length}}
+function planCostLabel(e){return !e.priced?'まだ計算できません':`${yen(e.lo)}${e.hi==null?'〜':e.hi!==e.lo?'〜'+yen(e.hi):''}`}
+const COST_CATS={transport:'交通費',hotel:'宿代',food:'食費',other:'観光・体験'};
+function costScope(t,plan=false,withBudget=true){const s=JSON.stringify([t.start,t.end,t.dest||'',t.from||'',t.move||'',t.people||'',...(plan&&withBudget?[t.budget||0]:[]),plan?items(t).map(x=>[x.date,x.time,x.kind,x.title,t.spots?.[x.spot]?.name||'',t.spots?.[x.spot]?.fee||'',t.spots?.[x.spot]?.lat??'',t.spots?.[x.spot]?.lon??'']).sort():t.people||'']);let h=2166136261;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return s.length+':'+(h>>>0).toString(16)}
+function costRanges(o){const r={};if(!o||typeof o!=='object')return r;for(const k of Object.keys(COST_CATS)){const x=o[k];if(!x||typeof x!=='object'||typeof x.min!=='number'||typeof x.max!=='number'||!Number.isFinite(x.min)||!Number.isFinite(x.max)||x.min<0||x.max<x.min||x.max>1e8)continue;r[k]={min:Math.round(x.min),max:Math.round(x.max),note:typeof x.note==='string'?x.note.slice(0,180):''}}return r}
+function cleanCosts(o){const ranges=costRanges(o?.forecast),booked={};for(const k of Object.keys(COST_CATS)){const v=o?.booked?.[k];if(typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1e9)booked[k]=Math.round(v)}const previousBookings={};for(const k of Object.keys(COST_CATS)){const v=o?.previousBookings?.[k];if(typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1e9)previousBookings[k]=Math.round(v)}return {forecast:ranges,booked,previousBookings,routeScope:typeof o?.routeScope==="string"?o.routeScope.slice(0,24000):"",scope:typeof o?.scope==='string'?o.scope.slice(0,24000):'',method:typeof o?.method==='string'?o.method.slice(0,30):'',bookScope:typeof o?.bookScope==='string'?o.bookScope.slice(0,2000):''}}
+function costSummary(t){const ds=dates(t),n=+t.people>0?+t.people:1,cp=cleanCosts(t.costPlan),fresh=cp.scope===costScope(t,true),legacy=cp.scope===costScope(t,true,false),transportFresh=fresh||legacy||cp.routeScope===costScope(t,true,false),bookFresh=cp.bookScope===costScope(t),rows=[];let lo=0,hi=0,missing=0;
+ const days=ds.length,nights=Math.max(0,days-1),known={food:0,other:0};let unpriced=0;
+ for(const x of items(t)){if(x.kind==='move'||x.kind==='stay'||t.spots?.[x.spot]?.cat==='shop')continue;const p=planFee(t.spots?.[x.spot]?.fee);if(p&&p.hi!=null){known[x.kind==='food'||t.spots?.[x.spot]?.cat==='cafe'?'food':'other']+=p.hi*n}else if(x.kind!=='food')unpriced++}
+ const baseline={hotel:{min:5000*nights,max:12000*nights,note:`学生向けの仮置き：1人1泊5,000〜12,000円 × ${nights}泊`},food:{min:2500*days,max:4500*days,note:`仮置き：1人1日2,500〜4,500円 × ${days}日`},other:{min:1000*days,max:3000*days,note:`観光・体験の予備枠：1人1日1,000〜3,000円 × ${days}日。買い物は別`}};
+ for(const k of Object.keys(COST_CATS)){let x,source;if(bookFresh&&Object.hasOwn(cp.booked,k)){x={min:cp.booked[k],max:cp.booked[k],note:'入力した旅行全体・全員分の金額'};source='予約・確定額'}else {const f=(fresh||k==="transport"&&transportFresh)&&cp.forecast[k];const b=f||baseline[k];if(b){x={min:b.min*n,max:b.max*n,note:b.note};source=f?(legacy&&!fresh?'以前の交通費予測（要確認）':'AIの予測'):'ざっくり予測';if(known[k]>x.min)x.min=known[k];if(known[k]>x.max)x.max=known[k]}}
+  if(!x){missing++;rows.push({key:k,label:COST_CATS[k],missing:true,note:t.from?'出発地と移動手段からAIで見積もれます':'出発地を入れるとAIで見積もれます'});continue}lo+=x.min;hi+=x.max;rows.push({key:k,label:COST_CATS[k],...x,source})}
+ return {lo,hi,rows,missing,people:n,transportKept:!fresh&&transportFresh&&!!cp.forecast.transport,peopleUnknown:!(+t.people>0),staleForecast:Object.keys(cp.forecast).length&&!fresh,staleBooking:Object.keys(cp.booked).length&&!bookFresh,unpriced}}
+function costRangeLabel(x){return `${yen(x.min)}${x.max!==x.min?'〜'+yen(x.max):''}`}
+function hotelBudgetBox(t,c){const nights=Math.max(0,dates(t).length-1);if(!t.budget)return '<p>旅行全体の予算を決めると、宿に使える上限が分かります。</p><button class="btn" data-a="moneySet">予算を決める</button>';if(!nights)return '<p>日帰りのため宿代は計算しません。</p>';if(c.peopleUnknown)return '<p>宿の上限を出すには、旅行の設定で人数を入れてください。</p>';const others=c.rows.filter(x=>x.key!=='hotel');if(others.some(x=>x.missing))return '<p>宿の上限：交通費を見積もると計算できます。</p>';const spend=others.reduce((n,x)=>n+(x.min+x.max)/2,0),left=t.budget-spend,per=Math.floor(Math.max(0,left)/c.people/nights/100)*100;return '<div class="inbox form"><b>予算内なら、宿は1人1泊 '+yen(per)+' まで</b><span>旅行全体・全員分の予算 '+yen(t.budget)+' から、交通・食事・観光の目安を引いた計算です。'+(left<0?'宿代を入れる前に予算を超えています。移動や予定を見直しましょう。':c.hi>t.budget?'高めの予測では予算を超える可能性があります。宿は上限以内で探しましょう。':'')+'</span></div>'}
+function costPreviousBox(t,cp){const old={...cp.previousBookings,...(cp.bookScope!==costScope(t)?cp.booked:{})};const entries=Object.entries(old).filter(([k])=>!(cp.bookScope===costScope(t)&&Object.hasOwn(cp.booked,k)));return entries.length?`<div class="inbox form"><b>前に入力した予約額（要確認）</b><p>変更後もこの予約が有効か確認してください。下のボタンで入力し、「この金額で再計算」で反映します。</p>${entries.map(([k,v])=>`<div class="row"><span>${COST_CATS[k]}：${yen(v)}</span><button type="button" class="btn" data-a="costRestore" data-k="${k}">確認して入力</button></div>`).join("")}</div>`:""}
+function planCostBox(t){const c=costSummary(t),cp=cleanCosts(t.costPlan);return `<section class="card form" aria-label="日程の予定金額"><h3 style="font-size:17px">この旅行、いくらくらい？</h3><p style="margin:4px 0">${c.missing?'交通費を除く目安':'旅行全体の目安'} ・ ${c.peopleUnknown?'人数未定のため1人分':c.people+'人分'}</p><b style="font-size:25px;line-height:1.5">目安 約 ${yen(c.lo===c.hi?c.lo:Math.min(c.hi,Math.max(c.lo,Math.round((c.lo+c.hi)/2/1000)*1000)))}</b><p style="margin:4px 0">${c.rows.every(x=>!x.missing&&x.source==="予約・確定額")?"入力した確定額の合計です。":c.lo===c.hi?"入力額・予測額を含む目安です。未計算の項目は含みません。":"予測幅の中央を表示。選ぶ宿・移動で変わります。"}</p><p style="margin:6px 0">${c.missing?'交通費を足すと総額が分かります。':'交通・宿・食事・観光をまとめた予測です。'}予約した金額で、あとから更新できます。</p>${cp.method&&(!c.staleForecast||c.transportKept)?`<p>交通費の見積もり条件：${esc(cp.method)}（現地の移動設定とは別）</p>`:''}${hotelBudgetBox(t,c)}${c.staleForecast||c.staleBooking?'<p class="warn">旅行の条件が変わりました。条件が合わない予測・予約額は合計から外しています。同じ移動条件の交通費予測は保持します。再確認してください。</p>':''}<details><summary style="min-height:44px;padding:10px 0;font-weight:600">内訳・予測の幅・予約金額</summary><p>予測の幅：${costRangeLabel({min:c.lo,max:c.hi})}。目安額はこの幅の中央です。</p><ul style="padding-left:20px">${c.rows.map(x=>`<li style="margin:12px 0"><b>${x.label}：${x.missing?'まだ含めていません':costRangeLabel(x)}</b><br>${x.missing?'':esc(x.source)+' ・ '}${esc(x.note)}</li>`).join('')}</ul><p>予測は予算を決めるための仮の幅で、店やホテルの販売価格・予約料金ではありません。繁忙期・選ぶ便や宿で変わります。予約・確定額は予測に置き換え、使ったお金とは二重に足しません。</p><details><summary style="min-height:44px;padding:10px 0;font-weight:600">予約した金額で更新する</summary><form id="costForm">${costPreviousBox(t,cp)}<p>各欄は旅行全体・全員分の合計です。宿は全泊分、交通は往復と現地移動をまとめて入力。空欄は予測に戻し、無料は0円を入力します。</p><div class="field"><label for="cost_people">人数</label><input id="cost_people" type="number" min="1" max="50" required value="${c.people}"></div>${Object.entries(COST_CATS).map(([k,v])=>`<div class="field"><label for="cost_${k}">${v}（全員分・円）</label><input id="cost_${k}" type="number" min="0" max="1000000000" step="1" placeholder="未予約なら空欄" value="${c.staleBooking?'':cp.booked[k]??''}"></div>`).join('')}<button type="submit" class="btn fill big">この金額で再計算</button></form></details></details><div class="row" style="gap:8px;margin-top:8px"><button class="btn fill" data-a="aiOpen" data-k="cost">AIで交通費・総額を見積もる</button><button class="btn" data-a="tab" data-t="split">使ったお金</button></div></section>`}
+function costPrompt(t,o){return `旅行の予算感を知りたい大学生向けに、次の日程の費用をざっくり予測してください。予算上限：${t.budget?`${t.budget}円（全員分・旅行全体）`:"未定"}。予算がある場合は交通・食事・観光を先に考え、残りを人数と泊数で割った宿代の上限内で学生向けの宿を想定。予算不足ならnoteで不足と安くする方法を示し、無理に金額を合わせない。正確な見積書ではなく、交通手段・距離・一般的な価格帯を考えた幅でよいです。実在する店・宿の確定料金や空き状況は作らないでください。\n行き先：${o.dest}、出発地：${o.from||'未定'}、${t.start}〜${t.end}、交通：${o.move}。\n今の日程：${items(t).map(x=>`${x.date} ${x.time||''} ${x.title}`).join('／')}\ntransportは往復と現地移動の合計。出発地未定ならtransportはnull。自家用車はガソリン・高速・駐車場を考え、車の費用を${+o.people>0?o.people:1}人で割った1人分にする。hotelは全泊分、学生向けは1人1泊5,000〜12,000円を出発点とし、日程や行き先で調整。foodは全日分、otherは観光・体験で買い物は除外。全部日本円・1人分・旅行全体。分からない項目はnull、無料の場合だけ0。noteには区間・片道と往復・泊数など計算の前提を短く書く。\n${aiCopyRules()}\n返事は説明を別に並べず、コピーできる1つのJSONコード枠だけにしてください。日程・場所は変更しません。\n{"costs":{"transport":{"min":0,"max":0,"note":"往復・現地移動の前提"},"hotel":{"min":0,"max":0,"note":"全泊分の前提"},"food":{"min":0,"max":0,"note":"全日分"},"other":{"min":0,"max":0,"note":"観光・体験"}}}`}
+function costAiView(t,A){const o=A.o;return `<section class="card form" id="aiForm"><div class="row" style="justify-content:space-between"><h2 style="font-size:20px">交通費・総額をAIで見積もる</h2><button class="btn" data-a="aiClose">閉じる</button></div>${A.step==='preview'?`<p>以下は1人分・旅行全体の予測です。日程は変更しません。</p><ul>${Object.entries(COST_CATS).map(([k,v])=>`<li style="margin:12px 0"><b>${v}：${A.c.costs[k]?costRangeLabel(A.c.costs[k]):'未確認'}</b><br>${esc(A.c.costs[k]?.note||'')}</li>`).join('')}</ul><button class="btn fill big" data-a="aiApply">この見積もりを使う</button><button class="btn" data-a="aiBack">貼り直す</button>`:!A.sent&&!A.copyText?`<p>出発地・交通手段から、往復の交通費と宿・食事を予測します。</p><div class="field"><label for="ai_from">出発地（例：名古屋）</label><input id="ai_from" maxlength="30" value="${esc(o.from)}"></div><div class="field"><label for="ai_move">見積もりに使う交通手段</label><select id="ai_move">${['電車・バス','新幹線','飛行機','レンタカー','自家用車','徒歩と電車'].map(v=>`<option ${o.move===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="ai_people">人数（車の費用を割るため）</label><input id="ai_people" type="number" min="1" max="50" value="${esc(o.people||1)}"></div>${aiLinkBox(A)}`:aiLinkBox(A)}</section>`}
+
+
+/* AIが既存予定を再出力しても、追加モードでは重複を入れない。 */
+function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time;const an=name(a),bn=name(b);return an||bn?(an||title(a))===(bn||title(b)):normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
+function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date));let dup=0,adjusted=0,unknown=0,unresolved=0;
+  const origin=String(S.ai?.o&&Object.hasOwn(S.ai.o,'from')?S.ai.o.from:t.from||DB.home||'').trim();const hasOrigin=!!origin&&!/^(未定|不明|わからない|あとで)$/.test(origin);const ds=dates(t);
+  Object.entries(c.days).forEach(([date,list])=>{const seen=kept.filter(x=>x.date===date);const fresh=[];
+    list.forEach((v,i)=>{const x={...v,date};if([...seen,...fresh].some(y=>aiSameItem(t,x,y))){dup++;return}
+      if(!hasOrigin&&x.kind==='move'&&((date===ds[0]&&i===0)||(date===ds[ds.length-1]&&i===list.length-1)||/帰路|帰宅|帰り|出発地|自家用車で.*(?:へ移動|出発)/.test(x.title))){x.time='';x.arrive='';x.note='【出発地を入力して移動時間を確認】'+x.note;unknown++}fresh.push(x)});
+    const all=[...seen,...fresh].sort((a,b)=>(timeKey(a.time)??1440)-(timeKey(b.time)??1440));
+    let prev=null;all.forEach(x=>{const k=timeKey(x.time);if(k==null)return;const getSpot=v=>t.spots?.[v.spot]||(v.spotName?Object.values(t.spots||{}).find(z=>normName(z.name)===normName(v.spotName))||c.spots.find(z=>normName(z.name)===normName(v.spotName)):null);const boundary=y=>y.kind==='move'&&/帰路|帰宅|帰り|飛行機|新幹線|出発地|空港|レンタカー.*(?:受取|受け取|返却)/.test(y.title);
+      const gap=(a,b)=>{if(!b)return 0;const p=getSpot(a),q=getSpot(b);if(p?.lat!=null&&q?.lat!=null){const km=distKm(p,q)*1.3;return km<0.05?0:Math.ceil(legMin(km,mainMove(t,km)))}return 30};
+      if(prev){const ps=getSpot(prev),sp=getSpot(x);let travel=0;if(ps?.lat!=null&&sp?.lat!=null){const km=distKm(ps,sp)*1.3;travel=km<0.05?0:Math.ceil(legMin(km,mainMove(t,km)))}else if(prev.kind!=='move'&&x.kind!=='move')travel=30;
+        const duration=prev.kind==='stay'?30:prev.kind==='move'?Math.max(0,(timeKey(prev.arrive)??timeKey(prev.time))-timeKey(prev.time)):prev.dur||ps?.minutes||60;
+        const need=timeKey(prev.time)+duration+travel;if(k<need&&fresh.includes(x)){const next=[...seen,...fresh.filter(boundary)].filter(y=>y!==x&&(timeKey(y.time)??-1)>k).sort((a,b)=>timeKey(a.time)-timeKey(b.time))[0];const end=need+(x.kind==='stay'?30:x.kind==='move'?Math.max(0,(timeKey(x.arrive)??k)-k):sp?.minutes||60)+gap(x,next);
+          if(need<1440&&(!next||end<=timeKey(next.time))&&x.kind!=='move'){x.time=hm(need);x.note='【移動・滞在時間を確保して変更】'+x.note;adjusted++}else{x.flag=true;x.note='【この時間では移動・滞在が足りません。時間を変更してください】'+x.note}}}
+      if(fresh.includes(x)&&x.kind!=='move'){const sp=getSpot(x);const next=[...seen,...fresh.filter(boundary)].filter(y=>y!==x&&(timeKey(y.time)??-1)>timeKey(x.time)).sort((a,b)=>timeKey(a.time)-timeKey(b.time))[0];if(next&&timeKey(x.time)+(x.kind==='stay'?30:x.dur||sp?.minutes||60)+gap(x,next)>timeKey(next.time)){x.flag=true;x.note='【次の固定予定までに収まりません。時間か場所を変更してください】'+x.note}}
+      if(x.flag&&fresh.includes(x))unresolved++;prev=x});out.days[date]=fresh});
+  if(dup)out.warn.push('すでにある予定・同じ日の同じ場所への予定'+dup+'件は追加しません');
+  if(adjusted)out.warn.push('移動・滞在時間が足りない予定'+adjusted+'件の開始時刻を調整しました。取り込む前に確認してください');
+  if(unknown)out.warn.push('出発地が未定のため、行き・帰りの移動'+unknown+'件の時刻を未定にしました');
+  if(unresolved)out.warn.push('固定予定までに収まらないなど、時間の確認が必要な予定が'+unresolved+'件あります。時刻や場所を見直してください');
+  out.nItems=Object.values(out.days).reduce((n,a)=>n+a.length,0);return out}
+
+
+
+
+
 function moneyStats(t){const list=Object.values(t.expenses||{});const spent=list.reduce((s,e)=>s+(e.amount||0),0);const today=ymd(new Date());
   return {list,spent,today:list.filter(e=>e.date===today).reduce((s,e)=>s+(e.amount||0),0),left:(t.budget||0)-spent}}
 function readExDraft(){return {a:$("ex_amount")?.value,ti:$("ex_title")?.value,d:$("ex_date")?.value,p:$("ex_payer")?.value,sp:[...document.querySelectorAll("[name=ex_split]")].map(x=>x.checked)}}
@@ -1917,7 +1978,7 @@ function splitView(t){const ms=mems(t),ds=dates(t);const list=Object.entries(t.e
      ${multi?`<div><span class="lbl">割る人</span><div class="checks">${ms.map(m=>`<label><input type="checkbox" name="ex_split" value="${m.id}" ${(e.split||[]).includes(m.id)?"checked":""}>${esc(m.name)}</label>`).join("")}</div></div>`:""}
      <div class="row"><button class="btn fill" type="submit">${S.wform==="new"?"記録する":"保存"}</button><button class="btn" type="button" data-a="cancel">やめる</button></div></form>`};
   const pct=t.budget?Math.min(100,st0.spent/t.budget*100):0;
-  return `<section class="mhero"><div class="mrow"><div><span class="ml">${t.budget?"残り":"使った合計"}</span><b class="mbig ${t.budget&&st0.left<0?"over":""}">${yen(t.budget?st0.left:st0.spent)}</b></div>${t.budget?`<div style="text-align:right"><span class="ml">予算</span><b>${yen(t.budget)}</b></div>`:`<button class="h2chip" data-a="moneySet">予算を決める</button>`}</div>
+  return `${planCostBox(t)}<section class="mhero"><div class="mrow"><div><span class="ml">${t.budget?"残り":"使った合計"}</span><b class="mbig ${t.budget&&st0.left<0?"over":""}">${yen(t.budget?st0.left:st0.spent)}</b></div>${t.budget?`<div style="text-align:right"><span class="ml">予算</span><b>${yen(t.budget)}</b></div>`:`<button class="h2chip" data-a="moneySet">予算を決める</button>`}</div>
     ${t.budget?`<div class="mmeter"><i style="width:${pct}%"></i></div>`:""}
     <div class="mstats"><div><b>${yen(st0.spent)}</b><span>使った合計</span></div><div><b>${yen(st0.spent/ppl)}</b><span>1人あたり</span></div><div><b>${yen(st0.today)}</b><span>今日</span></div></div>
     ${abroad?`<div class="mrate">${rate?`${fx(1,c)} ＝ <b>${rate.toLocaleString("ja-JP")}円</b>　<span>${t.rateAt?`${new Date(t.rateAt).getMonth()+1}/${new Date(t.rateAt).getDate()} 更新`:"手入力"}</span>`:"レートを取得しています…"}<button class="ib" data-a="rateNow">最新にする</button></div>`:""}</section>
@@ -1962,14 +2023,14 @@ let SAMPLE=null;(async()=>{try{SAMPLE=await window.claude?.use?.("sample")}catch
 const CATS={see:"観光",food:"ごはん",shop:"買い物",nature:"自然",activity:"体験",view:"景色",cafe:"カフェ"};
 const PREFS=["定番の名所","ごはん・グルメ","映える景色","自然","歴史・文化","カフェ","買い物","体験・アクティビティ","温泉","のんびり"];
 function aiDefaults(t){return {dest:t.dest||t.title.replace(/\s*\d+泊\d+日.*$/,""),from:t.from||DB.home||"",people:t.people||"",prefs:["定番の名所","ごはん・グルメ"],pace:"ふつう",move:t.move==="owncar"?"自家用車":t.move==="car"?"レンタカー":t.move==="walk"?"徒歩と電車":"電車・バス",budget:t.budget?`${t.budget}円（全員分）`:"",src:"",extra:"",count:12,theme:"",mode:"replace"}}
-function aiPrompt(t,o,kind){const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）`).join("、");
+function aiPrompt(t,o,kind){if(kind==="cost")return costPrompt(t,o);const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）`).join("、");
   const have=spots(t).map(s=>s.name);
   const rules=`## 守ってほしいこと
 - 実在して、今も営業している場所だけ。自信がない場所は入れない
 - お店は、長く続いていて名前がよく知られている所だけ。チェーン店や、名前に自信がないお店は入れない
 - note は必ず60〜80字（短すぎないように）
 - 緯度・経度（lat, lon）は小数5桁。分からなければ null
-- 料金・営業時間は目安でよい。変わりやすいものは note に「要確認」と書く
+- feeは日本円で「1人1000円」「1000〜2000円」「無料」のように書く。宿は「1室15000円」のように単位を明記する。分からない費用は「未確認」。実在しない料金を作らない。変わりやすいものはnoteに「要確認」と書く
 - 返事のデータは下の形の JSON にする。出典・リンク・参考にしたサイト名は入れない（長くなって途中で切れるのを防ぐため）
 ${aiCopyRules()}`;
   const shape=`## 返事の形（JSON）
@@ -1980,7 +2041,8 @@ ${aiCopyRules()}`;
   "spots": [ { "name": "場所の名前", "area": "エリア", "category": "see | food | shop | nature | activity | view | cafe",
     "note": "おすすめの理由・見どころ（60〜80字。何が楽しいか・どんな人に向くかが分かるように）",
     "wiki": "日本語版ウィキペディアの記事名（その場所の記事がなければ空文字）", "name_en": "英語の名前（例：Nirai Kanai Bridge）", "fee": "料金の目安", "lat": 0.0, "lon": 0.0,
-    "booking": false, "minutes": 60, "rain_ok": false } ]
+    "booking": false, "minutes": 60, "rain_ok": false } ]${kind==="plan"?`,
+  "costs": { "transport": {"min":0,"max":0,"note":"往復と現地移動の前提"}, "hotel": {"min":0,"max":0,"note":"全泊分"}, "food": {"min":0,"max":0,"note":"全日分"}, "other": {"min":0,"max":0,"note":"観光・体験"} }`:""}
 }`;
   if(kind==="text")return `次の文章（旅行の記事・ブログ・メモなど）に出てくる場所のうち、「${o.dest}」の旅行で行けそうな場所（観光地・お店・景色・体験など）を、行きたい場所の候補として抜き出してください。
 - 文章に出てこない場所は足さない。同じ場所は1つにまとめる
@@ -2010,20 +2072,21 @@ ${shape}`;
 ## 条件
 - 行き先：${o.dest}
 - 日程：${day}
-- 出発地：${o.from||"未定"}（行きと帰りの移動も予定に入れる）
+- 出発地：${o.from||"未定"}（未定なら行きと帰りの移動はtime・arriveを空文字にし、noteに「出発地を入力して時間を確認」と書く。出発時刻・移動時間を推測で決めない）
 - 人数：${o.people||"未定"}　移動手段：${o.move}
 - 好み：${o.prefs.join("、")||"特になし"}
 - ペース：${o.pace}（ゆったり＝観光は1日2〜3か所、ふつう＝3〜4か所、たくさん＝5か所まで）
-${o.budget?`- 予算の目安：${o.budget}\n`:""}${o.extra?`- その他の希望：${o.extra}\n`:""}
+${o.budget?`- 予算の上限：${o.budget}。この範囲で日程を考え、交通・食事・観光を引いた残りから宿の1人1泊の上限を計算。足りない場合は費用のnoteに不足と代替案を書く\n`:""}${o.extra?`- その他の希望：${o.extra}\n`:""}
 ${o.mode==="add"?`## 今ある日程（変更せず残す）
 ${ds.map(d=>d+"\n"+(items(t,d).map(x=>`- ${x.time||"時刻未定"}${x.arrive?"〜"+x.arrive:""} ${x.title}`).join("\n")||"予定なし")).join("\n")}
 - 今の予定を作り直さず、空いている時間に追加する新しい予定だけを days に入れる。既存の予定は days に再出力しない。既存の予定や場所への訪問を重複させない。
 `:""}## プランの作り方
-- ぎちぎちにしない。場所の間の移動時間を考え、各予定は前の予定の所要時間＋移動時間のあとにする
+- 各予定は必ず前の予定の滞在時間＋移動時間のあとにする。食事は60〜90分、チェックインは30分。次の固定予定までに入らなければ、その場所は候補にだけ入れる。最後に全日程の時刻を再確認する
 - 昼ごはん（11:30〜13:30）と夜ごはん（18:00〜20:00）を入れる。宿のチェックインも入れる${o.mode==="add"?"（既存の日程にあるものは追加しない）":""}
 - 初日は到着してから、最終日は帰りの出発の1時間以上前までに予定を終える
 - 移動（新幹線・飛行機など）は kind を "move" にして、出発 time と到着 arrive を入れる
 ${o.move==="自家用車"?"- 自家用車で移動する。レンタカーの予約・受け取り・貸出手続き・返却は予定に入れない。出発地が分かる場合はそこからの車移動を考え、分からなければ出発地を勝手に決めない。":""}
+- costsには、完成後の日程（追加モードは既存分も含む）の交通・宿・食事・観光の概算を幅で入れる。すべて日本円・1人分・旅行全体。交通は往復と現地移動。出発地未定ならtransportはnull。自家用車の費用は${+o.people>0?o.people:1}人で割る。宿は学生向けの1人1泊5,000〜12,000円を出発点に日程・行き先で調整。noteに前提を短く書く。販売価格や予約済み料金として断言しない。分からない項目はnull、無料だけ0。買い物は含めない。
 - 行きたい場所の候補は ${o.count}か所。日程に入れた場所に加えて、入れ替え用の候補も入れる。雨の日でも楽しめる場所を2か所以上
 ${rules}
 
@@ -2064,8 +2127,8 @@ const normName=s=>String(s||"").replace(/[\s　・（）()「」]/g,"").toLowerC
 const okTime=s=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(s||"").trim());return m&&+m[1]<24&&+m[2]<60?pad(+m[1])+":"+m[2]:""};
 const str=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
 /* AIの返事を検査して、取り込める形にする */
-function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[],days:{},areas:{}};
-  const exist=new Map(spots(t).map(s=>[normName(s.name),s.id]));const seen=new Set();
+function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[],days:{},areas:{}};if(kind==="cost"){const costs=costRanges(raw.costs);if(!Object.keys(costs).length)throw new Error("empty");return {...out,costs,nItems:0,warn:[]}}
+  if(kind==="plan")out.costs=costRanges(raw.costs);const exist=new Map(spots(t).map(s=>[normName(s.name),s.id]));const seen=new Set();
   (Array.isArray(raw.spots)?raw.spots:[]).slice(0,60).forEach(r=>{const name=str(r&&r.name,60);if(!name)return;const k=normName(name);if(seen.has(k))return;seen.add(k);
     let lat=+r.lat,lon=+r.lon;if(!(isFinite(lat)&&isFinite(lon))||Math.abs(lat)>90||Math.abs(lon)>180||(lat===0&&lon===0)){lat=null;lon=null}
     out.spots.push({name,dup:exist.has(k),wiki:str(r.wiki,80),en:str(r.name_en,80),area:str(r.area,30),cat:CATS[r.category]?r.category:"see",note:str(r.note,300),fee:str(r.fee,40),lat,lon,book:!!r.booking,minutes:+r.minutes>0?Math.min(600,Math.round(+r.minutes)):null,rain:!!r.rain_ok})});
@@ -2081,20 +2144,20 @@ function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[]
   if(clash)warn.push(`移動中・到着前などに入っている予定が${clash}件あります（取り込むと「要確認」が付きます）`);
   if(!out.spots.length&&!nItems)throw new Error("empty");
   return {...out,nItems,warn}}
-function aiApply(c,mode){return change(`AIの${c.nItems?"プラン":"候補"}を取り込みました`,t=>{t.spots=t.spots||{};t.items=t.items||{};t.dayInfo=t.dayInfo||{};
+function aiApply(c,mode){if(S.ai?.kind==="cost"){const o=S.ai.o;return change("予測を更新しました",t=>{t.from=String(o.from||"").trim().slice(0,30);t.people=Number.isInteger(+o.people)&&+o.people>0&&+o.people<=50?+o.people:t.people;const cp=cleanCosts(t.costPlan);t.costPlan={...cp,forecast:costRanges(c.costs),method:String(o.move||'').slice(0,30),routeScope:costScope(t,true,false),scope:costScope(t,true)};})}c=aiPrepare(T(),c,mode);return change(`AIの${c.nItems?"プラン":"候補"}を取り込みました`,t=>{t.spots=t.spots||{};t.items=t.items||{};t.dayInfo=t.dayInfo||{};
   const ids=new Map(spots(t).map(s=>[normName(s.name),s.id]));
   c.spots.forEach((s,i)=>{if(s.dup)return;const id=uid()+i;t.spots[id]={name:s.name,wiki:s.wiki||"",en:s.en||"",area:s.area,cat:s.cat,note:s.note+(s.rain?"（雨の日もOK）":""),rain:!!s.rain,fee:s.fee,url:"",lat:s.lat,lon:s.lon,book:s.book,minutes:s.minutes,ai:true,created:Date.now()+i};ids.set(normName(s.name),id)});
   /* 日程に出てくるのに候補の一覧にない場所は、候補として足す（写真を付けるため） */
   if(c.nItems)Object.values(c.days).flat().forEach((x,i)=>{if(x.spotName&&!ids.has(normName(x.spotName))&&x.kind!=="move"&&x.kind!=="stay"){const id=uid()+"x"+i;t.spots[id]={name:x.spotName,wiki:"",en:"",area:"",cat:x.kind==="food"?"food":"see",note:x.note||"",fee:"",url:"",lat:null,lon:null,book:false,minutes:null,ai:true,created:Date.now()+100+i};ids.set(normName(x.spotName),id)}});
   if(c.nItems){if(mode==="replace")t.items={};if(mode==="days"){const dd=new Set(Object.keys(c.days));for(const k of Object.keys(t.items))if(dd.has(t.items[k].date))delete t.items[k]}
     Object.entries(c.days).forEach(([date,its])=>{const base=nextOrder(t,date);its.forEach((x,i)=>{t.items[uid()+date+i]={date,time:x.time,arrive:x.kind==="move"?x.arrive:"",kind:x.kind,title:x.title,note:(x.flag?"【要確認：時間がかぶっています】":"")+x.note,spot:x.spotName?ids.get(normName(x.spotName))||"":"",order:base+i}});
-      if(c.areas[date])t.dayInfo[date]={...(t.dayInfo[date]||{}),area:c.areas[date]}})}})}
-function aiView(t){const A=S.ai,o=A.o;const more=A.kind==="more",txt=A.kind==="text";
+      if(c.areas[date])t.dayInfo[date]={...(t.dayInfo[date]||{}),area:c.areas[date]}})}if(c.costs&&Object.keys(c.costs).length){const cp=cleanCosts(t.costPlan);if(S.ai?.o){t.from=String(S.ai.o.from||"").trim().slice(0,30);if(Number.isInteger(+S.ai.o.people)&&+S.ai.o.people>0&&+S.ai.o.people<=50)t.people=+S.ai.o.people}t.costPlan={...cp,forecast:costRanges(c.costs),method:String(S.ai?.o?.move||"").slice(0,30),routeScope:costScope(t,true,false),scope:costScope(t,true)}}})}
+function aiView(t){const A=S.ai,o=A.o;if(A.kind==="cost")return costAiView(t,A);const more=A.kind==="more",txt=A.kind==="text";
   const head=`<div class="row" style="justify-content:space-between"><h2 style="font-size:20px">${A.first?"まず、AIに日程と候補を考えてもらいましょう":txt?"文章から行きたい場所を拾う":more?"AIで候補を増やす":"AIで日程と候補を作る"}</h2><button class="btn" data-a="aiClose">${A.first?"自分で予定を入れる":"閉じる"}</button></div>${A.first&&A.step!=="preview"?`<p class="sub">「${esc(o.dest)}」の日程と、行きたい場所の候補（10か所以上）をAIが考えます。下の条件のままで大丈夫です。</p>`:""}`;
-  if(A.step==="preview"){const c=A.c;return `<section class="card form">${head}
+  if(A.step==="preview"){const c=aiPrepare(t,A.c,o.mode||"replace");return `<section class="card form">${head}
      <p class="note">取り込む内容：予定 <b>${c.nItems}件</b> ・ 行きたい場所 <b>${c.spots.filter(s=>!s.dup).length}か所</b></p>
-     ${c.warn.map(w=>`<p class="warn" style="font-weight:500">${esc(w)}</p>`).join("")}${c.cut?`<div class="row"><button class="btn" data-a="aiCont">続きを頼む文をコピー</button><span class="sub">同じAIのチャットに貼って送ると、残りの場所だけを出してくれます。取り込んだあと、その答えも読み込めます。</span></div>`:""}
-     ${c.nItems?`<div class="field"><span class="lbl">今ある日程は？</span><div class="row"><label class="row" style="gap:6px"><input type="radio" name="ai_mode" value="replace" ${o.mode==="replace"?"checked":""}>置き換える（今の予定は消える）</label><label class="row" style="gap:6px"><input type="radio" name="ai_mode" value="add" ${o.mode==="add"?"checked":""}>追加する</label></div></div>`:""}
+     ${c.costs&&Object.keys(c.costs).length?`<details><summary style="min-height:44px;padding:10px 0">AIが予測した費用（1人分・旅行全体）</summary><ul>${Object.entries(c.costs).map(([k,x])=>`<li>${COST_CATS[k]}：${costRangeLabel(x)} ・ ${esc(x.note)}</li>`).join("")}</ul></details>`:""}${c.warn.map(w=>`<p class="warn" style="font-weight:500">${esc(w)}</p>`).join("")}${c.cut?`<div class="row"><button class="btn" data-a="aiCont">続きを頼む文をコピー</button><span class="sub">同じAIのチャットに貼って送ると、残りの場所だけを出してくれます。取り込んだあと、その答えも読み込めます。</span></div>`:""}
+     ${A.c.nItems?`<div class="field"><span class="lbl">今ある日程は？</span><div class="row"><label class="row" style="gap:6px"><input type="radio" name="ai_mode" value="replace" ${o.mode==="replace"?"checked":""}>置き換える（今の予定は消える）</label><label class="row" style="gap:6px"><input type="radio" name="ai_mode" value="add" ${o.mode==="add"?"checked":""}>追加する</label></div></div>`:""}
      <details><summary>場所の候補を確認（${c.spots.length}か所）</summary><div class="tbl"><table><thead><tr><th>場所</th><th>エリア</th><th>種類</th><th>位置</th></tr></thead><tbody>${c.spots.map(s=>`<tr style="${s.dup?"opacity:.45":""}"><td>${esc(s.name)}${s.dup?"（追加しない）":""}</td><td>${esc(s.area)}</td><td>${CATS[s.cat]}</td><td>${s.lat!=null?"○":"—"}</td></tr>`).join("")}</tbody></table></div></details>
      ${c.nItems?Object.entries(c.days).map(([d,its])=>`<details><summary>${md(d)}（${wd(d)}）${esc(c.areas[d]||"")}・ ${its.length}件の予定</summary><ul class="nlist">${its.map(x=>`<li><span class="when">${esc(x.time||"—")}${x.arrive?`<small>${esc(x.arrive)}着</small>`:""}</span><span${x.flag?' style="color:var(--warn)"':""}>${esc(x.title)}${x.flag?"（要確認）":""}</span></li>`).join("")}</ul></details>`).join(""):""}
      <div class="row"><button class="btn fill" data-a="aiApply">取り込む</button><button class="btn" data-a="aiBack">貼り直す</button></div></section>`}
@@ -2151,7 +2214,7 @@ function cleanMap(o,fn){const r={};if(o&&typeof o==="object")Object.entries(o).s
 function cleanPhoto(p){if(!p||typeof p!=="object")return {};if(p.none)return {photo:{none:1}};if(typeof p.u!=="string"||!/^https:\/\/(upload|thumb)\.wikimedia\.org\/[^\s"'<>]+$/.test(p.u))return {};
   return {photo:{u:p.u.slice(0,600),near:!!p.near,by:cs_(p.by,80)||"作者不明",lic:cs_(p.lic,40),pg:typeof p.pg==="string"&&/^https:\/\/commons\.wikimedia\.org\/[^\s"'<>]+$/.test(p.pg)?p.pg.slice(0,600):""}}}
 function cleanTrip(o){if(!o||typeof o!=="object")return null;const start=cd_(o.start),end=cd_(o.end);if(!start||!end||end<start)return null;
-  const t={title:cs_(o.title,40)||"旅行",start,end,people:cn_(o.people,1,50)??"",created:cn_(o.created,0,1e14)||Date.now(),sid:cid_(o.sid||"")?o.sid:uid(),dest:cs_(o.dest,40),from:cs_(o.from,30),move:MOVES[o.move]?o.move:"",budget:cn_(o.budget,1,1e9)||0,cur:CUR[o.cur]?o.cur:"",rate:cn_(o.rate,1e-6,1e6)||0,rateMan:o.rateMan===true,rateAt:cn_(o.rateAt,0,1e14)||0,plans:o.plans&&typeof o.plans==="object"?Object.fromEntries(Object.keys(EXCATS).map(k=>[k,cn_(o.plans[k],0,1e9)||0])):{},
+  const t={title:cs_(o.title,40)||"旅行",start,end,people:cn_(o.people,1,50)??"",created:cn_(o.created,0,1e14)||Date.now(),sid:cid_(o.sid||"")?o.sid:uid(),dest:cs_(o.dest,40),from:cs_(o.from,30),move:MOVES[o.move]?o.move:"",budget:cn_(o.budget,1,1e9)||0,cur:CUR[o.cur]?o.cur:"",rate:cn_(o.rate,1e-6,1e6)||0,rateMan:o.rateMan===true,rateAt:cn_(o.rateAt,0,1e14)||0,costPlan:cleanCosts(o.costPlan),plans:o.plans&&typeof o.plans==="object"?Object.fromEntries(Object.keys(EXCATS).map(k=>[k,cn_(o.plans[k],0,1e9)||0])):{},
     items:cleanMap(o.items,v=>{const date=cd_(v.date);if(!date)return null;return {date,time:ct_(v.time),arrive:ct_(v.arrive),kind:KINDS[v.kind]?v.kind:"other",title:cs_(v.title,60)||"予定",note:cs_(v.note,160),spot:cid_(v.spot||"")?v.spot:"",order:cn_(v.order,-1e6,1e6)||0,dur:cn_(v.dur,1,600)||0,done:!!v.done,bookNo:cs_(v.bookNo,60),bookUrl:/^https?:\/\//.test(v.bookUrl||"")?cs_(v.bookUrl,500):""}}),
     spots:cleanMap(o.spots,v=>{const name=cs_(v.name,60);if(!name)return null;const lat=cn_(v.lat,-90,90),lon=cn_(v.lon,-180,180);return {name,area:cs_(v.area,30),cat:CATS[v.cat]?v.cat:"",note:cs_(v.note,500),fee:cs_(v.fee,40),url:/^https?:\/\//.test(v.url||"")?cs_(v.url,500):"",lat:lat!=null&&lon!=null?lat:null,lon:lat!=null&&lon!=null?lon:null,book:!!v.book,rain:!!v.rain,minutes:cn_(v.minutes,1,600),created:cn_(v.created,0,1e14)||0,wiki:cs_(v.wiki,80),en:cs_(v.en,80),...cleanPhoto(v.photo)}}),
     members:cleanMap(o.members,v=>{const name=cs_(v.name,20);return name?{name,order:cn_(v.order,0,1e6)||0}:null}),
@@ -2205,7 +2268,7 @@ function draw(){setTimeout(()=>dispatchEvent(new Event("scroll")),0);const t=T()
   if(S.tab==="map"&&!S.ai){if(richMap())initML(t);else{bindMap();setVB(S.vb||fitVB(t))}}
   saveUI();
 }
-function go(tab){const ch=tab!==S.tab;if(tab==="split"&&S.tid)setTimeout(()=>fetchRate(S.tid),0);S.detail=null;if(ch)Native.haptic("light");setTimeout(()=>{if(!ch)return;const m=$("app");if(!m)return;m.classList.remove("enter");void m.offsetWidth;m.classList.add("enter")},0);S.print=false;S.ai=null;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
+function go(tab){const ch=tab!==S.tab;if(tab==="split"&&S.tid)setTimeout(()=>fetchRate(S.tid),0);S.detail=null;if(ch)Native.haptic("light");setTimeout(()=>{if(!ch)return;const m=$("app");if(!m)return;m.classList.remove("enter");void m.offsetWidth;m.classList.add("enter")},0);S.print=false;S.ai=null;S.mapAdding=false;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
 
 /* ================= 操作 ================= */
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b){if(S.menu){S.menu=null;draw()}return}const a=b.dataset.a,id=b.dataset.id;const t=T();
@@ -2253,7 +2316,7 @@ ${aiCopyRules()}
      try{await navigator.clipboard.writeText(pr);S.ai.contNext=true;toast("続きを頼む文をコピーしました。同じAIのチャットに貼って送ってください")}catch(e){S.ai.paste=pr;S.ai.manual=true;draw();toast("下の欄の文をコピーして、AIに送ってください")}break}
    case"aiApply":{aiReadForm();const c=S.ai.c,k=S.ai.kind;if(aiApply(c,S.ai.o.mode)){
      if(c.cut&&S.ai.contNext){const sent=S.ai.sent||DB.lastAI;S.ai={kind:"more",step:"form",o:{...aiDefaults(T()),count:10},sent,cont:true};draw();window.scrollTo(0,0);fillPhotos(S.tid);toast("取り込みました。続きの答えをコピーしたら「読み込む」を押してください");break}
-     S.ai=null;S.tab=k==="plan"&&c.nItems?"plan":"spots";draw();window.scrollTo(0,0);fillPhotos(S.tid)}break}
+     S.ai=null;S.tab=k==="cost"?"plan":k==="plan"&&c.nItems?"plan":"spots";draw();window.scrollTo(0,0);fillPhotos(S.tid)}break}
    case"aiClaude":{if(!SAMPLE||S.ai.busy)break;aiReadForm();if(S.ai.kind==="text"&&!(S.ai.o.src||"").trim()){toast("先に文章を貼ってください");break}const A=S.ai;A.busy=true;A.live="";draw();
      try{const r=await SAMPLE(aiPrompt(t,A.o,A.kind),{modelTier:"complex",onText:({text})=>{A.live=`${text.length}文字…`;const el=$("ai_live");if(el)el.textContent=A.live}});A.busy=false;if(S.ai!==A)break;aiParse(r.text)}
      catch(e){A.busy=false;draw();toast(e&&e.code==="not_granted"?"Claudeを使う許可がありません。ほかのAIで作る方法を使ってください":e&&e.code==="rate_limited"?"混み合っています。少し待ってからもう一度":"Claudeで作れませんでした。ほかのAIで作る方法も使えます")}break}
@@ -2269,7 +2332,7 @@ ${aiCopyRules()}
    case"cancel":if(S.tripForm){S.tripForm=null;S.confirm=null}else{S.edit=null;S.assign=null;S.wform=null;S.draft=null}draw();break;
    case"noConfirm":S.confirm=null;draw();break;
    case"tab":go(b.dataset.t);break;
-   case"candOpen":{if(!S.side){const secs=[...document.querySelectorAll(".day")];let k=Math.max(0,selectedPlanDay(t));secs.forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*0.4)k=+el.id.replace("day","")});S.sday=k}S.side=!S.side;S.flash=null;draw();break}
+   case"candOpen":{if(S.tab!=="plan"){S.tab="plan";S.edit=null;S.side=false}if(!S.side){const secs=[...document.querySelectorAll(".day")];let k=Math.max(0,selectedPlanDay(t));secs.forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*0.4)k=+el.id.replace("day","")});S.sday=k}S.side=!S.side;S.flash=null;draw();break}
    case"candDay":{S.sday=+b.dataset.k;showPlanDay(t,S.sday);draw();const el=$("day"+S.sday);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});break}
    case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
      const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
@@ -2337,20 +2400,22 @@ ${aiCopyRules()}
    case"pickOk":{const p=S.pick;S.pick=null;if(p.back){S.draft.lat=p.ll.lat;S.draft.lon=p.ll.lon;S.tab="spots";draw();window.scrollTo(0,0)}
      else if(change(`${p.name}の位置を決めました`,t=>{t.spots[p.id].lat=p.ll.lat;t.spots[p.id].lon=p.ll.lon})){S.sel=p.id;redrawMap()}break}
    case"pickCancel":{const p=S.pick;S.pick=null;if(p.back){S.tab="spots";draw()}else redrawMap();break}
-   case"tapAdd":{const ll=S.tapLL;S.tapLL=null;
+   case"mapAddMode":S.mapAdding=!S.mapAdding;S.tapLL=null;S.sel=null;redrawMap();break;
+   case"tapAdd":{const ll=S.tapLL;S.tapLL=null;S.mapAdding=false;
      if(ll.name){const cat=/restaurant|fast_food|food|bar|pub|ice_cream|bakery/.test(ll.cls+ll.sub)?"food":/cafe/.test(ll.cls+ll.sub)?"cafe":/shop|grocery|mall|market/.test(ll.cls+ll.sub)?"shop":/park|garden|beach|nature|viewpoint/.test(ll.cls+ll.sub)?"nature":"see";const nid=uid();
        if(change(`「${ll.name}」を行きたい場所に追加しました`,t=>{t.spots=t.spots||{};t.spots[nid]={name:ll.name.slice(0,60),area:"",cat,note:"",fee:"",url:"",lat:+ll.lat.toFixed(6),lon:+ll.lon.toFixed(6),created:Date.now()}})){S.sel=nid;redrawMap();fillPhotos(S.tid,[nid]).then(()=>{if(S.tab==="map")redrawMap()})}break}
      S.draft={name:"",area:"",note:"",fee:"",url:"",lat:ll.lat,lon:ll.lon};S.edit="spot:";S.tab="spots";draw();window.scrollTo(0,0);$("sf_name")?.focus();break}
    case"mapSimple":S.mapMode="simple";S.vb=null;draw();break;
    case"mapRich":S.mapMode="rich";ML.failed=false;draw();break;
-   case"tapCancel":S.tapLL=null;redrawMap();break;
+   case"tapCancel":S.mapAdding=false;S.tapLL=null;redrawMap();break;
    case"mapDay":S.mapDay=+b.dataset.d;redrawMap();break;
    case"zin":zoomAt(1.6);break;case"zout":zoomAt(1/1.6);break;case"zfit":S.vb=null;setVB(fitVB(t));break;
    case"addEx":S.wform="new";S.exCat=null;S.exCur=null;S.confirm=null;draw();$("ex_amount")?.focus();break;
    case"exCur":{const v=$("ex_amount")?.value;S.exCur=b.dataset.c;const sv=readExDraft();draw();restoreExDraft(sv);exConv();break}
    case"exCat":{S.exCat=b.dataset.c;const sv=readExDraft();draw();restoreExDraft(sv);break}
    case"rateNow":fetchRate(S.tid,true);break;
-   case"moneySet":S.moneySet=true;draw();$("moneySet")?.scrollIntoView({block:"start",behavior:"smooth"});$("mn_budget")?.focus();break;
+   case"costRestore":{const k=b.dataset.k,cp=cleanCosts(t.costPlan),old={...cp.previousBookings,...(cp.bookScope!==costScope(t)?cp.booked:{})};if(Object.hasOwn(COST_CATS,k)&&Object.hasOwn(old,k)&&$("cost_"+k)){$("cost_"+k).value=old[k];toast("確認した金額を入力しました。再計算で反映します")}break}
+   case"moneySet":S.tab="split";S.moneySet=true;draw();$("moneySet")?.scrollIntoView({block:"start",behavior:"smooth"});$("mn_budget")?.focus();break;
    case"editEx":S.wform=id;S.exCat=t.expenses[id]?.cat||"other";S.exCur=t.expenses[id]?.cur||null;S.confirm=null;draw();break;
    case"delEx":S.confirm=id;draw();break;
    case"delExYes":if(change("記録を削除しました",t=>{delete t.expenses[id]})){S.confirm=null;draw()}break;
@@ -2409,7 +2474,7 @@ addEventListener("scroll",iosNav,{passive:true});
 /* 日程の「次のスポットを追加する」は、トップの写真を過ぎてから出す */
 addEventListener("scroll",()=>{const f=$("fab"),h=document.querySelector(".hero2");document.body.classList.toggle("onhero",!!h&&S.tab==="plan"&&!S.ai&&h.getBoundingClientRect().bottom>90);if(!f)return;f.classList.toggle("show",!h||h.getBoundingClientRect().bottom<innerHeight*.45)},{passive:true});
 document.addEventListener("input",e=>{if(e.target.id==="ex_amount"){exConv();return}if(e.target.id==="sq"){S.q=e.target.value;const t=T(),el=$("excards");if(t&&el)el.innerHTML=exList(t)}});
-document.addEventListener("change",async e=>{if(e.target.id==="sf_day"){S.sfDay=e.target.value;const btn=$("spotForm")?.querySelector("button[type=submit]");if(btn)btn.textContent=S.sfDay?`${dates(T()).indexOf(S.sfDay)+1}日目に追加`:"候補に保存";return}if(e.target.id==="ai_json_file"||e.target.id==="cg_json_file"){const f=e.target.files?.[0];if(!f)return;if(f.size>2*1024*1024){toast("ファイルが大きすぎます。2MB以下のJSONを選んでください");e.target.value="";return}const prefix=e.target.id.startsWith("cg_")?"cg":"ai",flow=prefix==="cg"?S.cg:S.ai;try{const tx=await f.text();if((prefix==="cg"?S.cg:S.ai)!==flow)return;if(prefix==="cg")cgParse(tx);else{S.ai.paste=tx;aiParse(tx)}}catch(err){toast("ファイルを読めませんでした。コード枠をコピーして読み込んでください")}return}if(e.target.id==="f_bimg"){const f=e.target.files&&e.target.files[0];if(!f)return;try{S.bkImg=await shrinkBlob(f,1400,.82);const lb=e.target.closest("label");if(lb)lb.firstChild.textContent="画像を変える";toast("画像を付けました（保存を押すと残ります）")}catch(err){toast("この画像は読み込めませんでした")}return}if(e.target.id==="sf_file"){const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await shrinkImg(f);S.draft=readSpotForm();S.sfPhoto={u,own:true,by:"自分の写真",lic:""};draw()}catch(err){toast("この写真は読み込めませんでした")}return}if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
+document.addEventListener("change",async e=>{if(e.target.name==="ai_mode"&&S.ai){S.ai.o.mode=e.target.value;draw();return}if(e.target.id==="sf_day"){S.sfDay=e.target.value;const btn=$("spotForm")?.querySelector("button[type=submit]");if(btn)btn.textContent=S.sfDay?`${dates(T()).indexOf(S.sfDay)+1}日目に追加`:"候補に保存";return}if(e.target.id==="ai_json_file"||e.target.id==="cg_json_file"){const f=e.target.files?.[0];if(!f)return;if(f.size>2*1024*1024){toast("ファイルが大きすぎます。2MB以下のJSONを選んでください");e.target.value="";return}const prefix=e.target.id.startsWith("cg_")?"cg":"ai",flow=prefix==="cg"?S.cg:S.ai;try{const tx=await f.text();if((prefix==="cg"?S.cg:S.ai)!==flow)return;if(prefix==="cg")cgParse(tx);else{S.ai.paste=tx;aiParse(tx)}}catch(err){toast("ファイルを読めませんでした。コード枠をコピーして読み込んでください")}return}if(e.target.id==="f_bimg"){const f=e.target.files&&e.target.files[0];if(!f)return;try{S.bkImg=await shrinkBlob(f,1400,.82);const lb=e.target.closest("label");if(lb)lb.firstChild.textContent="画像を変える";toast("画像を付けました（保存を押すと残ります）")}catch(err){toast("この画像は読み込めませんでした")}return}if(e.target.id==="sf_file"){const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await shrinkImg(f);S.draft=readSpotForm();S.sfPhoto={u,own:true,by:"自分の写真",lic:""};draw()}catch(err){toast("この写真は読み込めませんでした")}return}if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
   const t=T();if(!t)return;
   if(e.target.dataset&&e.target.dataset.check){const id=e.target.dataset.check,v=e.target.checked;if(change(v?"チェックしました":"チェックを外しました",t=>{t.checks[id].done=v},true))draw();return}
   if(e.target.id==="c_hide"){S.hideDone=e.target.checked;draw();return}
@@ -2422,8 +2487,8 @@ document.addEventListener("change",async e=>{if(e.target.id==="sf_day"){S.sfDay=
     if(change("通知の設定を変えました",t=>{t.notif=nn},true)){draw();const on=nn.before>0||nn.eve.on||nn.morn.on||nn.pre.on;
       if(on&&Native.isApp&&S.perm!=="granted")Native.perm(true).then(p=>{S.perm=p;if(p==="granted")schedNotif();draw()})}}
 });
-document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const t=T();
-  if(f.id==="tripForm"){let title=$("tf_title").value.trim();const start=$("tf_start").value,end=$("tf_end").value,people=$("tf_people").value,move=$("tf_move").value,dest=$("tf_dest").value.trim(),from=$("tf_from").value.trim(),budget=Math.round(+$("tf_budget").value)||0;
+document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const t=T();if(f.id==="costForm"){const n=+$("cost_people").value;if(!Number.isInteger(n)||n<1||n>50){toast("人数を1〜50人で入力してください");return}const booked={};for(const k of Object.keys(COST_CATS)){const v=$("cost_"+k).value.trim();if(!v)continue;const amount=+v;if(!Number.isInteger(amount)||amount<0||amount>1e9){toast("金額を0円以上で入力してください");return}booked[k]=amount}if(change("予約金額で再計算しました",t=>{t.people=n;const cp=cleanCosts(t.costPlan);const previousBookings={...cp.previousBookings,...(cp.bookScope!==costScope(t)?cp.booked:{})};if(cp.bookScope===costScope(t))for(const k of Object.keys(cp.booked))if(!Object.hasOwn(booked,k))delete previousBookings[k];t.costPlan={...cp,previousBookings,booked,bookScope:costScope(t)};})){draw();$("main")?.scrollIntoView({block:"start"})}return}
+  if(f.id==="tripForm"){let title=$("tf_title").value.trim();const start=$("tf_start").value,end=$("tf_end").value,people=$("tf_people").value,move=$("tf_move").value,dest=$("tf_dest").value.trim(),from=$("tf_from").value.trim(),budget=(Math.round(+$("tf_budget").value)||0)*($("tf_budget_scope")?.value==="person"?(+people||1):1);if($("tf_budget_scope")?.value==="person"&&+$("tf_budget").value>0&&!(+people>0)){toast("1人あたりの予算を使うには人数を入力してください");return}if(budget>1e9){toast("全員分の予算を10億円以下で入力してください");return}
     if(!start||!end){toast("日にちを入れてください");return}if(!title&&!dest){toast("行き先か旅行の名前を入れてください");return}
     if(!title){const n=Math.round((toD(end)-toD(start))/864e5);title=`${dest} ${n>0?`${n}泊${n+1}日`:"日帰り"}`}if(from)DB.home=from;if(end<start){toast("帰る日は出発日より後にしてください");return}
     if((toD(end)-toD(start))/864e5>30){toast("31日以内の旅行にしてください");return}
