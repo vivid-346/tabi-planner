@@ -51,4 +51,13 @@ const storage=new Map([['notify-test-on','1'],['notify-test-token',thirdToken]])
 const reg={pushManager:{getSubscription:async()=>({toJSON:()=>sub3})}};let deliveries=0;globalThis.fetch=async()=>{deliveries++;return new Response(null,{status:201})};
 const context={crypto,Uint8Array,atob,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},document:{getElementById:get},navigator:{userAgent:'test',platform:'test',maxTouchPoints:0,serviceWorker:{register:async()=>reg,ready:Promise.resolve(reg)}},window:{matchMedia:()=>({matches:false}),PushManager:{},Notification:{}},fetch:(path,options={})=>worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
 vm.createContext(context);const script=TEST_HTML.match(/<script>([\s\S]*?)<\/script>/)[1].replace(';init();',';globalThis.ready=init();');vm.runInContext(script,context);await context.ready;assert.equal(get('send').disabled,false);await get('send').onclick();assert.equal(deliveries,1);assert.match(get('state').textContent,/送信を受け付け/);assert(sql.prepare('SELECT expires FROM devices WHERE subscription LIKE ?').get('%demo3%').expires>Date.now());
-console.log('PASS: canonical/bundle routes, device authorization, VAPID signature, independent payload decryption, cooldown, provider error');
+// Send and Stop cannot overlap: the visible Stop control and its handler are locked.
+let release,stopped=0,unsubscribed=0;
+reg.pushManager.getSubscription=async()=>({toJSON:()=>sub3,unsubscribe:async()=>{unsubscribed++;return true}});
+vm.runInContext('sub=null',context);await context.ready; // use a fresh page context below
+const raceElements=new Map();context.document={getElementById:id=>{if(!raceElements.has(id))raceElements.set(id,{});return raceElements.get(id)}};
+const race=vm.createContext({...context});vm.runInContext(script,race);await race.ready;
+race.fetch=async(path,options={})=>{if(path==='/schedule')await new Promise(resolve=>{release=resolve});if(path==='/stop')stopped++;return worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
+const sending=raceElements.get('send').onclick();assert.equal(raceElements.get('stop').disabled,true);await raceElements.get('stop').onclick();assert.equal(stopped,0);assert.equal(unsubscribed,0);release();await sending;
+assert.equal(raceElements.get('stop').disabled,false);await raceElements.get('stop').onclick();assert.equal(stopped,1);assert.equal(unsubscribed,1);assert.equal(sql.prepare('SELECT count(*) AS n FROM devices WHERE subscription LIKE ?').get('%demo3%').n,0);assert.equal(storage.has('notify-test-on'),false);
+console.log('PASS: routes, ownership, encryption, expired registration renewal, structured DB failures, Send/Stop exclusion and final removal');
