@@ -11,3 +11,18 @@ c.S.edit='spot:';c.S.sfDay='';html=c.spotForm(trip);assert(html.includes('候補
 c.items=()=>[];c.S.edit=null;c.S.planDay=2;html=c.planView(trip);assert(html.includes('この日に予定を追加'));assert(html.includes('data-date="2027-02-13"'));
 report.push('PASS '+file+': JS syntax; single-day/all-day rendering; switching trips and date bounds; empty-day action; collapsed new-place form and expanded edit form; all inputs retained exactly once; destination-aware submit label');}
 console.log(report.join("\n"));
+
+
+(async()=>{ 
+for(const file of ['app/src/app.html','app/index.html']){const s=fs.readFileSync(path.join(root,file),'utf8');const start=s.indexOf('document.addEventListener("click",async e=>'),end=s.indexOf('\n/* 並べ替えのドラッグ',start);let handler;
+const days=['2027-02-11','2027-02-12','2027-02-13'],t={items:{one:{date:days[0],time:'10:00',title:'場所'}},spots:{place:{name:'候補',cat:'see',minutes:60}}};let counter=0,labels=[];
+const c={S:{tid:'test',planTrip:'test',planDay:0,tab:'plan'},T:()=>t,dates:()=>days,ymd:()=> '2026-10-08',document:{addEventListener:(name,fn)=>handler=fn,querySelector:()=>null,querySelectorAll:()=>[]},window:{scrollTo:()=>{}},draw:()=>{},toast:x=>labels.push(x),items:(t,d)=>Object.entries(t.items).filter(([id,x])=>x.date===d).map(([id,x])=>({id,...x})),suggestSlot:()=>({k:840}),hm:()=> '14:00',conflict:()=>'',uid:()=> 'new'+(++counter),DURS:[60],nextOrder:()=>1,change:(label,fn)=>{labels.push(label);fn(t);return true},$:()=>null,setTimeout:()=>{},roDirty:()=>false};vm.createContext(c);vm.runInContext(s.slice(s.indexOf('function selectedPlanDay('),s.indexOf('\nfunction planHero('))+s.slice(start,end),c);
+const click=async(a,data={})=>handler({target:{closest:()=>({dataset:{a,...data}})}});await click('jumpDay',{k:'2'});assert.equal(c.S.planDay,2);await click('roOpen');assert.equal(c.S.ro.date,days[2]);c.S.ro=null;await click('addPlaceDay',{date:days[2]});assert.equal(c.S.sfDay,days[2]);assert.equal(c.S.tab,'spots');c.S.sday=1;await click('candAdd',{id:'place'});assert.equal(c.S.planDay,1);assert.equal(t.items.new1.date,days[1]);assert(labels.some(x=>x.includes('2日目の14:00')));
+c.S.edit='one';const before=c.S.planDay;await click('jumpDay',{k:'2'});assert.equal(c.S.planDay,before);assert.equal(c.S.edit,'one');c.S.edit=null;
+c.S.ro={date:days[1],ids:['one']};c.roDirty=()=>true;await click('jumpDay',{k:'2'});assert.equal(c.S.planDay,before);assert(c.S.ro);c.S.ro=null;c.roDirty=()=>false;
+c.S.planDay=-1;c.S.sday=2;await click('roOpen');assert.equal(c.S.ro.date,days[2]);c.S.ro=null;
+c.S.planDay=-1;c.ymd=()=>days[1];await click('roOpen');assert.equal(c.S.ro.date,days[1]);c.S.ro=null;
+c.S.planTrip='other';c.showPlanDay(t,2);assert.equal(c.selectedPlanDay(t),2);assert.equal(c.S.sday,2);
+// JSON parsing must accept long content in a compact single code block without losing it.
+vm.runInContext(s.slice(s.indexOf('function pickJSON('),s.indexOf('\nconst normName=',s.indexOf('function pickJSON('))),c);const payload={days:[{date:days[0],items:[{time:'10:00',title:'場所',note:'詳しい案内。'.repeat(30)}]}],spots:[]};assert.equal(JSON.stringify(c.pickJSON('コピーしてください\n```json\n'+JSON.stringify(payload)+'\n```')),JSON.stringify(payload));console.log('PASS '+file+': real click handler day switching/reorder target/place target/candidate addition and compact JSON round-trip');}
+})().catch(e=>{console.error(e);process.exit(1)});

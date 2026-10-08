@@ -1356,6 +1356,7 @@ function nextStop(t){const now=new Date(),today=ymd(now),nm=now.getHours()*60+no
   const x=its.find(y=>timeKey(y.time)>nm&&!y.done&&y.kind!=="move")||null;if(!x)return null;const cur=[...its].reverse().find(y=>timeKey(y.time)<=nm&&y.kind!=="move")||null;
   const s=x.spot&&t.spots?.[x.spot];return {x,s,cur,left:timeKey(x.time)-nm,leg:cur?legOf(t,cur,x):null}}
 function selectedPlanDay(t){const ds=dates(t);if(S.planTrip!==S.tid){S.planTrip=S.tid;S.planDay=Math.max(0,ds.indexOf(ymd(new Date())))}if(S.planDay!==-1)S.planDay=Math.max(0,Math.min(S.planDay||0,ds.length-1));return S.planDay}
+function showPlanDay(t,k){S.planTrip=S.tid;S.planDay=k===-1?-1:Math.max(0,Math.min(k,dates(t).length-1));if(S.planDay>=0)S.sday=S.planDay}
 function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
   const its=Object.values(t.items||{}).filter(x=>x.kind!=="move");const done=its.filter(x=>x.done).length;
   const areas=ds.map(d=>t.dayInfo?.[d]?.area).filter(Boolean);const today=ymd(new Date());const ti=Math.max(0,ds.indexOf(today));
@@ -1374,7 +1375,7 @@ function planHero(t){const ds=dates(t),p=tripPhoto(t),n=daysLeft(t);
   ${tripTools(t)}
   <div class="dprow">${ds.length>1?`<nav class="daypills" aria-label="日にち"><button data-a="jumpDay" data-k="-1" aria-current="${selectedPlanDay(t)===-1}"><b>全日程</b><small>まとめて見る</small></button>${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}" aria-current="${k===selectedPlanDay(t)}"><b>${k+1}日目</b><small>${+d.slice(5,7)}.${+d.slice(8)}（${wd(d)}）</small></button>`).join("")}</nav>`:`<span style="flex:1"></span>`}<button class="btn" data-a="compactPlan" aria-pressed="${!!S.compact}">${S.compact?"写真表示":"コンパクト"}</button>${planMenu(t)}</div>`}
 /* 旅の道具（理想の8番）：ルート最適化・持ち物・予算・共有 */
-function tripTools(t){const cs=checks(t),cd=cs.filter(c=>c.done).length;const m=moneyStats(t);const ds=dates(t),today=ymd(new Date());const d0=ds.includes(today)?today:ds[0];
+function tripTools(t){const cs=checks(t),cd=cs.filter(c=>c.done).length;const m=moneyStats(t);const ds=dates(t),today=ymd(new Date());const selected=selectedPlanDay(t);const d0=selected>=0?ds[selected]:ds.includes(today)?today:ds[Math.min(S.sday||0,ds.length-1)];
   const T4=[["roOpen","route","ルート最適化","移動が短い順に並べ替え","#E6F6EE","#1E9E63",` data-date="${d0}"`],["tab","check","持ち物リスト",cs.length?`${cd} / ${cs.length} 準備済み`:"忘れ物を防ぐ","#E6F4F7","#138A9E",' data-t="notif"'],["tab","yen","予算管理",t.budget?`あと ${yen(m.left)}`:m.spent?`${yen(m.spent)} 使用`:"費用を自動で集計","#FCEBEB","#D64545",' data-t="split"'],["shareTrip","share","共有する","LINEなどで送る","#EEEBFC","#5B4BDB",""]];
   return `<div class="tools">${T4.map(([a,ic,h,sub,bg,fg,x])=>`<button class="tool" data-a="${a}"${x}><span class="ti" style="background:${bg};color:${fg}">${li(ic)}</span><span class="tt"><b>${h}</b><small>${sub}</small></span></button>`).join("")}</div>`}
 /* 「…」メニュー。items:[[action,label,extraAttrs?,danger?]] */
@@ -1542,7 +1543,7 @@ function qaSheet(sid,date,tm){const t=T(),s=t.spots[sid];if(!s)return;document.q
     if(b.dataset.qa==="d"){d=b.dataset.d;time=hm(suggestSlot(T(),d,s).k);render();return}
     if(b.dataset.qa==="go"){const t2=T();const w=timeKey(time)==null?"時間を入れてください":conflict(t2,d,time);if(w){const e2=ov.querySelector("#qa_e");e2.textContent=w;e2.hidden=false;return}
       const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
-      if(change(`${s.name}を${ds.indexOf(d)+1}日目の${time}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date:d,time,arrive:"",kind,title:s.name,note:"",spot:sid,order:nextOrder(t,d),...(dur?{dur}:{})}})){ov.remove();S.tab="plan";S.planDay=ds.indexOf(d);S.flash=nid;draw();$("it_"+nid)?.scrollIntoView({block:"center"})}}});
+      if(change(`${s.name}を${ds.indexOf(d)+1}日目の${time}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date:d,time,arrive:"",kind,title:s.name,note:"",spot:sid,order:nextOrder(t,d),...(dur?{dur}:{})}})){ov.remove();S.tab="plan";showPlanDay(t,ds.indexOf(d));S.flash=nid;draw();$("it_"+nid)?.scrollIntoView({block:"center"})}}});
   render();document.body.appendChild(ov);setTimeout(()=>ov.querySelector(".qago")?.focus(),50)}
 function suggestSlot(t,date,s){const its=items(t,date).filter(x=>timeKey(x.time)!=null);const stay=s.minutes||60;const r15=m=>Math.ceil(m/15)*15;const loc=x=>x&&x.spot&&t.spots?.[x.spot]||null;
   if(!its.length)return {k:600,fit:true};
@@ -1699,7 +1700,7 @@ function planBtns(t,s){const d=spotDay(t,s.id);
   return d?`<button class="btn" data-a="unassign" data-id="${s.id}" style="align-self:flex-start">日程から外す</button>`:`<button class="btn fill" data-a="assign" data-id="${s.id}" style="align-self:flex-start">日程に入れる</button>`}
 function asDays(t,s){return dates(t).map((d,k)=>{const w=conflict(t,d,S.atime);return `<button class="btn" data-a="assignDay" data-id="${s.id}" data-date="${d}" ${w?`disabled title="${esc(w)}"`:""} style="border-color:${dayColor(k+1)}">${k+1}日目 ${md(d)}${w?`<small style="color:var(--warn)">${esc(w.replace(/（.*$/,""))}</small>`:""}</button>`}).join("")}
 function spotForm(t){const id=S.edit.split(":")[1];const v=S.draft||(id?{...t.spots[id]}:{name:"",area:"",note:"",fee:"",url:"",lat:null,lon:null,cat:"see",minutes:60});
-  const ph=S.sfPhoto!==undefined?S.sfPhoto:(spotPhoto(v));const ds=dates(t);
+  const ph=S.sfPhoto!==undefined?S.sfPhoto:(spotPhoto(v));const ds=dates(t);if(!id&&!ds.includes(S.sfDay))S.sfDay="";
   return `<form class="card form" id="spotForm" data-id="${id||""}"><h2 style="font-size:19px">${id?"場所を編集":"行きたい場所を追加"}</h2>
    <div class="field"><label for="sf_name">名前</label><input type="text" id="sf_name" required maxlength="60" value="${esc(v.name)}" placeholder="店名・支店名（例：スタバ 富山環水公園）"><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn fill" type="button" data-a="geoFind">この名前でお店・場所を探す</button><button class="btn" type="button" data-a="spotMapSearch">Googleマップで探す</button></div><div id="sf_geo" class="geol" aria-live="polite"></div></div>
    ${!id&&ds.length?`<div class="field"><label for="sf_day">追加先</label><select id="sf_day"><option value="">候補に保存（あとで日程に入れる）</option>${ds.map((d,k)=>`<option value="${d}" ${S.sfDay===d?"selected":""}>${k+1}日目 ${md(d)}（${wd(d)}）のあいている時間</option>`).join("")}</select></div>`:""}
@@ -1734,7 +1735,7 @@ async function geoFind(){const box=$("sf_geo"),q=$("sf_name").value.trim();if(!b
   if(navigator.onLine===false){box.innerHTML=`<span class="sub">電波がないので探せません</span><button type="button" class="btn" data-a="geoFind">再試行</button>`;return}
   const request=Symbol();box._request=request;const form=$("spotForm"),t=T(),c=tripCenter(t)||destinationCenter(t),out=[];let failures=0,successes=0;
   const searchName=placeQuery(q),region=$("sf_area")?.value.trim()||t.dest||"";
-  const current=()=>box.isConnected&&box._request===request&&$("spotForm")===form&&$("sf_name")?.value.trim()===q;
+  const current=()=>box.isConnected&&box._request===request&&$("spotForm")===form&&$("sf_name")?.value.trim()===q&&($("sf_area")?.value.trim()||t.dest||"")===region;
   const bounded=p=>new Promise((ok,no)=>{const timer=setTimeout(()=>no(new Error("timeout")),10000);Promise.resolve(p).then(v=>{clearTimeout(timer);ok(v)},e=>{clearTimeout(timer);no(e)})});
   box.innerHTML=`<span class="sub" role="status">「${esc(q)}」の位置を探しています…</span>`;
   $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置は残しています。新しい検索結果を確認してください。":"検索中・位置はまだ決まっていません";
@@ -1743,8 +1744,8 @@ async function geoFind(){const box=$("sf_geo"),q=$("sf_name").value.trim();if(!b
     successes++;(r.features||[]).forEach(f=>{const p=f.properties||{},g=f.geometry?.coordinates;if(!g)return;out.push({lat:+g[1],lon:+g[0],name:p.name||q,area:[p.city||p.county||p.district,p.street,p.housenumber].filter(Boolean).join(" "),label:[p.name,p.street,p.housenumber,p.city||p.county||p.district,p.state,p.country].filter((x,i,a)=>x&&a.indexOf(x)===i).join("・"),src:"地図"})});if(out.some(o=>o.src==="地図"))break}}catch(e){failures++}
   if(!current())return;
   const seen=[];const list=out.filter(o=>chainBranchMatches(q,region,o.label)&&isFinite(o.lat)&&isFinite(o.lon)&&!seen.some(x=>distKm(x,o)<0.05)&&seen.push(o)).slice(0,6);
-  $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置があります。変更する場合は候補を選んでください。":list.length?"候補が見つかりました・まだ未設定":"検索未完了・位置は未設定";
-  box.innerHTML=list.length?`<span class="sub">位置はまだ確定していません。店名と住所を確認して「この場所を選ぶ」を押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-name="${esc(o.name||q)}" data-area="${esc(o.area||"")}" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><span>この場所を選ぶ</span><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">${!successes&&failures?"通信に失敗しました。再試行してください。":"この検索では見つかりませんでした。"}支店名を入れ直すか、上の「Googleマップで探す」で確認できます。位置なしでも候補に追加できます。</span><button type="button" class="btn" data-a="geoFind">再試行</button>`}
+  $("sf_pos").textContent=$("sf_lat").value?"設定済みの位置があります。変更する場合は候補を選んでください。":list.length?"候補が見つかりました・まだ未設定":failures?"通信に失敗しました・位置は未設定":"候補なし・位置は未設定";
+  box.innerHTML=list.length?`<span class="sub">位置はまだ確定していません。店名と住所を確認して「この場所を選ぶ」を押してください</span>${list.map(o=>{const km=c?distKm(c,o):null;return `<button class="btn geo" type="button" data-a="geoPick" data-name="${esc(o.name||q)}" data-area="${esc(o.area||"")}" data-lat="${o.lat}" data-lon="${o.lon}"><b>${esc(o.label)}</b><span>この場所を選ぶ</span><small>${o.src}${km!=null?` ・ ${km<100?`ほかの場所から約${km.toFixed(km<10?1:0)}km`:`<span style="color:var(--warn)">ほかの場所から${Math.round(km)}km はなれています</span>`}`:""}</small></button>`}).join("")}`:`<span class="sub">${failures?"通信に失敗しました。再試行してください。":"この検索では見つかりませんでした。"}支店名を入れ直すか、上の「Googleマップで探す」で確認できます。位置なしでも候補に追加できます。</span><button type="button" class="btn" data-a="geoFind">再試行</button>`}
 function parseLL(s){s=(s||"").trim();let m=/@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(s)||/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(s)||/[?&](?:q|query|ll|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i.exec(s)||/^(-?\d{1,2}\.\d+)\s*[,、 ]\s*(-?\d{2,3}\.\d+)$/.exec(s);
   if(!m)return null;const lat=+m[1],lon=+m[2];if(Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat,lon}}
 function readSpotForm(){if($("sf_day"))S.sfDay=$("sf_day").value;return {cat:$("sf_cat").value,minutes:+$("sf_min").value,name:$("sf_name").value.trim(),area:$("sf_area").value.trim(),note:$("sf_note").value.trim(),fee:$("sf_fee").value.trim(),url:$("sf_url").value.trim(),lat:$("sf_lat").value===""?null:+$("sf_lat").value,lon:$("sf_lon").value===""?null:+$("sf_lon").value}}
@@ -2269,11 +2270,11 @@ ${aiCopyRules()}
    case"noConfirm":S.confirm=null;draw();break;
    case"tab":go(b.dataset.t);break;
    case"candOpen":{if(!S.side){const secs=[...document.querySelectorAll(".day")];let k=Math.max(0,selectedPlanDay(t));secs.forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*0.4)k=+el.id.replace("day","")});S.sday=k}S.side=!S.side;S.flash=null;draw();break}
-   case"candDay":{S.sday=+b.dataset.k;S.planDay=S.sday;draw();const el=$("day"+S.sday);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});break}
+   case"candDay":{S.sday=+b.dataset.k;showPlanDay(t,S.sday);draw();const el=$("day"+S.sday);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});break}
    case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
      const nid=uid();const kind=s.cat==="food"||s.cat==="cafe"?"food":"see";const dur=DURS.includes(+s.minutes)?+s.minutes:0;
-     if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;S.planDay=dates(t).indexOf(date);draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
-   case"jumpDay":{S.planDay=+b.dataset.k;S.edit=null;S.confirm=null;S.ro=null;if(S.planDay>=0)S.sday=S.planDay;draw();document.querySelector(".dprow")?.scrollIntoView({block:"start"});break}
+     if(change(`${s.name}を${(S.sday||0)+1}日目の${tm}に入れました`,t=>{t.items=t.items||{};t.items[nid]={date,time:tm,arrive:"",kind,title:s.name,note:"",spot:id,order:nextOrder(t,date),...(dur?{dur}:{})}})){S.flash=nid;showPlanDay(t,dates(t).indexOf(date));draw();const el=$("it_"+nid);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{if(S.flash===nid){S.flash=null;const e=$("it_"+nid);if(e)e.classList.remove("flash")}},2400)}break}
+   case"jumpDay":{if(S.edit){toast("予定を保存するか、やめてから日にちを切り替えてください");break}if(S.ro&&roDirty()){toast("並べ替えを保存するか、やめてから日にちを切り替えてください");break}showPlanDay(t,+b.dataset.k);S.edit=null;S.confirm=null;S.ro=null;if(S.planDay>=0)S.sday=S.planDay;draw();document.querySelector(".dprow")?.scrollIntoView({block:"start"});break}
    case"compactPlan":S.compact=!S.compact;draw();break;
    case"addPlaceDay":S.sfDay=b.dataset.date;S.detail=null;S.edit="spot:";S.tab="spots";S.draft=null;S.sfPhoto=undefined;draw();window.scrollTo(0,0);break;
    case"findPhotos":Object.values(t.spots||{}).forEach(s=>{if(s.photo&&s.photo.none)delete s.photo});fillPhotos(S.tid);break;
@@ -2283,7 +2284,7 @@ ${aiCopyRules()}
    case"printClose":S.print=false;draw();break;
    case"doneItem":{const v=!t.items[id].done;if(change(v?`「${t.items[id].title}」に行った`:"「行った」を外しました",t=>{t.items[id].done=v},true))draw();break}
    case"addItem":S.bkImg=undefined;S.edit="new:"+b.dataset.date;S.confirm=null;draw();itemWarn();break;
-   case"editItem":S.planDay=dates(t).indexOf(t.items[id].date);S.edit=id;S.bkImg=undefined;S.confirm=null;draw();itemWarn();break;
+   case"editItem":showPlanDay(t,dates(t).indexOf(t.items[id].date));S.edit=id;S.bkImg=undefined;S.confirm=null;draw();itemWarn();break;
    case"delItem":S.confirm=id;draw();break;
    case"delItemYes":if(change("予定を削除しました",t=>{delete t.items[id]})){S.confirm=null;S.edit=null;draw()}break;
    case"copyPlan":S.copy=planText(t);draw();{const r=await Native.share(t.title,S.copy);if(r==="copied")toast("コピーしました。LINEなどに貼れます");if(r==="shared"){S.copy=null;draw()}}break;
@@ -2302,7 +2303,7 @@ ${aiCopyRules()}
    case"cgOk":{const c=S.cg.c;if(aiApply(c,"days")){cgPush("a",S.cg.msg&&S.cg.msg.length?S.cg.msg:["日程を更新しました"]);S.cg={step:"done"};draw();cgScroll();fillPhotos(S.tid)}break}
    case"cgNo":S.cg={step:"idle"};draw();cgScroll();break;
    case"cgClear":if(change("会話を消しました",t=>{t.chat=[]},true)){S.cg={step:"idle"};draw()}break;
-   case"roOpen":{const ds=dates(t),td=ymd(new Date());const dd=b.dataset.date||ds[Math.max(0,selectedPlanDay(t))];if(!dd)break;S.planDay=ds.indexOf(dd);S.ro={date:dd,ids:items(t,dd).map(x=>x.id)};S.ro.orig=[...S.ro.ids];S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
+   case"roOpen":{const ds=dates(t),td=ymd(new Date());const selected=selectedPlanDay(t);const dd=b.dataset.date||(selected>=0?ds[selected]:ds.includes(td)?td:ds[Math.min(S.sday||0,ds.length-1)]);if(!dd)break;showPlanDay(t,ds.indexOf(dd));S.ro={date:dd,ids:items(t,dd).map(x=>x.id)};S.ro.orig=[...S.ro.ids];S.edit=null;draw();document.querySelector(`#day${dates(t).indexOf(S.ro.date)}`)?.scrollIntoView({block:"start"});break}
    case"roCancel":S.ro=null;draw();break;
    case"roDel":{const k=+b.dataset.k;const id2=S.ro.ids[k];S.ro.del=(S.ro.del||[]).concat([id2]);S.ro.ids.splice(k,1);roRender();toast("この日から外します（「この順番で保存」で確定）");break}
    case"roAdd":{if(roDirty()){S.ro.ask=true;roRender();break}const k=dates(t).indexOf(S.ro.date);S.ro=null;S.side=true;S.sday=Math.max(0,k);draw();break}
@@ -2442,7 +2443,7 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
     /* ずらした後の形で、移動中・到着前に入っていないかを確かめる */
     const tmp=JSON.parse(JSON.stringify(t));const e1=put(tmp);if(e1){toast(e1);return}
     for(const y of items(tmp,date)){if(y.kind!=="move"&&(y.id===nid||sp)){const w=conflict(tmp,date,y.time,y.id);if(w){toast(y.id===nid?w:`ずらすと「${y.title}」が${w}`);return}}}
-    if(change(sp?`予定を保存して、後ろの${sp.later.length}件もずらしました`:moved?`予定を${dates(t).indexOf(date)+1}日目に移しました`:old?"予定を保存しました":`${dates(t).indexOf(date)+1}日目の${time||"時間未定"}に予定を追加しました`,t=>{put(t)})){if(bimg)bkPut(nid,bimg);S.bkImg=undefined;S.edit=null;S.planDay=dates(t).indexOf(date);draw()}return}
+    if(change(sp?`予定を保存して、後ろの${sp.later.length}件もずらしました`:moved?`予定を${dates(t).indexOf(date)+1}日目に移しました`:old?"予定を保存しました":`${dates(t).indexOf(date)+1}日目の${time||"時間未定"}に予定を追加しました`,t=>{put(t)})){if(bimg)bkPut(nid,bimg);S.bkImg=undefined;S.edit=null;showPlanDay(t,dates(t).indexOf(date));draw()}return}
   if(f.id==="spotForm"){const id=f.dataset.id||null;const v=readSpotForm();const ll=parseLL($("sf_ll").value);if(ll){v.lat=ll.lat;v.lon=ll.lon}
     if(!v.name){toast("名前を入れてください");return}if(v.url&&!/^https?:\/\//.test(v.url)){toast("リンクは https:// から始まるものにしてください");return}
     const old=id?t.spots[id]:null;
@@ -2451,7 +2452,7 @@ document.addEventListener("submit",e=>{e.preventDefault();const f=e.target;const
     if(day){const sl=suggestSlot(t,day,v);const tm=hm(sl.k);if(!conflict(t,day,tm)){nid=uid();msg=`${v.name}を追加して、${dates(t).indexOf(day)+1}日目の${tm}に入れました`}}
     if(change(msg,t=>{t.spots=t.spots||{};t.spots[sid]={...v,wiki:renamed?"":old?.wiki||"",photo:own!==undefined?(own||{none:1}):renamed?undefined:old?.photo,created:old?.created||Date.now()};if(!t.spots[sid].photo)delete t.spots[sid].photo;
       if(nid){t.items=t.items||{};t.items[nid]={date:day,time:hm(suggestSlot(t,day,v).k),arrive:"",kind:v.cat==="food"||v.cat==="cafe"?"food":"see",title:v.name,note:"",spot:sid,order:nextOrder(t,day),...(DURS.includes(v.minutes)?{dur:v.minutes}:{})}}})){
-      S.edit=null;S.draft=null;S.sfPhoto=undefined;S.sfDay="";if(nid){S.flash=nid;S.tab="plan";S.planDay=dates(t).indexOf(day)}draw();if(nid){const el=$("it_"+nid);if(el)el.scrollIntoView({block:"center"})}if(own===undefined&&(!old||renamed))fillPhotos(S.tid,[sid])}return}
+      S.edit=null;S.draft=null;S.sfPhoto=undefined;S.sfDay="";if(nid){S.flash=nid;S.tab="plan";showPlanDay(t,dates(t).indexOf(day))}draw();if(nid){const el=$("it_"+nid);if(el)el.scrollIntoView({block:"center"})}if(own===undefined&&(!old||renamed))fillPhotos(S.tid,[sid])}return}
   if(f.id==="cForm"){const title=$("c_title").value.trim();if(!title)return;const g=$("c_group").value;const cs=checks(t);
     if(change("項目を追加しました",t=>{t.checks=t.checks||{};t.checks[uid()]={title,group:g,done:false,order:(cs.length?Math.max(...cs.map(c=>c.order||0)):0)+1}},true)){draw();$("c_title")?.focus()}return}
   if(f.id==="mForm"){const name=$("m_name").value.trim();if(!name)return;const ms=mems(t);if(ms.some(m=>m.name===name)){toast("同じ名前の人がいます");return}if(ms.length>=20){toast("メンバーは20人までです");return}
