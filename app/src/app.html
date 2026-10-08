@@ -1099,6 +1099,26 @@ body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-bac
 @media(max-width:699px){.dprow{flex-wrap:wrap}.dprow .daypills{flex:1 0 100%;width:100%;box-sizing:border-box}.dprow>.btn{margin-left:auto}.day,.day .tl li{scroll-margin-top:210px!important}.daypills button{min-width:112px!important;padding-inline:12px!important}}
 .btn[data-a="moneySet"],.btn[data-a="tab"][data-t="split"],#aiForm .btn[data-a="aiClose"]{background:#fff!important;border:2px solid #7354CB!important;color:#34265F!important;box-shadow:0 1px 2px rgba(0,0,0,.08)!important;text-align:center;justify-content:center}
 
+/* 思い出（旅行の写真） */
+.memhead{display:grid;gap:6px;margin:4px 0 12px}.memhead h2{font-size:28px;margin:0}.memhead p{margin:0;color:#475467;font-size:14px;line-height:1.6}
+.mempills{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;margin-bottom:6px}.mempills button{flex:none;min-height:40px;padding:8px 16px;border-radius:999px;border:1px solid #D0D5DD;background:#fff;color:#1D2939;font-weight:600;font-size:14px}
+.mempills button[aria-selected="true"]{background:var(--accent,#5B4BD6);border-color:var(--accent,#5B4BD6);color:#fff}
+.memadd{width:100%;justify-content:center;gap:8px;margin:4px 0 16px;min-height:50px;cursor:pointer}
+.memday{margin:0 0 22px}.memday header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}.memday h3{font-size:17px;margin:0}
+.memgrp{margin:0 0 12px}.memgrp h4{font-size:14px;margin:0 0 6px;display:flex;gap:8px;align-items:baseline}.memgrp h4 small{color:#475467;font-weight:500}
+.memgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.memth{position:relative;aspect-ratio:1;max-width:100%;padding:0;border:0;border-radius:8px;overflow:hidden;background:#EEF0F4;display:block;width:100%}
+.memth img{width:100%;height:100%;object-fit:cover;display:block}.memth.gone{opacity:.4}
+.memth i{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:rgba(16,24,40,.35);color:#fff;font-style:normal;font-weight:700;display:grid;place-items:center;font-size:14px}
+.memth.on{outline:3px solid var(--accent,#5B4BD6);outline-offset:-3px}.memth.on i{background:var(--accent,#5B4BD6)}
+.membar{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #E4E7EC;border-radius:16px;padding:10px 12px;box-shadow:0 6px 20px rgba(16,24,40,.12);z-index:5}
+.membar span{flex:1;min-width:100px;font-weight:600}.membar .btn{min-height:44px}
+.memsv{display:grid;gap:6px}.memsv .btn{min-height:40px;justify-content:center}
+.memout{border:1px solid #F3D9A4;background:#FFFBF2;border-radius:14px;padding:12px}.memout h3{font-size:15px;display:flex;align-items:center;gap:6px}.memout p{margin:0 0 8px}
+.memcard{display:grid;gap:8px;margin:12px 0}.memcard b{font-size:18px}.memcard p{margin:0;color:#475467;font-size:14px}
+.memmini{margin:10px 0;min-height:44px;gap:6px;background:#fff!important;border:1px solid #D0D5DD!important}
+.memov img{max-height:52vh;width:100%;object-fit:contain;border-radius:10px;background:#F2F4F7}.memdel{margin:0;font-size:14px;color:#475467;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
 .vote-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.vote-tools .btn{min-height:44px}.vote-tools p{margin:0;width:100%;color:#344054;font-size:14px}.vote-row{border:1px solid #D0D5DD;border-radius:16px;padding:12px;margin:8px 0;background:#fff;min-width:0}.vote-row legend{font-weight:700;font-size:17px;padding:0 4px}.vote-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.vote-choices .btn{min-height:44px;padding:8px 4px;font-size:14px;justify-content:center}.exc .exo .vote-count{font-weight:600;color:#1D2939!important;background:rgba(255,255,255,.94);border-radius:8px;padding:3px 7px;align-self:flex-start}.vote-form h2{font-size:28px}.vote-form p{color:#344054}
 </style>
 
@@ -1189,16 +1209,95 @@ async function findPhoto(s){
 /* ===== 写真を端末に保存（電波がなくても写真が出る）。IndexedDB に Blob で置き、表示は保存した写真を優先 ===== */
 const PH={db:null,map:new Map(),busy:false};
 function phSrc(u){return (u&&PH.map.get(u))||u}
-function phDB(){return new Promise(ok=>{if(PH.db)return ok(PH.db);try{const r=indexedDB.open("tabinote-photos",2);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("p"))d.createObjectStore("p");if(!d.objectStoreNames.contains("r"))d.createObjectStore("r")};r.onsuccess=()=>{PH.db=r.result;ok(PH.db)};r.onerror=()=>ok(null)}catch(e){ok(null)}})}
+function phDB(){return new Promise(ok=>{if(PH.db)return ok(PH.db);try{const r=indexedDB.open("tabinote-photos",3);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("p"))d.createObjectStore("p");if(!d.objectStoreNames.contains("r"))d.createObjectStore("r");if(!d.objectStoreNames.contains("m"))d.createObjectStore("m")};r.onsuccess=()=>{PH.db=r.result;ok(PH.db)};r.onerror=()=>ok(null)}catch(e){ok(null)}})}
 async function phLoad(){const db=await phDB();if(!db)return;await new Promise(ok=>{try{const tx=db.transaction("p");const st=tx.objectStore("p");const c=st.openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(cur.value instanceof Blob)PH.map.set(cur.key,URL.createObjectURL(cur.value));cur.continue()}else ok()};c.onerror=()=>ok()}catch(e){ok()}});if(PH.map.size)draw()}
 /* 予約の画像（確認メールのスクショなど）：端末の中だけ。旅行を渡すコードには入れない */
 async function bkPut(id,blob){const db=await phDB();if(!db)return false;return new Promise(ok=>{try{const tx=db.transaction("r","readwrite");blob?tx.objectStore("r").put(blob,id):tx.objectStore("r").delete(id);tx.oncomplete=()=>ok(true);tx.onerror=()=>ok(false)}catch(e){ok(false)}})}
 /* どの予定からも使われなくなった予約画像を消す（起動時。「元に戻す」で戻せるよう、削除した瞬間には消さない） */
 async function bkGc(){const db=await phDB();if(!db)return;const used=new Set();Object.values(DB.trips||{}).forEach(t=>Object.entries(t.items||{}).forEach(([id,x])=>{if(x&&x.bookImg)used.add(id)}));
   await new Promise(ok=>{try{const tx=db.transaction("r","readwrite");const st=tx.objectStore("r");const c=st.openKeyCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(!used.has(cur.key))st.delete(cur.key);cur.continue()}};tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}})}
-async function phWipe(){const db=await phDB();if(!db)return;await new Promise(ok=>{try{const tx=db.transaction(["p","r"],"readwrite");tx.objectStore("p").clear();tx.objectStore("r").clear();tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}});PH.map.forEach(u=>{try{URL.revokeObjectURL(u)}catch(e){}});PH.map.clear()}
+async function phWipe(){const db=await phDB();if(!db)return;await new Promise(ok=>{try{const tx=db.transaction(["p","r","m"],"readwrite");tx.objectStore("p").clear();tx.objectStore("r").clear();tx.objectStore("m").clear();tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}});PH.map.forEach(u=>{try{URL.revokeObjectURL(u)}catch(e){}});PH.map.clear();MEM.url.forEach(u=>{try{URL.revokeObjectURL(u)}catch(e){}});MEM.url.clear()}
 async function bkGet(id){const db=await phDB();if(!db)return null;return new Promise(ok=>{try{const q=db.transaction("r").objectStore("r").get(id);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)}catch(e){ok(null)}})}
 async function shrinkBlob(file,max,q){const url=URL.createObjectURL(file);try{const img=new Image();await new Promise((ok,ng)=>{img.onload=ok;img.onerror=ng;img.src=url});const k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,"image/jpeg",q))}finally{URL.revokeObjectURL(url)}}
+/* ===== 思い出（旅行の写真）：写真は端末の中（IndexedDB の "m"）だけ。旅行を渡すコードやバックアップには入れない ===== */
+const MEM={url:new Map(),busy:false};
+function memList(t,date){return Object.entries(t.mem||{}).map(([id,v])=>({id,...v})).filter(x=>!date||x.date===date).sort((a,b)=>(a.shot||a.at||0)-(b.shot||b.at||0))}
+async function memPut(id,blob){const db=await phDB();if(!db)return false;return new Promise(ok=>{try{const tx=db.transaction("m","readwrite");blob?tx.objectStore("m").put(blob,id):tx.objectStore("m").delete(id);tx.oncomplete=()=>ok(true);tx.onerror=()=>ok(false);tx.onabort=()=>ok(false)}catch(e){ok(false)}})}
+async function memGet(id){const db=await phDB();if(!db)return null;return new Promise(ok=>{try{const q=db.transaction("m").objectStore("m").get(id);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)}catch(e){ok(null)}})}
+async function memUrl(id){if(MEM.url.has(id))return MEM.url.get(id);const b=await memGet(id);if(!b)return "";const u=URL.createObjectURL(b);MEM.url.set(id,u);return u}
+/* 画面に出ている写真だけ、あとから読み込んで表示する */
+async function memHydrate(){for(const img of document.querySelectorAll("img[data-mid]:not([src])")){const u=await memUrl(img.dataset.mid);if(u&&img.isConnected)img.src=u;else if(img.isConnected)img.closest(".memth")?.classList.add("gone")}}
+/* どの旅行からも使われなくなった写真を消す（起動時と旅行の削除時） */
+async function memGc(){const db=await phDB();if(!db)return;const used=new Set();Object.values(DB.trips||{}).forEach(t=>Object.keys(t.mem||{}).forEach(id=>used.add(id)));
+  /* 「元に戻す」で戻せるうちは消さない */
+  if(UNDO&&UNDO.before){try{Object.keys(JSON.parse(UNDO.before).mem||{}).forEach(id=>used.add(id))}catch(e){}}
+  await new Promise(ok=>{try{const tx=db.transaction("m","readwrite");const st=tx.objectStore("m");const c=st.openKeyCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(!used.has(cur.key)){st.delete(cur.key);const u=MEM.url.get(cur.key);if(u){URL.revokeObjectURL(u);MEM.url.delete(cur.key)}}cur.continue()}};tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}})}
+/* JPEG の撮影日時（Exif DateTimeOriginal）。読めなければ null */
+async function exifDate(file){try{if(!/jpe?g/i.test(file.type||file.name||""))return null;const v=new DataView(await file.slice(0,262144).arrayBuffer());if(v.getUint16(0)!==0xFFD8)return null;let o=2;
+  while(o+4<v.byteLength){const mk=v.getUint16(o),len=v.getUint16(o+2);if(mk===0xFFE1&&v.getUint32(o+4)===0x45786966){const ts=o+10,le=v.getUint16(ts)===0x4949;const u16=p=>v.getUint16(ts+p,le),u32=p=>v.getUint32(ts+p,le);
+      const ifd=(p,tag)=>{const n=u16(p);for(let i=0;i<n;i++){const e=p+2+i*12;if(u16(e)===tag)return e}return -1};
+      const e0=ifd(u32(4),0x8769);if(e0<0)return null;const e1=ifd(u32(e0+8),0x9003);if(e1<0)return null;const at=u32(e1+8);let s="";for(let i=0;i<19;i++)s+=String.fromCharCode(v.getUint8(ts+at+i));
+      const m=/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/.exec(s);return m?new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]):null}
+    if((mk&0xFF00)!==0xFF00)return null;o+=2+len}}catch(e){}return null}
+/* 取り込み中に画面の旅行が変わっても、始めた旅行に書く */
+function memWrite(tid,fn){const t=DB.trips[tid];if(!t)return false;const before=JSON.stringify(t);fn(t);
+  if(!save()){DB.trips[tid]=JSON.parse(before);return false}return true}
+async function memAdd(files){const t=T();if(!t||MEM.busy)return;const ds=dates(t);if(!ds.length)return;const tid=S.tid;MEM.busy=true;S.memBusy=`写真を保存しています…`;draw();
+  let ok=0,skip=0,full=false;const fallback=S.memDay&&ds.includes(S.memDay)?S.memDay:(ds.includes(ymd(new Date()))?ymd(new Date()):ds[0]);
+  try{for(const f of [...files].slice(0,60)){if(!/^image\//.test(f.type||"")&&!/\.(jpe?g|png|heic|webp)$/i.test(f.name||"")){skip++;continue}
+      const shot=await exifDate(f)||(f.lastModified?new Date(f.lastModified):null);const sd=shot?ymd(shot):"";const date=ds.includes(sd)?sd:fallback;
+      let blob=null;try{blob=await shrinkBlob(f,2048,0.85)}catch(e){blob=null}if(!blob){skip++;continue}
+      const id="m"+uid();if(!DB.trips[tid]){await memPut(id,null);break}
+      if(!await memPut(id,blob)){full=true;break}
+      const saved=memWrite(tid,x=>{x.mem=x.mem||{};x.mem[id]={date,spot:"",shot:shot?shot.getTime():0,at:Date.now()}});if(!saved){await memPut(id,null);full=true;break}ok++;
+      S.memBusy=`写真を保存しています…（${ok}枚）`;const el=$("memBusy");if(el)el.textContent=S.memBusy}}
+  finally{MEM.busy=false;S.memBusy=null}
+  draw();const where=S.tid!==tid?`「${esc(DB.trips[tid]?.title||"旅行")}」に`:"";
+  toast(full?`${where}${ok}枚保存しました。端末の空き容量が足りず、残りは保存できませんでした（保存済みの写真はそのままです）`:skip?`${where}${ok}枚保存しました（${skip}枚は読み込めませんでした）`:`${where}${ok}枚保存しました`)}
+function memDays(t){const ds=dates(t);return S.memDay&&ds.includes(S.memDay)?[S.memDay]:ds}
+function memView(t){const ds=dates(t),all=memList(t),sel=S.memSel;setTimeout(memHydrate,0);
+  const pills=`<div class="mempills" role="tablist">${[["","全日"],...ds.map((d,k)=>[d,`${k+1}日目`])].map(([d,l])=>`<button role="tab" data-a="memDay" data-date="${d}" aria-selected="${(S.memDay||"")===d}">${l}</button>`).join("")}</div>`;
+  const add=`<label class="btn fill big memadd">${li("img")}写真を追加<input type="file" id="mem_file" accept="image/*" multiple hidden></label>`;
+  const head=`<div class="memhead"><h2>思い出</h2><p>旅行の写真を、日にちと場所ごとにまとめます。写真はこの端末の中だけに保存され、共有コードやバックアップには入りません。保存するときに少し小さくします（長い辺2048px）。</p></div>`;
+  if(S.memSave)return head+memSaveBox(t);
+  if(!all.length)return `${head}${S.memBusy?`<p class="sub" id="memBusy" role="status">${esc(S.memBusy)}</p>`:""}<div class="empty"><b>まだ写真がありません</b><span>旅行で撮った写真を選ぶと、撮った日ごとに分かれます。友達へはこの画面からまとめて送れます。</span>${add}</div>`;
+  const ds0=new Set(ds);const out=S.memDay?[]:all.filter(x=>!ds0.has(x.date));
+  const outside=out.length?`<section class="memday memout"><header><h3>${li("img")}日にちが旅行の外にある写真（${out.length}枚）</h3></header><p class="sub">旅行の日程を変えたため、どの日にも入っていません。写真を押して日にちを選び直せます。</p><div class="memgrid">${out.map(x=>`<button class="memth" data-a="memOpen" data-id="${x.id}" aria-label="写真を開く"><img data-mid="${x.id}" alt=""></button>`).join("")}</div></section>`:"";
+  const days=memDays(t).map(date=>{const k=ds.indexOf(date)+1,list=all.filter(x=>x.date===date);
+    const groups=[];const order=[...new Set(items(t,date).map(x=>x.spot).filter(Boolean))];const seen=new Set();
+    order.forEach(sid=>{const g=list.filter(x=>x.spot===sid);if(g.length){groups.push([t.spots?.[sid]?.name||"場所",g]);g.forEach(x=>seen.add(x.id))}});
+    const others={};list.filter(x=>!seen.has(x.id)).forEach(x=>{const key=x.spot&&t.spots?.[x.spot]?t.spots[x.spot].name:"";(others[key]=others[key]||[]).push(x)});
+    Object.entries(others).sort((a,b)=>(a[0]===""?1:0)-(b[0]===""?1:0)).forEach(([n,g])=>groups.push([n||"場所を決めていない写真",g]));
+    return `<section class="memday"><header><h3>${k}日目 ・ ${md(date)}（${wd(date)}）</h3>${list.length&&!sel?`<button class="btn" data-a="memPick" data-date="${date}">この日の写真を送る</button>`:""}</header>
+      ${list.length?groups.map(([n,g])=>`<div class="memgrp"><h4>${esc(n)}<small>${g.length}枚</small></h4><div class="memgrid">${g.map(x=>{const on=sel&&sel.ids.includes(x.id);return `<button class="memth${on?" on":""}" data-a="${sel?"memToggle":"memOpen"}" data-id="${x.id}" aria-label="${sel?(on?"選択を外す":"選ぶ"):"写真を開く"}"${sel?` aria-pressed="${!!on}"`:""}><img data-mid="${x.id}" alt="">${sel?`<i aria-hidden="true">${on?"✓":""}</i>`:""}</button>`}).join("")}</div></div>`).join(""):`<p class="sub">この日の写真はまだありません</p>`}</section>`}).join("");
+  const bar=sel?`<div class="membar"><span>${sel.ids.length}枚を選択中</span><button class="btn" data-a="memPickEnd">やめる</button><button class="btn fill" data-a="memSend" ${sel.ids.length?"":"disabled"}>選んだ写真を送る</button></div>`:"";
+  return `${head}${pills}${S.memBusy?`<p class="sub" id="memBusy" role="status">${esc(S.memBusy)}</p>`:""}${sel?`<p class="note">送る写真を選んでください。送り先（AirDrop・LINEなど）は次の画面で選べます。</p>`:add}${sel?"":outside}${days}${bar}`}
+/* 共有画面を開けない端末（PCのブラウザなど）：1枚ずつ保存してから送ってもらう */
+function memSaveBox(t){setTimeout(memHydrate,0);return `<div class="card form"><b>この端末では共有画面を開けません</b><p class="sub">写真を1枚ずつ保存してから、LINEなどで送ってください。</p><div class="memgrid">${S.memSave.map(id=>`<div class="memsv"><div class="memth"><img data-mid="${id}" alt=""></div><button class="btn" data-a="memDl" data-id="${id}">保存</button></div>`).join("")}</div><button class="btn" data-a="memSaveEnd">戻る</button></div>`}
+async function memSend(){const t=T(),sel=S.memSel;if(!t||!sel||!sel.ids.length)return;const files=[];
+  for(const [i,id] of sel.ids.entries()){const b=await memGet(id);if(b)files.push(new File([b],`${(t.title||"旅行").replace(/[\\/:*?"<>|]/g,"")}_${(t.mem[id]?.date||"").replace(/-/g,"")}_${i+1}.jpg`,{type:b.type||"image/jpeg"}))}
+  if(!files.length){toast("写真を読み込めませんでした");return}
+  let can=false;try{can=!!(navigator.canShare&&navigator.canShare({files}))}catch(e){can=false}
+  if(can){try{await navigator.share({files,title:t.title});S.memSel=null;draw();toast("共有画面を閉じました")}catch(e){if(e&&e.name==="AbortError")return;S.memSave=sel.ids;S.memSel=null;draw()}return}
+  S.memSave=sel.ids;S.memSel=null;draw()}
+async function memDl(id){const t=T(),b=await memGet(id);if(!b){toast("写真を読み込めませんでした");return}const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=`${(t?.title||"旅行").replace(/[\\/:*?"<>|]/g,"")}_${(t?.mem?.[id]?.date||"").replace(/-/g,"")}.jpg`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+/* 1枚を大きく見る：日にち・場所を変える、消す */
+async function memOpen(id){const t=T(),x=t?.mem?.[id];if(!x)return;const u=await memUrl(id);const ds=dates(t),sp=spots(t);
+  const ov=document.createElement("div");ov.className="bkov";ov.innerHTML=`<div class="bkc memov" role="dialog" aria-label="写真"><div class="row" style="justify-content:space-between"><b>写真</b><button class="ib icon" data-close aria-label="閉じる">✕</button></div>
+    ${u?`<img src="${u}" alt="">`:`<p class="sub">写真を読み込めませんでした</p>`}
+    <div class="field"><label for="mem_date">日にち</label><select id="mem_date">${ds.includes(x.date)?"":`<option value="${x.date}" selected>${md(x.date)}（旅行の外）</option>`}${ds.map((d,k)=>`<option value="${d}" ${d===x.date?"selected":""}>${k+1}日目 ${md(d)}（${wd(d)}）</option>`).join("")}</select></div>
+    <div class="field"><label for="mem_spot">場所（なくてもOK）</label><select id="mem_spot"><option value="">決めない</option>${sp.map(s=>`<option value="${s.id}" ${s.id===x.spot?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+    <div class="row"><button class="btn fill" data-save>保存</button><button class="btn" data-del>この写真を消す</button></div><p class="memdel" hidden>アプリの中の写真を消します。スマホの写真アプリの写真は消えません。<button class="btn" data-delyes>消す</button></p></div>`;
+  const close=()=>ov.remove();
+  ov.addEventListener("click",async e=>{if(e.target===ov||e.target.closest("[data-close]"))close();
+    else if(e.target.closest("[data-save]")){const d=ov.querySelector("#mem_date").value,s=ov.querySelector("#mem_spot").value;if(change("",y=>{if(y.mem?.[id]){y.mem[id].date=d;y.mem[id].spot=s}},true)){close();draw();toast("写真の日にち・場所を変えました")}}
+    else if(e.target.closest("[data-del]"))ov.querySelector(".memdel").hidden=false;
+    else if(e.target.closest("[data-delyes]")){if(change("写真を消しました",y=>{if(y.mem)delete y.mem[id]})){close();draw()}}});
+  document.body.appendChild(ov)}
+/* 日程画面の入口。旅行の最終日以降は大きく、旅行中は小さく出す */
+function memEntry(t){const ds=dates(t);if(!ds.length)return "";const today=ymd(new Date()),n=Object.keys(t.mem||{}).length;
+  if(today>ds[ds.length-1])return `<section class="card memcard"><b>思い出をまとめよう</b><p>${n?`写真 ${n}枚。日にちごとにまとまっています。友達へまとめて送れます。`:"旅行で撮った写真を集めて、友達へまとめて送れます。"}</p><button class="btn fill big" data-a="tab" data-t="mem">${n?"思い出を見る":"写真を追加"}</button></section>`;
+  return `<button class="btn memmini" data-a="tab" data-t="mem">${li("img")}${today>=ds[0]?"旅の写真を追加":"思い出（旅行の写真）"}${n?`（${n}枚）`:""}</button>`}
 function bookBadge(x){return x.bookNo||x.bookImg||x.bookUrl?`<button class="bkb" data-a="bookView" data-id="${x.id}">${li("ticket")}${x.bookNo?`予約 ${esc(x.bookNo)}`:"予約あり"}</button>`:""}
 async function bookView(id){const t=T(),x=t.items[id];if(!x)return;const b=x.bookImg?await bkGet(id):null;const u=b?URL.createObjectURL(b):"";
   const ov=document.createElement("div");ov.className="bkov";ov.innerHTML=`<div class="bkc" role="dialog" aria-label="予約情報"><div class="row" style="justify-content:space-between"><b>${esc(x.title)}</b><button class="ib icon" data-close aria-label="閉じる">✕</button></div>
@@ -1245,7 +1344,18 @@ const fuelYen=km=>Math.round(km/FUEL.kmpl*FUEL.yen/10)*10;
 /* 画面の状態（保存しない） */
 const S={tid:null,tab:"plan",edit:null,confirm:null,assign:null,atime:"",sel:null,mapDay:0,vb:null,pick:null,draft:null,tripForm:null,wform:null,copy:null,menu:null,cg:{step:"idle"},bkImg:undefined,ro:null,exCat:null,exCur:null,moneySet:false,detail:null,dtab:"info",q:"",cat:"",side:false,sday:0,flash:null,sfPhoto:undefined,sfDay:""};
 try{const u=JSON.parse(localStorage.getItem(KEY+"-ui")||"{}");if(u.tid&&DB.trips[u.tid]){S.tid=u.tid;S.tab=u.tab||"plan"}}catch(e){}
-function saveUI(){try{localStorage.setItem(KEY+"-ui",JSON.stringify({tid:S.tid,tab:S.tab}))}catch(e){}}
+function saveUI(){try{localStorage.setItem(KEY+"-ui",JSON.stringify({tid:S.tid,tab:S.tab}))}catch(e){}flowSave()}
+/* AIに聞きに行ったあと、アプリが閉じられても「答えを読み込む」から再開できるように、途中の状態だけ覚える（3時間まで） */
+function flowSave(){try{const A=S.ai,C=S.cg;let f=null;
+  if(A&&A.sent&&A.step!=="preview"&&!A.c)f={k:"ai",tid:S.tid,kind:A.kind,o:A.o,sent:A.sent,first:!!A.first};
+  else if(C&&C.step==="wait"&&C.ai)f={k:"cg",tid:S.tid,req:C.req,ai:C.ai};
+  if(!f){localStorage.removeItem(KEY+"-flow");return}
+  const key=f.k+"|"+f.tid+"|"+(f.k==="cg"?f.req:f.kind+"|"+JSON.stringify(f.o||{}));
+  const old=JSON.parse(localStorage.getItem(KEY+"-flow")||"null");f.at=old&&old.key===key?old.at:Date.now();f.key=key;localStorage.setItem(KEY+"-flow",JSON.stringify(f))}catch(e){}}
+function flowRestore(){try{const f=JSON.parse(localStorage.getItem(KEY+"-flow")||"null");if(!f||!DB.trips[f.tid]||Date.now()-(f.at||0)>3*3600e3){localStorage.removeItem(KEY+"-flow");return false}
+  /* 最後に見ていた旅行と違うなら、勝手に切り替えない */
+  if(S.tid&&S.tid!==f.tid)return false;
+  S.tid=f.tid;if(f.k==="ai"){S.ai={kind:f.kind,step:"form",o:f.o||aiDefaults(DB.trips[f.tid]),sent:f.sent,first:f.first,back:true,restored:true}}else{S.tab="ai";S.cg={step:"wait",req:f.req,ai:f.ai,back:true,restored:true}}return true}catch(e){return false}}
 const T=()=>DB.trips[S.tid];
 
 /* 変更は「元に戻す」で1回戻せる */
@@ -1386,7 +1496,7 @@ function tripTools(t){const cs=checks(t),cd=cs.filter(c=>c.done).length;const m=
 function planMenu(t){return moreMenu("plan",[["aiOpen","AIで日程を作り直す",' data-k="plan"'],["editTrip","旅行の設定"]])}
 function moreMenu(key,items,extra){return `<span class="mwrap"><button class="btn icon-only" type="button" data-a="more" data-id="${key}" aria-label="その他の操作" aria-expanded="${S.menu===key}">${ico("more")}</button>${S.menu===key?`<div class="menu" role="menu">${items.map(([a,l,x,d])=>`<button type="button" role="menuitem" data-a="${a}"${x||""}${d?' class="danger"':""}>${l}</button>`).join("")}</div>`:""}</span>`}
 /* 線のアイコン（Lucide と同じ形）。絵文字は使わない */
-const LI={sun:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41",
+const LI={img:"M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21",sun:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41",
  cloudsun:"M12 2v2M4.93 4.93l1.41 1.41M20 12h2M19.07 4.93l-1.41 1.41M15.947 12.65a4 4 0 0 0-5.925-4.128M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z",
  cloud:"M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z",
  rain:"M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M16 14v6M8 14v6M12 16v6",
@@ -1501,7 +1611,7 @@ function aiFlowBox(A,prefix,prompt){const cg=prefix==="cg",last=DB.lastAI||"chat
  const fallback=A.copyText?`<div class="field"><label for="${prefix}_prompt">この文を選択してコピー</label><textarea id="${prefix}_prompt" readonly>${esc(A.copyText)}</textarea><button class="btn" data-a="${act("Copied")}">コピーできた → 次へ</button></div>`:"";
  const order=[...AIS].sort((a,b)=>(b[0]===ai)-(a[0]===ai));
  let content=phase===1?`<h3>${cg?2:1} AIに聞く</h3><p>使いたいAIを選んでください。ChatGPT・Claudeは指示文入りで開きます。Geminiはコピーした指示文を貼って送信してください。</p><div class="ai-services">${order.map(([k,l])=>`<button class="btn ${k===ai?"fill":""} big" data-a="${act("Go")}" data-ai="${k}">${l}で聞く</button>`).join("")}</div><details><summary>AIの答えは、どこをコピーする？</summary><p>答えが出そろったら、日程と場所がまとまった枠の右上などにある「コピー」か、重なった四角のアイコンを押します。自分が送った指示文ではなく、AIが返した答えをコピーしてください。</p><p>コピーできたら旅のノートに戻り、「コピーした答えを読み込む」を押します。</p><p>枠のコピーが見つからなければ、AIの返事全体のコピーボタンでも読み込めます。</p></details>${fallback}<details><summary>指示文だけコピーする</summary><button class="btn" data-a="${act("Copy")}">指示文だけコピー</button></details><button class="btn" data-a="${act("Ready")}">もう答えをコピーしてある → 読み込む</button>`:
- `<h3>${cg?3:2} AIの答えを読み込む</h3><p>AIの答えをコピーしたら、下のボタンで取り込めます。</p><details><summary>コピーする場所が分からない</summary><ol class="ai-copy-steps"><li>AIの答えが出そろうまで待つ</li><li>答えの枠の右上などにある「コピー」か、重なった四角のアイコンを押す</li><li>旅のノートに戻り、下の「コピーした答えを読み込む」を押す</li></ol><p>自分が送った指示文ではなく、AIが返した答えをコピーします。枠のコピーが見つからなければ、返事全体のコピーボタンでもOKです。</p><p>読み込んだ内容を確認してから日程に入れられます。</p></details><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details open><summary>AIの回答をここに貼り付ける</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>JSONファイルで読み込む（任意）</summary><p>AIがファイルも作った場合に使えます。コード枠のコピーだけでも取り込めます。</p><label class="btn" for="${prefix}_json_file">AIのJSONファイルを選ぶ</label><input type="file" id="${prefix}_json_file" accept=".json,.txt,application/json,text/plain" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></details><details><summary>AIをもう一度開く</summary><div class="ai-services">${order.map(([k,l])=>`<button class="btn" data-a="${act("Go")}" data-ai="${k}">${l}をもう一度開く</button>`).join("")}</div><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
+ `<h3>${cg?3:2} AIの答えを読み込む</h3><p>${A.restored?"さっきAIに聞いた続きです。":""}AIの答えの「コピー」を押して戻ってきたら、下のボタンを押すだけです。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details><summary>コピーする場所が分からない</summary><ol class="ai-copy-steps"><li>AIの答えが出そろうまで待つ</li><li>答えの枠の右上などにある「コピー」か、重なった四角のアイコンを押す</li><li>旅のノートに戻り、下の「コピーした答えを読み込む」を押す</li></ol><p>自分が送った指示文ではなく、AIが返した答えをコピーします。枠のコピーが見つからなければ、返事全体のコピーボタンでもOKです。</p><p>読み込んだ内容を確認してから日程に入れられます。</p></details><details${manual?" open":""}><summary>うまくいかないときは、答えをここに貼る（貼ると自動で読み込みます）</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>JSONファイルで読み込む（任意）</summary><p>AIがファイルも作った場合に使えます。コード枠のコピーだけでも取り込めます。</p><label class="btn" for="${prefix}_json_file">AIのJSONファイルを選ぶ</label><input type="file" id="${prefix}_json_file" accept=".json,.txt,application/json,text/plain" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></details><details><summary>AIをもう一度開く</summary><div class="ai-services">${order.map(([k,l])=>`<button class="btn" data-a="${act("Go")}" data-ai="${k}">${l}をもう一度開く</button>`).join("")}</div><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
  phase===2?`<h3>2 自分のAIを開いて貼る</h3><p>AIの入力欄に貼って送信し、返ってきた答えをコピーしてください。</p><div class="row">${AIS.map(([k,l])=>`<button class="btn ${k===ai?"fill":""}" data-a="${act("Go")}" data-ai="${k}">${l}を開く</button>`).join("")}</div><button class="btn fill big" data-a="${act("Ready")}">答えをコピーした → 読み込む</button>`:
  `<h3>3 AIの答えを読み込む</h3><p>読み込んだ内容を確認してから反映できます。</p><button class="btn fill big" data-a="${act("Clip")}" id="${cg?"cgClip":"aiClip"}">コピーした答えを読み込む</button><details${manual?" open":""}><summary>答えを自分で貼る</summary><label class="sr" for="${prefix}_paste">AIの答え</label><textarea id="${prefix}_paste" placeholder="AIの答えをまるごと貼る">${esc(A.paste||"")}</textarea><button class="btn" data-a="${act("Read")}">貼った答えを読み込む</button></details><details><summary>AIの答えを取り直す</summary><button class="btn" data-a="${act("Go")}" data-ai="${ai}">${AI_NAME[ai]}を開く</button><button class="btn" data-a="${act("Copy")}">指示文をもう一度コピー</button></details>`;
  return `<div class="flowcard" id="${cg?"cgFlow":"aiBox"}" aria-live="polite">${cg?`<p>依頼：${esc(A.req)}</p>`:""}${content}${cg?'<button class="btn" data-a="cgNo">やめて、入力に戻る</button>':'<button class="ib" data-a="aiEdit">← 条件を変える</button>'}</div>`}
@@ -1518,7 +1628,7 @@ function cgParse(text){const t=T();try{const raw=pickJSON(text);const c=aiCheck(
   const msg=Array.isArray(raw.message)?raw.message.map(x=>String(x).slice(0,80)).filter(Boolean).slice(0,6):raw.message?[String(raw.message).slice(0,160)]:[];
   S.cg={...S.cg,step:"preview",c,msg};draw();cgScroll()}catch(e){S.cg.manual=true;draw();toast(e.message==="noplan"?"答えに日程が見つかりませんでした。AIの答えをまるごとコピーしてください":"読み取れませんでした。AIの答えを { から } までまるごとコピーしてください")}}
 function planView(t){const ds=dates(t),selected=selectedPlanDay(t);setTimeout(()=>wxFetch(S.tid),0);
-  return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${Object.keys(t.items||{}).length?`<div class="ai-plan-add"><button class="btn fill big" data-a="aiOpen" data-k="plan" data-mode="add">${li("spark")} AIで予定を追加する</button><p>今の予定を残して、空いている時間に追加を考えてもらう</p></div>`:""}<details class="card form"><summary style="min-height:44px;padding:10px 0;font-weight:600">しおり・書き出し</summary><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" data-a="copyPlan">日程をコピー</button><button class="btn" data-a="print">しおりを印刷</button></div></details>${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${dates(t).includes(ymd(new Date()))&&nextStop(t)?"":nowCard(t)}
+  return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${memEntry(t)}${Object.keys(t.items||{}).length?`<div class="ai-plan-add"><button class="btn fill big" data-a="aiOpen" data-k="plan" data-mode="add">${li("spark")} AIで予定を追加する</button><p>今の予定を残して、空いている時間に追加を考えてもらう</p></div>`:""}<details class="card form"><summary style="min-height:44px;padding:10px 0;font-weight:600">しおり・書き出し</summary><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" data-a="copyPlan">日程をコピー</button><button class="btn" data-a="print">しおりを印刷</button><button class="btn" data-a="tab" data-t="mem">思い出（写真）</button></div></details>${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${dates(t).includes(ymd(new Date()))&&nextStop(t)?"":nowCard(t)}
   ${S.codeOut&&!S.tripForm?`<div id="codeOutWrap">${codeOutBox()}</div>`:""}
   ${S.copy?`<div class="card form"><span class="lbl">この文章をコピーして LINE などに貼れます</span><textarea class="copybox" id="copybox" readonly>${esc(S.copy)}</textarea><div class="row"><button class="btn fill" data-a="copyAgain">コピー</button><button class="btn" data-a="closeCopy">閉じる</button></div></div>`:""}
   ${S.side?`<div class="pw">`:""}<div class="days">${ds.map((date,k)=>{if(selected!==-1&&k!==selected)return "";const i=k+1,its=items(t,date);return `<section class="day" id="day${k}" style="--dc:${dayColor(i)}"><header><div class="dh1"><span class="k">${i}日目 ・ ${md(date)}（${wd(date)}）</span>${wxChip(t.wx?.[date])}</div><div class="dh2"><h3>${t.dayInfo?.[date]?.area?esc(t.dayInfo[date].area):`${i}日目`}</h3>${its.length>1&&!(S.ro&&S.ro.date===date)?`<button class="roopen" data-a="roOpen" data-date="${date}" aria-label="並べ替え" title="並べ替え">${li("sort")}<span class="rotx">並べ替え</span></button>`:""}</div>${dayStat(t,date)}</header>
@@ -1592,7 +1702,7 @@ function nowCard(t){const now=new Date(),today=ymd(now);if(!dates(t).includes(to
   const its=items(t,today).filter(x=>timeKey(x.time)!=null);if(!its.length)return"";
   const next=its.find(x=>timeKey(x.time)>nm&&!x.done);const cur=[...its].reverse().find(x=>timeKey(x.time)<=nm);
   const s=next&&next.spot&&t.spots?.[next.spot];
-  return `<section class="nowcard">${cur?`<div><div class="l">いま</div><div class="n" style="font-size:15px">${esc(cur.title)}${cur.dur?`<small>〜${addMin(cur.time,cur.dur)}</small>`:""}</div></div>`:""}
+  return `<section class="nowcard">${cur?`<div><div class="l">${!cur.done&&cur.dur>0&&timeKey(cur.time)+cur.dur>nm?"いま":"直前の予定"}</div><div class="n" style="font-size:15px">${esc(cur.title)}${cur.dur?`<small>〜${addMin(cur.time,cur.dur)}</small>`:""}</div></div>`:""}
    ${next?`<div><div class="l">次の予定</div><div class="n">${esc(next.time)} ${esc(next.title)}<small>あと${fmtMin(timeKey(next.time)-nm)}</small></div></div>
    <div class="row">${s&&s.lat!=null?`<a class="btn fill" href="${esc(Native.dirUrl(s))}" target="_blank" rel="noopener">ここへ行く</a>`:""}${cur&&!cur.done?`<button class="btn" data-a="doneItem" data-id="${cur.id}">「${esc(cur.title.slice(0,12))}」に行った</button>`:""}</div>`:`<div class="sub">今日の予定はこれでおわりです。おつかれさまでした</div>`}</section>`}
 const MODE_L={walk:"徒歩",car:"車",train:"電車・バス"};
@@ -2287,7 +2397,7 @@ function aiParse(text){const t=T();try{const raw=pickJSON(text);S.ai.c=aiCheck(t
    旅行のデータを圧縮して「コード」（TABI1:…）にする。LINEなどで送り、相手は貼るだけで取り込める */
 const b64u=u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
 const unb64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");const b=atob(s);return Uint8Array.from(b,c=>c.charCodeAt(0))};
-async function packCode(kind,obj){const raw=new TextEncoder().encode(JSON.stringify(obj,(k,v)=>k==="photo"&&v&&v.own?undefined:v));
+async function packCode(kind,obj){const raw=new TextEncoder().encode(JSON.stringify(obj,(k,v)=>(k==="photo"&&v&&v.own)||k==="mem"?undefined:v));
   if(window.CompressionStream){try{const cs=new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"));return `TABI${kind}1:`+b64u(new Uint8Array(await new Response(cs).arrayBuffer()))}catch(e){}}
   return `TABI${kind}0:`+b64u(raw)}
 async function unpackCode(text){const m=/TABI(ALL|VOTE|ANSWER)?([01]):([A-Za-z0-9_-]{8,})/.exec(String(text||"").replace(/\s+/g,""));if(!m)throw new Error("nocode");
@@ -2340,7 +2450,7 @@ function prepView(t){const cs=checks(t),done=cs.filter(c=>c.done).length;const g
 
 /* ================= 描画 ================= */
 const TABS=[["plan","日程","M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"],["spots","場所を探す","M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36z"],["map","地図","M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0zM15 5.764v15M9 3.236v15"],["ai","AI相談","M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0zM20 3v4M22 5h-4"]];
-const SUBTAB={split:"予算と割り勘",notif:"持ち物と通知"};
+const SUBTAB={split:"予算と割り勘",notif:"持ち物と通知",mem:"思い出"};
 const ICON={more:"M11 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M4 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0-2 0",edit:"M12 20h9M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z",del:"M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",plane:"M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"};
 const ico=(k,label)=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]}"/></svg>`;
 function draw(){setTimeout(()=>dispatchEvent(new Event("scroll")),0);const t=T();
@@ -2353,12 +2463,12 @@ function draw(){setTimeout(()=>dispatchEvent(new Event("scroll")),0);const t=T()
   $("bar").innerHTML=`${sub?`<button class="back" data-a="tab" data-t="plan">‹ 旅</button><div class="ttl"><b>${SUBTAB[S.tab]}</b><small>${esc(t.title)}</small></div>`:`<button class="back" data-a="home">‹ 旅行</button><div class="ttl"><b>${esc(t.title)}</b><small>${md(ds[0])}（${wd(ds[0])}）〜${md(ds[ds.length-1])}（${wd(ds[ds.length-1])}）</small></div>`}<nav class="toptabs">${TABS.map(([k,l])=>`<button data-a="tab" data-t="${k}" aria-current="${cur===k?"page":"false"}">${l}</button>`).join("")}</nav>${S.tab==="plan"&&!S.ai?`<button class="hpill" data-a="tab" data-t="map">${li("pin")}地図</button>`:""}<button class="ib" data-a="editTrip">設定</button>`;
   $("tabbar").hidden=false;$("tabs").innerHTML=TABS.map(([k,l,ic])=>`<button data-a="tab" data-t="${k}" aria-current="${cur===k?"page":"false"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ic}"/></svg>${l}</button>`).join("");
   if(S.print){$("tabbar").hidden=true;$("app").innerHTML=`<div class="page">${printView(t)}</div>`;saveUI();return}
-  const v=S.ai?aiView(t):S.tab==="plan"?planView(t):S.tab==="spots"?spotsView(t):S.tab==="map"?mapView(t):S.tab==="split"?splitView(t):S.tab==="ai"?cgView(t):prepView(t);
+  const v=S.ai?aiView(t):S.tab==="plan"?planView(t):S.tab==="spots"?spotsView(t):S.tab==="map"?mapView(t):S.tab==="split"?splitView(t):S.tab==="ai"?cgView(t):S.tab==="mem"?memView(t):prepView(t);
   $("app").innerHTML=`<div class="page">${v}</div>`;
   if(S.tab==="map"&&!S.ai){if(richMap())initML(t);else{bindMap();setVB(S.vb||fitVB(t))}}
   saveUI();
 }
-function go(tab){const ch=tab!==S.tab;if(tab==="split"&&S.tid)setTimeout(()=>fetchRate(S.tid),0);S.detail=null;if(ch)Native.haptic("light");setTimeout(()=>{if(!ch)return;const m=$("app");if(!m)return;m.classList.remove("enter");void m.offsetWidth;m.classList.add("enter")},0);S.print=false;S.ai=null;S.mapAdding=false;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
+function go(tab){const ch=tab!==S.tab;if(tab==="split"&&S.tid)setTimeout(()=>fetchRate(S.tid),0);S.detail=null;if(ch)Native.haptic("light");setTimeout(()=>{if(!ch)return;const m=$("app");if(!m)return;m.classList.remove("enter");void m.offsetWidth;m.classList.add("enter")},0);S.print=false;S.ai=null;S.mapAdding=false;S.tapLL=null;S.tab=tab;S.edit=null;S.confirm=null;S.assign=null;S.wform=null;S.copy=null;S.memSel=null;S.memSave=null;if(tab!=="map"){S.vb=null}draw();window.scrollTo(0,0)}
 
 /* ================= 操作 ================= */
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b){if(S.menu){S.menu=null;draw()}return}const a=b.dataset.a,id=b.dataset.id;const t=T();
@@ -2370,7 +2480,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
@@ -2384,7 +2494,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"impRead":{const text=$("imp_text").value;S.imp.text=text;try{const r=await unpackCode(text);if(r.kind==="VOTE"||r.kind==="ANSWER"){await voteReceive(text);break}const raw=r.all?Object.values(r.data.trips||{}):[r.data];const list=raw.map(cleanTrip).filter(Boolean);if(!list.length)throw new Error("empty");S.imp.list=list;draw()}
      catch(e){toast(e.message==="old"?"この端末では読めない形式です。アプリを最新にしてください":e.message==="nocode"?"コードが見つかりませんでした。TABI1: から始まる部分を含めて貼ってください":"読み取れませんでした。メッセージをまるごと貼り直してください")}break}
    case"impOk":{const I=S.imp;const backup=JSON.stringify(DB.trips);let n=0;I.list.forEach((x,i)=>{const r=document.querySelector(`[name=imp_${i}]:checked`);const same=Object.entries(DB.trips).find(([k,v])=>v.sid&&v.sid===x.sid);
-       if(same&&(!r||r.value==="replace")){DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});
+       if(same&&(!r||r.value==="replace")){const keep=DB.trips[same[0]].mem;if(keep&&Object.keys(keep).length)x.mem=keep;DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});
      if(!save()){DB.trips=JSON.parse(backup);toast("この端末に保存できませんでした");break}S.imp=null;UNDO=null;toast(`${n}件の旅行を取り込みました`);draw();break}
    case"aiOpen":S.ai={kind:b.dataset.k,step:"form",o:{...aiDefaults(t),...(b.dataset.mode==="add"?{mode:"add"}: {})}};S.edit=null;draw();window.scrollTo(0,0);break;
    case"aiClose":{const first=S.ai&&S.ai.first;S.ai=null;if(first&&S.tab==="plan"){const d0=dates(t)[0];if(d0&&!items(t,d0).length){S.edit="new:"+d0;draw();setTimeout(()=>{$("day0")?.scrollIntoView({block:"start"});scrollBy(0,-140);toast("1日目の予定から入れていきましょう")},50);break}}draw();break}
@@ -2419,10 +2529,18 @@ ${aiCopyRules()}
    case"home":S.print=false;S.ai=null;S.codeOut=null;S.imp=null;S.tid=null;S.edit=null;S.pick=null;S.draft=null;draw();window.scrollTo(0,0);break;
    case"editTrip":S.codeOut=null;S.tripForm="edit";S.confirm=null;draw();if(b.dataset.share){const el=$("shareBox");if(el){el.scrollIntoView({block:"start"});scrollBy(0,-80);el.classList.add("flash")}}else window.scrollTo(0,0);break;
    case"delTrip":S.confirm="trip";draw();break;
-   case"delTripYes":{const old=DB.trips[S.tid];delete DB.trips[S.tid];if(!save()){DB.trips[S.tid]=old;toast("削除できませんでした");break}S.tripForm=null;S.confirm=null;S.tid=null;UNDO=null;toast("旅行を削除しました");draw();break}
+   case"delTripYes":{const old=DB.trips[S.tid];delete DB.trips[S.tid];if(!save()){DB.trips[S.tid]=old;toast("削除できませんでした");break}S.tripForm=null;S.confirm=null;S.tid=null;UNDO=null;toast("旅行を削除しました");memGc();draw();break}
    case"cancel":if(S.tripForm){S.tripForm=null;S.confirm=null}else{S.edit=null;S.assign=null;S.wform=null;S.draft=null}draw();break;
    case"noConfirm":S.confirm=null;draw();break;
    case"tab":go(b.dataset.t);break;
+   case"memDay":S.memDay=b.dataset.date||"";S.memSel=null;draw();break;
+   case"memPick":{const ids=memList(t,b.dataset.date).map(x=>x.id);S.memSel={date:b.dataset.date,ids};draw();break}
+   case"memToggle":{const sel=S.memSel;if(!sel)break;const k=sel.ids.indexOf(id);if(k<0)sel.ids.push(id);else sel.ids.splice(k,1);draw();break}
+   case"memPickEnd":S.memSel=null;draw();break;
+   case"memSend":await memSend();break;
+   case"memOpen":await memOpen(id);break;
+   case"memSaveEnd":S.memSave=null;draw();break;
+   case"memDl":await memDl(id);break;
    case"candOpen":{if(S.tab!=="plan"){S.tab="plan";S.edit=null;S.side=false}if(!S.side){const secs=[...document.querySelectorAll(".day")];let k=Math.max(0,selectedPlanDay(t));secs.forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*0.4)k=+el.id.replace("day","")});S.sday=k}S.side=!S.side;S.flash=null;draw();break}
    case"candDay":{S.sday=+b.dataset.k;showPlanDay(t,S.sday);draw();const el=$("day"+S.sday);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});break}
    case"candAdd":{const s=t.spots[id];const date=dates(t)[Math.min(S.sday||0,dates(t).length-1)];const sl=suggestSlot(t,date,s);const tm=hm(sl.k);const w=conflict(t,date,tm);if(w){toast(w);break}
@@ -2565,7 +2683,8 @@ addEventListener("scroll",iosNav,{passive:true});
 /* 日程の「次のスポットを追加する」は、トップの写真を過ぎてから出す */
 addEventListener("scroll",()=>{const f=$("fab"),h=document.querySelector(".hero2");document.body.classList.toggle("onhero",!!h&&S.tab==="plan"&&!S.ai&&h.getBoundingClientRect().bottom>90);if(!f)return;f.classList.toggle("show",!h||h.getBoundingClientRect().bottom<innerHeight*.45)},{passive:true});
 document.addEventListener("input",e=>{if(e.target.id==="ex_amount"){exConv();return}if(e.target.id==="sq"){S.q=e.target.value;const t=T(),el=$("excards");if(t&&el)el.innerHTML=exList(t)}});
-document.addEventListener("change",async e=>{if(e.target.name==="ai_mode"&&S.ai){S.ai.o.mode=e.target.value;draw();return}if(e.target.id==="sf_day"){S.sfDay=e.target.value;const btn=$("spotForm")?.querySelector("button[type=submit]");if(btn)btn.textContent=S.sfDay?`${dates(T()).indexOf(S.sfDay)+1}日目に追加`:"候補に保存";return}if(e.target.id==="ai_json_file"||e.target.id==="cg_json_file"){const f=e.target.files?.[0];if(!f)return;if(f.size>2*1024*1024){toast("ファイルが大きすぎます。2MB以下のJSONを選んでください");e.target.value="";return}const prefix=e.target.id.startsWith("cg_")?"cg":"ai",flow=prefix==="cg"?S.cg:S.ai;try{const tx=await f.text();if((prefix==="cg"?S.cg:S.ai)!==flow)return;if(prefix==="cg")cgParse(tx);else{S.ai.paste=tx;aiParse(tx)}}catch(err){toast("ファイルを読めませんでした。コード枠をコピーして読み込んでください")}return}if(e.target.id==="f_bimg"){const f=e.target.files&&e.target.files[0];if(!f)return;try{S.bkImg=await shrinkBlob(f,1400,.82);const lb=e.target.closest("label");if(lb)lb.firstChild.textContent="画像を変える";toast("画像を付けました（保存を押すと残ります）")}catch(err){toast("この画像は読み込めませんでした")}return}if(e.target.id==="sf_file"){const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await shrinkImg(f);S.draft=readSpotForm();S.sfPhoto={u,own:true,by:"自分の写真",lic:""};draw()}catch(err){toast("この写真は読み込めませんでした")}return}if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
+document.addEventListener("paste",e=>{const id=e.target&&e.target.id;if(id!=="ai_paste"&&id!=="cg_paste")return;setTimeout(()=>{const v=e.target.value||"";if(!v.includes("{"))return;document.querySelector(`[data-a="${id==="ai_paste"?"aiRead":"cgRead"}"]`)?.click()},60)});
+document.addEventListener("change",async e=>{if(e.target.id==="mem_file"){const fs=e.target.files;if(fs&&fs.length)await memAdd(fs);e.target.value="";return}if(e.target.name==="ai_mode"&&S.ai){S.ai.o.mode=e.target.value;draw();return}if(e.target.id==="sf_day"){S.sfDay=e.target.value;const btn=$("spotForm")?.querySelector("button[type=submit]");if(btn)btn.textContent=S.sfDay?`${dates(T()).indexOf(S.sfDay)+1}日目に追加`:"候補に保存";return}if(e.target.id==="ai_json_file"||e.target.id==="cg_json_file"){const f=e.target.files?.[0];if(!f)return;if(f.size>2*1024*1024){toast("ファイルが大きすぎます。2MB以下のJSONを選んでください");e.target.value="";return}const prefix=e.target.id.startsWith("cg_")?"cg":"ai",flow=prefix==="cg"?S.cg:S.ai;try{const tx=await f.text();if((prefix==="cg"?S.cg:S.ai)!==flow)return;if(prefix==="cg")cgParse(tx);else{S.ai.paste=tx;aiParse(tx)}}catch(err){toast("ファイルを読めませんでした。コード枠をコピーして読み込んでください")}return}if(e.target.id==="f_bimg"){const f=e.target.files&&e.target.files[0];if(!f)return;try{S.bkImg=await shrinkBlob(f,1400,.82);const lb=e.target.closest("label");if(lb)lb.firstChild.textContent="画像を変える";toast("画像を付けました（保存を押すと残ります）")}catch(err){toast("この画像は読み込めませんでした")}return}if(e.target.id==="sf_file"){const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await shrinkImg(f);S.draft=readSpotForm();S.sfPhoto={u,own:true,by:"自分の写真",lic:""};draw()}catch(err){toast("この写真は読み込めませんでした")}return}if(e.target.id==="set_photo"){DB.photos=e.target.checked;save();toast(DB.photos?"写真を自動で探します":"写真を探すのをやめました");return}
   const t=T();if(!t)return;
   if(e.target.dataset&&e.target.dataset.check){const id=e.target.dataset.check,v=e.target.checked;if(change(v?"チェックしました":"チェックを外しました",t=>{t.checks[id].done=v},true))draw();return}
   if(e.target.id==="c_hide"){S.hideDone=e.target.checked;draw();return}
@@ -2642,6 +2761,6 @@ function onboard(){if(DB.onboarded||Object.keys(DB.trips).length)return;let k=0;
   ov.addEventListener("click",e=>{const b=e.target.closest("[data-ob]");if(!b)return;const a=b.dataset.ob;if(a==="next"){k++;r()}else if(a==="end")end();else if(a==="sample"){end();openSample()}});
   let x0=null;ov.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});ov.addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(dx<-50&&k<OB.length-1){k++;r()}else if(dx>50&&k>0){k--;r()}x0=null});
   r();document.body.appendChild(ov)}
-draw();schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();addEventListener("online",()=>{phCache();wxAll()});
+const FLOW_BACK=flowRestore();draw();if(FLOW_BACK){setTimeout(()=>{($("aiBox")||$("cgFlow"))?.scrollIntoView({block:"start"});toast("さっきAIに聞いた続きです。答えをコピーして読み込んでください")},80)}schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();memGc();addEventListener("online",()=>{phCache();wxAll()});
 Native.perm(false).then(p=>{S.perm=p;if(S.tab==="notif")draw()});
 </script>
