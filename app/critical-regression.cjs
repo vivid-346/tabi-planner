@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');const s=fs.readFileSync(path.join(__dirname,'src/app.html'),'utf8');
 const t={start:'2026-11-21',end:'2026-11-23',people:3,budget:90000,dest:'京都',from:'名古屋',move:'train',items:{a:{date:'2026-11-21',kind:'see',title:'清水寺',time:'10:00'}},spots:{}};
-const c={items:t=>Object.values(t.items),dates:()=>['2026-11-21','2026-11-22','2026-11-23'],yen:String,esc:String,md:String,T:()=>t};vm.createContext(c);vm.runInContext(s.slice(s.indexOf('function planFee('),s.indexOf('/* AIが既存予定')),c);
+const c={items:(t,d)=>Object.values(t.items).filter(x=>!d||x.date===d),dates:()=>['2026-11-21','2026-11-22','2026-11-23'],yen:String,esc:String,md:String,T:()=>t};vm.createContext(c);vm.runInContext(s.slice(s.indexOf('function planFee('),s.indexOf('/* AIが既存予定')),c);
 t.costPlan={forecast:{transport:{min:10000,max:12000},hotel:{min:3000,max:4000}},scope:c.costScope(t,true),transportScope:c.costTransportScope(t)};
 t.items.a.time='11:00';assert(!c.costSummary(t).missing);assert(c.costSummary(t).transportKept);
 t.items.b={date:'2026-11-21',kind:'move',title:'新幹線'};assert.equal(c.costSummary(t).missing,1);delete t.items.b;
