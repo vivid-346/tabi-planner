@@ -1265,7 +1265,7 @@ function memView(t){const ds=dates(t),all=memList(t),sel=S.memSel;setTimeout(mem
   const head=`<div class="memhead"><h2>思い出</h2><p>旅行の写真を、日にちと場所ごとにまとめます。写真はこの端末の中だけに保存され、共有コードやバックアップには入りません。保存するときに少し小さくします（長い辺2048px）。</p></div>`;
   if(S.memSave)return head+memSaveBox(t);
   if(!all.length)return `${head}${S.memBusy?`<p class="sub" id="memBusy" role="status">${esc(S.memBusy)}</p>`:""}<div class="empty"><b>まだ写真がありません</b><span>旅行で撮った写真を選ぶと、撮った日ごとに分かれます。友達へはこの画面からまとめて送れます。</span>${add}</div>`;
-  const ds0=new Set(ds);const out=all.filter(x=>!ds0.has(x.date));
+  const ds0=new Set(ds);const out=S.memDay?[]:all.filter(x=>!ds0.has(x.date));
   const outside=out.length?`<section class="memday memout"><header><h3>${li("img")}日にちが旅行の外にある写真（${out.length}枚）</h3></header><p class="sub">旅行の日程を変えたため、どの日にも入っていません。写真を押して日にちを選び直せます。</p><div class="memgrid">${out.map(x=>`<button class="memth" data-a="memOpen" data-id="${x.id}" aria-label="写真を開く"><img data-mid="${x.id}" alt=""></button>`).join("")}</div></section>`:"";
   const days=memDays(t).map(date=>{const k=ds.indexOf(date)+1,list=all.filter(x=>x.date===date);
     const groups=[];const order=[...new Set(items(t,date).map(x=>x.spot).filter(Boolean))];const seen=new Set();
