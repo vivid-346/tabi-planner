@@ -29,3 +29,15 @@ vm.runInContext(src.slice(src.indexOf('function conflict('),src.indexOf('functio
 
 const morning={...oldTrip,items:{old:{...oldTrip.items.old,arrive:''},early:{id:'early',date:'2026-11-21',time:'08:00',kind:'see',title:'朝の観光'},overlap:{id:'overlap',date:'2026-11-21',time:'10:30',kind:'see',title:'移動中の観光'},after:{id:'after',date:'2026-11-21',time:'11:00',kind:'see',title:'到着後の観光'}}};const win=c.aiPrepare(morning,{...missingThenKnown,days:{'2026-11-21':[{...transfer,arrive:'11:00'}]}},'add');assert.deepEqual(Array.from(win.overlaps),['overlap']);console.log('PASS only stops inside the enriched transfer interval are flagged; earlier and arrival-time stops remain valid');
 
+assert(!c.conflict({...morning,items:{...morning.items,old:{...morning.items.old,arrive:'11:00'}}},'2026-11-21','08:00','early'));
+const inboundTitle='東京から京都へ新幹線で移動';
+const inbound={...morning,items:Object.fromEntries(Object.entries(morning.items).map(([id,x])=>[id,{...x,...(id==='old'?{title:inboundTitle}: {})}]))};
+const inboundAnswer={...missingThenKnown,areas:{},days:{'2026-11-21':[{...transfer,title:inboundTitle,arrive:'11:00'}]}};
+const inboundPreview=c.aiPrepare(inbound,inboundAnswer,'add');
+assert.deepEqual(Array.from(inboundPreview.overlaps),['early','overlap']);
+assert.equal(inbound.items.old.arrive,'');assert(!inbound.items.early.flag);
+Object.assign(c,{T:()=>inbound,change:(msg,fn)=>fn(inbound)});c.aiApply(inboundAnswer,'add');
+assert.equal(inbound.items.old.arrive,'11:00');assert(inbound.items.early.flag);assert(inbound.items.overlap.flag);assert(!inbound.items.after.flag);
+assert(c.conflict(inbound,'2026-11-21','08:00','early').includes('到着前'));
+console.log('PASS inbound arrival enrichment flags pre-departure and in-transit stops; local transfer does not block the morning');
+
