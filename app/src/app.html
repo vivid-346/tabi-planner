@@ -1114,6 +1114,7 @@ body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-bac
 .membar{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid #E4E7EC;border-radius:16px;padding:10px 12px;box-shadow:0 6px 20px rgba(16,24,40,.12);z-index:5}
 .membar span{flex:1;min-width:100px;font-weight:600}.membar .btn{min-height:44px}
 .memsv{display:grid;gap:6px}.memsv .btn{min-height:40px;justify-content:center}
+.memout{border:1px solid #F3D9A4;background:#FFFBF2;border-radius:14px;padding:12px}.memout h3{font-size:15px;display:flex;align-items:center;gap:6px}.memout p{margin:0 0 8px}
 .memcard{display:grid;gap:8px;margin:12px 0}.memcard b{font-size:18px}.memcard p{margin:0;color:#475467;font-size:14px}
 .memmini{margin:10px 0;min-height:44px;gap:6px;background:#fff!important;border:1px solid #D0D5DD!important}
 .memov img{max-height:52vh;width:100%;object-fit:contain;border-radius:10px;background:#F2F4F7}.memdel{margin:0;font-size:14px;color:#475467;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -1258,6 +1259,8 @@ function memView(t){const ds=dates(t),all=memList(t),sel=S.memSel;setTimeout(mem
   const head=`<div class="memhead"><h2>思い出</h2><p>旅行の写真を、日にちと場所ごとにまとめます。写真はこの端末の中だけに保存され、共有コードやバックアップには入りません。保存するときに少し小さくします（長い辺2048px）。</p></div>`;
   if(S.memSave)return head+memSaveBox(t);
   if(!all.length)return `${head}${S.memBusy?`<p class="sub" id="memBusy" role="status">${esc(S.memBusy)}</p>`:""}<div class="empty"><b>まだ写真がありません</b><span>旅行で撮った写真を選ぶと、撮った日ごとに分かれます。友達へはこの画面からまとめて送れます。</span>${add}</div>`;
+  const ds0=new Set(ds);const out=all.filter(x=>!ds0.has(x.date));
+  const outside=out.length?`<section class="memday memout"><header><h3>${li("img")}日にちが旅行の外にある写真（${out.length}枚）</h3></header><p class="sub">旅行の日程を変えたため、どの日にも入っていません。写真を押して日にちを選び直せます。</p><div class="memgrid">${out.map(x=>`<button class="memth" data-a="memOpen" data-id="${x.id}" aria-label="写真を開く"><img data-mid="${x.id}" alt=""></button>`).join("")}</div></section>`:"";
   const days=memDays(t).map(date=>{const k=ds.indexOf(date)+1,list=all.filter(x=>x.date===date);
     const groups=[];const order=[...new Set(items(t,date).map(x=>x.spot).filter(Boolean))];const seen=new Set();
     order.forEach(sid=>{const g=list.filter(x=>x.spot===sid);if(g.length){groups.push([t.spots?.[sid]?.name||"場所",g]);g.forEach(x=>seen.add(x.id))}});
@@ -1266,7 +1269,7 @@ function memView(t){const ds=dates(t),all=memList(t),sel=S.memSel;setTimeout(mem
     return `<section class="memday"><header><h3>${k}日目 ・ ${md(date)}（${wd(date)}）</h3>${list.length&&!sel?`<button class="btn" data-a="memPick" data-date="${date}">この日の写真を送る</button>`:""}</header>
       ${list.length?groups.map(([n,g])=>`<div class="memgrp"><h4>${esc(n)}<small>${g.length}枚</small></h4><div class="memgrid">${g.map(x=>{const on=sel&&sel.ids.includes(x.id);return `<button class="memth${on?" on":""}" data-a="${sel?"memToggle":"memOpen"}" data-id="${x.id}" aria-label="${sel?(on?"選択を外す":"選ぶ"):"写真を開く"}"${sel?` aria-pressed="${!!on}"`:""}><img data-mid="${x.id}" alt="">${sel?`<i aria-hidden="true">${on?"✓":""}</i>`:""}</button>`}).join("")}</div></div>`).join(""):`<p class="sub">この日の写真はまだありません</p>`}</section>`}).join("");
   const bar=sel?`<div class="membar"><span>${sel.ids.length}枚を選択中</span><button class="btn" data-a="memPickEnd">やめる</button><button class="btn fill" data-a="memSend" ${sel.ids.length?"":"disabled"}>選んだ写真を送る</button></div>`:"";
-  return `${head}${pills}${S.memBusy?`<p class="sub" id="memBusy" role="status">${esc(S.memBusy)}</p>`:""}${sel?`<p class="note">送る写真を選んでください。送り先（AirDrop・LINEなど）は次の画面で選べます。</p>`:add}${days}${bar}`}
+  return `${head}${pills}${S.memBusy?`<p class="sub" id="memBusy" role="status">${esc(S.memBusy)}</p>`:""}${sel?`<p class="note">送る写真を選んでください。送り先（AirDrop・LINEなど）は次の画面で選べます。</p>`:add}${sel?"":outside}${days}${bar}`}
 /* 共有画面を開けない端末（PCのブラウザなど）：1枚ずつ保存してから送ってもらう */
 function memSaveBox(t){setTimeout(memHydrate,0);return `<div class="card form"><b>この端末では共有画面を開けません</b><p class="sub">写真を1枚ずつ保存してから、LINEなどで送ってください。</p><div class="memgrid">${S.memSave.map(id=>`<div class="memsv"><div class="memth"><img data-mid="${id}" alt=""></div><button class="btn" data-a="memDl" data-id="${id}">保存</button></div>`).join("")}</div><button class="btn" data-a="memSaveEnd">戻る</button></div>`}
 async function memSend(){const t=T(),sel=S.memSel;if(!t||!sel||!sel.ids.length)return;const files=[];
@@ -1280,7 +1283,7 @@ async function memDl(id){const t=T(),b=await memGet(id);if(!b){toast("写真を�
 async function memOpen(id){const t=T(),x=t?.mem?.[id];if(!x)return;const u=await memUrl(id);const ds=dates(t),sp=spots(t);
   const ov=document.createElement("div");ov.className="bkov";ov.innerHTML=`<div class="bkc memov" role="dialog" aria-label="写真"><div class="row" style="justify-content:space-between"><b>写真</b><button class="ib icon" data-close aria-label="閉じる">✕</button></div>
     ${u?`<img src="${u}" alt="">`:`<p class="sub">写真を読み込めませんでした</p>`}
-    <div class="field"><label for="mem_date">日にち</label><select id="mem_date">${ds.map((d,k)=>`<option value="${d}" ${d===x.date?"selected":""}>${k+1}日目 ${md(d)}（${wd(d)}）</option>`).join("")}</select></div>
+    <div class="field"><label for="mem_date">日にち</label><select id="mem_date">${ds.includes(x.date)?"":`<option value="${x.date}" selected>${md(x.date)}（旅行の外）</option>`}${ds.map((d,k)=>`<option value="${d}" ${d===x.date?"selected":""}>${k+1}日目 ${md(d)}（${wd(d)}）</option>`).join("")}</select></div>
     <div class="field"><label for="mem_spot">場所（なくてもOK）</label><select id="mem_spot"><option value="">決めない</option>${sp.map(s=>`<option value="${s.id}" ${s.id===x.spot?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
     <div class="row"><button class="btn fill" data-save>保存</button><button class="btn" data-del>この写真を消す</button></div><p class="memdel" hidden>アプリの中の写真を消します。スマホの写真アプリの写真は消えません。<button class="btn" data-delyes>消す</button></p></div>`;
   const close=()=>ov.remove();
@@ -1345,8 +1348,11 @@ function flowSave(){try{const A=S.ai,C=S.cg;let f=null;
   if(A&&A.sent&&A.step!=="preview"&&!A.c)f={k:"ai",tid:S.tid,kind:A.kind,o:A.o,sent:A.sent,first:!!A.first};
   else if(C&&C.step==="wait"&&C.ai)f={k:"cg",tid:S.tid,req:C.req,ai:C.ai};
   if(!f){localStorage.removeItem(KEY+"-flow");return}
-  const old=JSON.parse(localStorage.getItem(KEY+"-flow")||"null");f.at=old&&old.k===f.k&&old.tid===f.tid?old.at:Date.now();localStorage.setItem(KEY+"-flow",JSON.stringify(f))}catch(e){}}
+  const key=f.k+"|"+f.tid+"|"+(f.k==="cg"?f.req:f.kind+"|"+JSON.stringify(f.o||{}));
+  const old=JSON.parse(localStorage.getItem(KEY+"-flow")||"null");f.at=old&&old.key===key?old.at:Date.now();f.key=key;localStorage.setItem(KEY+"-flow",JSON.stringify(f))}catch(e){}}
 function flowRestore(){try{const f=JSON.parse(localStorage.getItem(KEY+"-flow")||"null");if(!f||!DB.trips[f.tid]||Date.now()-(f.at||0)>3*3600e3){localStorage.removeItem(KEY+"-flow");return false}
+  /* 最後に見ていた旅行と違うなら、勝手に切り替えない */
+  if(S.tid&&S.tid!==f.tid)return false;
   S.tid=f.tid;if(f.k==="ai"){S.ai={kind:f.kind,step:"form",o:f.o||aiDefaults(DB.trips[f.tid]),sent:f.sent,first:f.first,back:true,restored:true}}else{S.tab="ai";S.cg={step:"wait",req:f.req,ai:f.ai,back:true,restored:true}}return true}catch(e){return false}}
 const T=()=>DB.trips[S.tid];
 
