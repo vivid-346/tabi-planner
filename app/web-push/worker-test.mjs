@@ -49,15 +49,22 @@ const sub3={...subscription,endpoint:'https://web.push.apple.com/demo3'},thirdTo
 assert.equal((await worker.fetch(req('/schedule',{subscription:sub3,notifications:[]},origin,thirdToken),env)).status,200);sql.prepare('UPDATE devices SET expires=0 WHERE subscription LIKE ?').run('%demo3%');
 const storage=new Map([['notify-test-on','1'],['notify-test-token',thirdToken]]),elements=new Map();const get=id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id)};
 const reg={pushManager:{getSubscription:async()=>({toJSON:()=>sub3})}};let deliveries=0;globalThis.fetch=async()=>{deliveries++;return new Response(null,{status:201})};
-const context={crypto,Uint8Array,atob,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},document:{getElementById:get},navigator:{userAgent:'test',platform:'test',maxTouchPoints:0,serviceWorker:{register:async()=>reg,ready:Promise.resolve(reg)}},window:{matchMedia:()=>({matches:false}),PushManager:{},Notification:{}},fetch:(path,options={})=>worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
+let lockTail=Promise.resolve();const locks={request:(_name,fn)=>{const task=lockTail.then(fn);lockTail=task.catch(()=>{});return task}};
+const context={Promise,crypto,Uint8Array,atob,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},document:{getElementById:get},navigator:{locks,userAgent:'test',platform:'test',maxTouchPoints:0,serviceWorker:{register:async()=>reg,ready:Promise.resolve(reg)}},window:{matchMedia:()=>({matches:false}),PushManager:{},Notification:{}},fetch:(path,options={})=>worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
 vm.createContext(context);const script=TEST_HTML.match(/<script>([\s\S]*?)<\/script>/)[1].replace(';init();',';globalThis.ready=init();');vm.runInContext(script,context);await context.ready;assert.equal(get('send').disabled,false);await get('send').onclick();assert.equal(deliveries,1);assert.match(get('state').textContent,/送信を受け付け/);assert(sql.prepare('SELECT expires FROM devices WHERE subscription LIKE ?').get('%demo3%').expires>Date.now());
 // Send and Stop cannot overlap: the visible Stop control and its handler are locked.
 let release,stopped=0,unsubscribed=0;
 reg.pushManager.getSubscription=async()=>({toJSON:()=>sub3,unsubscribe:async()=>{unsubscribed++;return true}});
-vm.runInContext('sub=null',context);await context.ready; // use a fresh page context below
+// A separate document shares local storage and the browser operation lock.
 const raceElements=new Map();context.document={getElementById:id=>{if(!raceElements.has(id))raceElements.set(id,{});return raceElements.get(id)}};
 const race=vm.createContext({...context});vm.runInContext(script,race);await race.ready;
 race.fetch=async(path,options={})=>{if(path==='/schedule')await new Promise(resolve=>{release=resolve});if(path==='/stop')stopped++;return worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
-const sending=raceElements.get('send').onclick();assert.equal(raceElements.get('stop').disabled,true);await raceElements.get('stop').onclick();assert.equal(stopped,0);assert.equal(unsubscribed,0);release();await sending;
+const sending=raceElements.get('send').onclick();await Promise.resolve();assert.equal(raceElements.get('stop').disabled,true);await raceElements.get('stop').onclick();assert.equal(stopped,0);assert.equal(unsubscribed,0);release();await sending;
 assert.equal(raceElements.get('stop').disabled,false);await raceElements.get('stop').onclick();assert.equal(stopped,1);assert.equal(unsubscribed,1);assert.equal(sql.prepare('SELECT count(*) AS n FROM devices WHERE subscription LIKE ?').get('%demo3%').n,0);assert.equal(storage.has('notify-test-on'),false);
-console.log('PASS: routes, ownership, encryption, expired registration renewal, structured DB failures, Send/Stop exclusion and final removal');
+// An already-open second tab must not recreate a device after another tab stopped it.
+await get('send').onclick();assert.equal(sql.prepare('SELECT count(*) AS n FROM devices WHERE subscription LIKE ?').get('%demo3%').n,0);assert.equal(get('send').disabled,true);
+// Renewal failure remains retryable: Send and Stop are restored, registration controls are not locked.
+storage.set('notify-test-on','1');storage.set('notify-test-token',thirdToken);
+const failedElements=new Map(),failedContext=vm.createContext({...context,document:{getElementById:id=>{if(!failedElements.has(id))failedElements.set(id,{});return failedElements.get(id)}},fetch:(path,options={})=>path==='/schedule'?Promise.resolve(new Response(JSON.stringify({error:'storage_failed'}),{status:503})):worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)});
+vm.runInContext(script,failedContext);await failedContext.ready;await failedElements.get('send').onclick();assert.equal(failedElements.get('send').disabled,false);assert.equal(failedElements.get('stop').disabled,false);assert.match(failedElements.get('state').textContent,/storage_failed/);
+console.log('PASS: routes, ownership, encryption, expired renewal, DB failures, same-tab and cross-tab stop exclusion, failed renewal retry');
