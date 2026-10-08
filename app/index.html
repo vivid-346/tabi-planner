@@ -1232,6 +1232,8 @@ async function memUrl(id){if(MEM.url.has(id))return MEM.url.get(id);const b=awai
 async function memHydrate(){for(const img of document.querySelectorAll("img[data-mid]:not([src])")){const u=await memUrl(img.dataset.mid);if(u&&img.isConnected)img.src=u;else if(img.isConnected)img.closest(".memth")?.classList.add("gone")}}
 /* どの旅行からも使われなくなった写真を消す（起動時と旅行の削除時） */
 async function memGc(){const db=await phDB();if(!db)return;const used=new Set();Object.values(DB.trips||{}).forEach(t=>Object.keys(t.mem||{}).forEach(id=>used.add(id)));
+  /* 「元に戻す」で戻せるうちは消さない */
+  if(UNDO&&UNDO.before){try{Object.keys(JSON.parse(UNDO.before).mem||{}).forEach(id=>used.add(id))}catch(e){}}
   await new Promise(ok=>{try{const tx=db.transaction("m","readwrite");const st=tx.objectStore("m");const c=st.openKeyCursor();c.onsuccess=()=>{const cur=c.result;if(cur){if(!used.has(cur.key)){st.delete(cur.key);const u=MEM.url.get(cur.key);if(u){URL.revokeObjectURL(u);MEM.url.delete(cur.key)}}cur.continue()}};tx.oncomplete=()=>ok();tx.onerror=()=>ok()}catch(e){ok()}})}
 /* JPEG の撮影日時（Exif DateTimeOriginal）。読めなければ null */
 async function exifDate(file){try{if(!/jpe?g/i.test(file.type||file.name||""))return null;const v=new DataView(await file.slice(0,262144).arrayBuffer());if(v.getUint16(0)!==0xFFD8)return null;let o=2;
@@ -1240,16 +1242,21 @@ async function exifDate(file){try{if(!/jpe?g/i.test(file.type||file.name||""))re
       const e0=ifd(u32(4),0x8769);if(e0<0)return null;const e1=ifd(u32(e0+8),0x9003);if(e1<0)return null;const at=u32(e1+8);let s="";for(let i=0;i<19;i++)s+=String.fromCharCode(v.getUint8(ts+at+i));
       const m=/^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/.exec(s);return m?new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]):null}
     if((mk&0xFF00)!==0xFF00)return null;o+=2+len}}catch(e){}return null}
-async function memAdd(files){const t=T();if(!t||MEM.busy)return;const ds=dates(t);if(!ds.length)return;MEM.busy=true;S.memBusy=`写真を保存しています…`;draw();
+/* 取り込み中に画面の旅行が変わっても、始めた旅行に書く */
+function memWrite(tid,fn){const t=DB.trips[tid];if(!t)return false;const before=JSON.stringify(t);fn(t);
+  if(!save()){DB.trips[tid]=JSON.parse(before);return false}return true}
+async function memAdd(files){const t=T();if(!t||MEM.busy)return;const ds=dates(t);if(!ds.length)return;const tid=S.tid;MEM.busy=true;S.memBusy=`写真を保存しています…`;draw();
   let ok=0,skip=0,full=false;const fallback=S.memDay&&ds.includes(S.memDay)?S.memDay:(ds.includes(ymd(new Date()))?ymd(new Date()):ds[0]);
   try{for(const f of [...files].slice(0,60)){if(!/^image\//.test(f.type||"")&&!/\.(jpe?g|png|heic|webp)$/i.test(f.name||"")){skip++;continue}
       const shot=await exifDate(f)||(f.lastModified?new Date(f.lastModified):null);const sd=shot?ymd(shot):"";const date=ds.includes(sd)?sd:fallback;
       let blob=null;try{blob=await shrinkBlob(f,2048,0.85)}catch(e){blob=null}if(!blob){skip++;continue}
-      const id="m"+uid();if(!await memPut(id,blob)){full=true;break}
-      const saved=change("",x=>{x.mem=x.mem||{};x.mem[id]={date,spot:"",shot:shot?shot.getTime():0,at:Date.now()}},true);if(!saved){await memPut(id,null);full=true;break}ok++;
+      const id="m"+uid();if(!DB.trips[tid]){await memPut(id,null);break}
+      if(!await memPut(id,blob)){full=true;break}
+      const saved=memWrite(tid,x=>{x.mem=x.mem||{};x.mem[id]={date,spot:"",shot:shot?shot.getTime():0,at:Date.now()}});if(!saved){await memPut(id,null);full=true;break}ok++;
       S.memBusy=`写真を保存しています…（${ok}枚）`;const el=$("memBusy");if(el)el.textContent=S.memBusy}}
   finally{MEM.busy=false;S.memBusy=null}
-  draw();toast(full?`${ok}枚保存しました。端末の空き容量が足りず、残りは保存できませんでした（保存済みの写真はそのままです）`:skip?`${ok}枚保存しました（${skip}枚は読み込めませんでした）`:`${ok}枚保存しました`)}
+  draw();const where=S.tid!==tid?`「${esc(DB.trips[tid]?.title||"旅行")}」に`:"";
+  toast(full?`${where}${ok}枚保存しました。端末の空き容量が足りず、残りは保存できませんでした（保存済みの写真はそのままです）`:skip?`${where}${ok}枚保存しました（${skip}枚は読み込めませんでした）`:`${where}${ok}枚保存しました`)}
 function memDays(t){const ds=dates(t);return S.memDay&&ds.includes(S.memDay)?[S.memDay]:ds}
 function memView(t){const ds=dates(t),all=memList(t),sel=S.memSel;setTimeout(memHydrate,0);
   const pills=`<div class="mempills" role="tablist">${[["","全日"],...ds.map((d,k)=>[d,`${k+1}日目`])].map(([d,l])=>`<button role="tab" data-a="memDay" data-date="${d}" aria-selected="${(S.memDay||"")===d}">${l}</button>`).join("")}</div>`;
@@ -1286,7 +1293,7 @@ async function memOpen(id){const t=T(),x=t?.mem?.[id];if(!x)return;const u=await
   ov.addEventListener("click",async e=>{if(e.target===ov||e.target.closest("[data-close]"))close();
     else if(e.target.closest("[data-save]")){const d=ov.querySelector("#mem_date").value,s=ov.querySelector("#mem_spot").value;if(change("",y=>{if(y.mem?.[id]){y.mem[id].date=d;y.mem[id].spot=s}},true)){close();draw();toast("写真の日にち・場所を変えました")}}
     else if(e.target.closest("[data-del]"))ov.querySelector(".memdel").hidden=false;
-    else if(e.target.closest("[data-delyes]")){if(change("",y=>{if(y.mem)delete y.mem[id]},true)){await memPut(id,null);const v=MEM.url.get(id);if(v){URL.revokeObjectURL(v);MEM.url.delete(id)}close();draw();toast("写真を消しました")}}});
+    else if(e.target.closest("[data-delyes]")){if(change("写真を消しました",y=>{if(y.mem)delete y.mem[id]})){close();draw()}}});
   document.body.appendChild(ov)}
 /* 日程画面の入口。旅行の最終日以降は大きく、旅行中は小さく出す */
 function memEntry(t){const ds=dates(t);if(!ds.length)return "";const today=ymd(new Date()),n=Object.keys(t.mem||{}).length;
@@ -2398,7 +2405,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"impRead":{const text=$("imp_text").value;S.imp.text=text;try{const r=await unpackCode(text);const raw=r.all?Object.values(r.data.trips||{}):[r.data];const list=raw.map(cleanTrip).filter(Boolean);if(!list.length)throw new Error("empty");S.imp.list=list;draw()}
      catch(e){toast(e.message==="old"?"この端末では読めない形式です。アプリを最新にしてください":e.message==="nocode"?"コードが見つかりませんでした。TABI1: から始まる部分を含めて貼ってください":"読み取れませんでした。メッセージをまるごと貼り直してください")}break}
    case"impOk":{const I=S.imp;const backup=JSON.stringify(DB.trips);let n=0;I.list.forEach((x,i)=>{const r=document.querySelector(`[name=imp_${i}]:checked`);const same=Object.entries(DB.trips).find(([k,v])=>v.sid&&v.sid===x.sid);
-       if(same&&(!r||r.value==="replace")){DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});
+       if(same&&(!r||r.value==="replace")){const keep=DB.trips[same[0]].mem;if(keep&&Object.keys(keep).length)x.mem=keep;DB.trips[same[0]]=x}else{if(same)x.sid=uid();DB.trips[uid()+i]=x}n++});
      if(!save()){DB.trips=JSON.parse(backup);toast("この端末に保存できませんでした");break}S.imp=null;UNDO=null;toast(`${n}件の旅行を取り込みました`);draw();break}
    case"aiOpen":S.ai={kind:b.dataset.k,step:"form",o:{...aiDefaults(t),...(b.dataset.mode==="add"?{mode:"add"}: {})}};S.edit=null;draw();window.scrollTo(0,0);break;
    case"aiClose":{const first=S.ai&&S.ai.first;S.ai=null;if(first&&S.tab==="plan"){const d0=dates(t)[0];if(d0&&!items(t,d0).length){S.edit="new:"+d0;draw();setTimeout(()=>{$("day0")?.scrollIntoView({block:"start"});scrollBy(0,-140);toast("1日目の予定から入れていきましょう")},50);break}}draw();break}
