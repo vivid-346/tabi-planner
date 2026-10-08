@@ -1596,7 +1596,7 @@ function nowCard(t){const now=new Date(),today=ymd(now);if(!dates(t).includes(to
   const its=items(t,today).filter(x=>timeKey(x.time)!=null);if(!its.length)return"";
   const next=its.find(x=>timeKey(x.time)>nm&&!x.done);const cur=[...its].reverse().find(x=>timeKey(x.time)<=nm);
   const s=next&&next.spot&&t.spots?.[next.spot];
-  return `<section class="nowcard">${cur?`<div><div class="l">いま</div><div class="n" style="font-size:15px">${esc(cur.title)}${cur.dur?`<small>〜${addMin(cur.time,cur.dur)}</small>`:""}</div></div>`:""}
+  return `<section class="nowcard">${cur?`<div><div class="l">${!cur.done&&cur.dur>0&&timeKey(cur.time)+cur.dur>nm?"いま":"直前の予定"}</div><div class="n" style="font-size:15px">${esc(cur.title)}${cur.dur?`<small>〜${addMin(cur.time,cur.dur)}</small>`:""}</div></div>`:""}
    ${next?`<div><div class="l">次の予定</div><div class="n">${esc(next.time)} ${esc(next.title)}<small>あと${fmtMin(timeKey(next.time)-nm)}</small></div></div>
    <div class="row">${s&&s.lat!=null?`<a class="btn fill" href="${esc(Native.dirUrl(s))}" target="_blank" rel="noopener">ここへ行く</a>`:""}${cur&&!cur.done?`<button class="btn" data-a="doneItem" data-id="${cur.id}">「${esc(cur.title.slice(0,12))}」に行った</button>`:""}</div>`:`<div class="sub">今日の予定はこれでおわりです。おつかれさまでした</div>`}</section>`}
 const MODE_L={walk:"徒歩",car:"車",train:"電車・バス"};
@@ -2561,5 +2561,4 @@ function onboard(){if(DB.onboarded||Object.keys(DB.trips).length)return;let k=0;
   r();document.body.appendChild(ov)}
 draw();schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();addEventListener("online",()=>{phCache();wxAll()});
 Native.perm(false).then(p=>{S.perm=p;if(S.tab==="notif")draw()});
-</script>
-</body></html>
+</script></body></html>
