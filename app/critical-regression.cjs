@@ -16,3 +16,5 @@ assert(c.N.dirUrl({lat:35,lon:135},'train').includes('dirflg=r'));c.N.isIOS=c.N.
 const first=p.phDB();assert.strictEqual(p.phDB(),first);timer();assert.equal(await first,null);request.result={close(){closed++}};request.onsuccess();assert.equal(closed,1);
 const second=p.phDB();request.result={close(){closed++}};request.onsuccess();const db=await second;assert.equal(p.PH.db,db);db.onversionchange();assert.equal(p.PH.db,null);assert.equal(closed,2);
 console.log('PASS transport preservation/invalidation, booked-warning reset, low hotel allowance, navigation modes, blocked photo timeout and database version release');})();
+
+const large={...t,items:Object.fromEntries(Array.from({length:800},(_,i)=>['x'+i,{date:'2026-11-21',time:'10:00',kind:'see',title:'観光スポット'.repeat(10)+i}]))};const sig=c.costTransportScope(large);assert(sig.length<100);large.costPlan={forecast:{transport:{min:10000,max:12000}},scope:c.costScope(large,true),transportScope:sig};large.items.x0.time='11:00';assert(!c.costSummary(large).missing);assert.equal(c.cleanCosts(large.costPlan).transportScope,sig);console.log('PASS 800-stop transport signature survives serialization and time edits');
