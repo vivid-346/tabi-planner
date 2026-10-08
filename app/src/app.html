@@ -1395,6 +1395,7 @@ function notifList(t){const n=nset(t),ds=dates(t),out=[];if(!ds.length)return ou
 /* アプリでは保存のたびに通知を入れ直す（全旅行ぶん） */
 /* Web版通知。旅行名・場所・メモは送信しない。 */
 const WebNotify={
+ messages:{before:'まもなく予定の時間です。日程を確認しましょう。',eve:'明日の予定を確認しましょう。',morn:'今日の予定を確認しましょう。',pre:'旅行前の予約と持ち物を確認しましょう。'},
  url:'https://tabinote-notify-test.hourensou2048.workers.dev',busy:false,error:'',saved:0,
  enabled(){return localStorage.getItem(KEY+'-push-on')==='1'},
  supported(){return 'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window},
@@ -2234,11 +2235,11 @@ function splitView(t){const ms=mems(t),ds=dates(t);const list=Object.entries(t.e
 
 /* ================= 画面：通知 ================= */
 function sw(id,on,label){return `<label class="sw"><input type="checkbox" id="${id}" ${on?"checked":""} aria-label="${label}"><span></span></label>`}
-function notifView(t){const n=nset(t),list=notifList(t),now=new Date();const fut=list.filter(x=>x.at>now);
+function notifView(t){const n=nset(t),list=notifList(t).map(x=>Native.isApp?x:{...x,title:"旅のノート",body:WebNotify.messages[x.kind]}),now=new Date();const fut=list.filter(x=>x.at>now);
   const tm=(id,v)=>{const [h,m]=v.split(":");return `<span class="tsel"><select id="${id}_h" aria-label="時">${Array.from({length:24},(_,k)=>`<option value="${k}" ${+h===k?"selected":""}>${k}時</option>`).join("")}</select><select id="${id}_m" aria-label="分">${["00","15","30","45"].map(v=>`<option ${v===m?"selected":""}>${v}</option>`).join("")}</select></span>`};
   return `${!Native.isApp?WebNotify.view():""}<section class="card"><div class="nset">
-   <div class="nrow"><b>各予定の前</b><span class="ctl"><select id="n_before" aria-label="何分前">${[[0,"通知しない"],[10,"10分前"],[15,"15分前"],[30,"30分前"],[60,"1時間前"],[120,"2時間前"]].map(([v,l])=>`<option value="${v}" ${n.before===v?"selected":""}>${l}</option>`).join("")}</select></span><small>時間が入っている予定ごとに届きます。例：「30分後：美ら海水族館」</small></div>
-   <div class="nrow"><b>前日の夜</b><span class="ctl">${n.eve.on?tm("n_eve",n.eve.time):""}${sw("n_eve_on",n.eve.on,"前日の夜の通知")}</span><small>翌日の最初の予定をお知らせ。例：「明日は2日目。最初は 8:30 那覇 → 本部」</small></div>
+   <div class="nrow"><b>各予定の前</b><span class="ctl"><select id="n_before" aria-label="何分前">${[[0,"通知しない"],[10,"10分前"],[15,"15分前"],[30,"30分前"],[60,"1時間前"],[120,"2時間前"]].map(([v,l])=>`<option value="${v}" ${n.before===v?"selected":""}>${l}</option>`).join("")}</select></span><small>時間が入っている予定の前に、日程の確認をうながします。</small></div>
+   <div class="nrow"><b>前日の夜</b><span class="ctl">${n.eve.on?tm("n_eve",n.eve.time):""}${sw("n_eve_on",n.eve.on,"前日の夜の通知")}</span><small>翌日の予定の確認をうながします。</small></div>
    <div class="nrow"><b>当日の朝</b><span class="ctl">${n.morn.on?tm("n_morn",n.morn.time):""}${sw("n_morn_on",n.morn.on,"当日の朝の通知")}</span><small>その日の予定をまとめてお知らせ</small></div>
    <div class="nrow"><b>出発の前に</b><span class="ctl">${n.pre.on?`<select id="n_pre_days" aria-label="何日前">${[1,3,7,14,30].map(d=>`<option value="${d}" ${n.pre.days===d?"selected":""}>${d}日前</option>`).join("")}</select>`:""}${sw("n_pre_on",n.pre.on,"出発前の通知")}</span><small>予約や持ち物の確認をうながします（19時に届きます）</small></div>
   </div></section>
@@ -2515,7 +2516,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{if(!Native.isApp&&WebNotify.enabled()){try{await WebNotify.stop()}catch(e){toast("通知を停止できませんでした。通信を確認してからもう一度消してください");break}}try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{if(!Native.isApp&&WebNotify.enabled()){try{await WebNotify.stop()}catch(e){toast("通知を停止できませんでした。通信を確認してからもう一度消してください");break}}try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro");for(const k of ["-push-on","-push-token","-push-saved"])localStorage.removeItem(KEY+k)}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
@@ -2797,6 +2798,6 @@ function onboard(){if(DB.onboarded||Object.keys(DB.trips).length)return;let k=0;
   ov.addEventListener("click",e=>{const b=e.target.closest("[data-ob]");if(!b)return;const a=b.dataset.ob;if(a==="next"){k++;r()}else if(a==="end")end();else if(a==="sample"){end();openSample()}});
   let x0=null;ov.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});ov.addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(dx<-50&&k<OB.length-1){k++;r()}else if(dx>50&&k>0){k--;r()}x0=null});
   r();document.body.appendChild(ov)}
-const FLOW_BACK=flowRestore();draw();if(FLOW_BACK){setTimeout(()=>{($("aiBox")||$("cgFlow"))?.scrollIntoView({block:"start"});toast("さっきAIに聞いた続きです。答えをコピーして読み込んでください")},80)}schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();memGc();addEventListener("online",()=>{phCache();wxAll();schedNotif()});
+const FLOW_BACK=flowRestore();draw();if(FLOW_BACK){setTimeout(()=>{($("aiBox")||$("cgFlow"))?.scrollIntoView({block:"start"});toast("さっきAIに聞いた続きです。答えをコピーして読み込んでください")},80)}schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();memGc();addEventListener("online",()=>{phCache();wxAll();schedNotif()});addEventListener("pageshow",schedNotif);addEventListener("focus",schedNotif);document.addEventListener("visibilitychange",()=>{if(!document.hidden)schedNotif()});
 Native.perm(false).then(p=>{S.perm=p;if(S.tab==="notif")draw()});
 </script>
