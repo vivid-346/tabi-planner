@@ -1898,7 +1898,7 @@ async function fetchRate(tid,force){const t=DB.trips[tid];if(!t)return;const c=t
   catch(e){if(force)toast("レートを取れませんでした。設定から手で入れられます")}}
 /* 日程の料金だけを集計。候補・支出・予算上限とは合算しない。 */
 function planFee(text){const v=String(text||'').normalize('NFKC').replace(/,/g,'').trim();
-  if(/^(無料|0円)(?:$|[（(・\s])/.test(v))return {lo:0,hi:0};
+  if(/^(無料|0円)(?:[（(]要確認[）)])?$/.test(v))return {lo:0,hi:0};
   if(!v||/[$＄€£]|USD|EUR|ドル|ユーロ|万|子供|小学生|往復|片道|時間|泊|部屋|室|人.*人|円.*円.*円|円[・\s].*\d/i.test(v))return null;
   const m=v.match(/^(?:約|大人|1人(?:あたり)?|一人(?:あたり)?)?\s*(\d+)\s*(?:円)?\s*(?:[〜～~－-]\s*(\d+)\s*)?円(?:前後|程度|目安|から|〜|～)?(?:$|[（(・\s])/);
   if(!m)return null;const lo=+m[1],hi=m[2]?+m[2]:/[〜～]|から/.test(v)?null:lo;
@@ -1912,7 +1912,7 @@ function planEstimate(t){const rows=[];const people=+t.people>0?+t.people:null;
 function planCostLabel(e){return !e.priced?'まだ計算できません':`${yen(e.lo)}${e.hi==null?'〜':e.hi!==e.lo?'〜'+yen(e.hi):''}`}
 function planCostBox(t){const e=planEstimate(t);if(!e.rows.length)return '';return `<section class="card form" aria-label="日程の予定金額"><h3 style="font-size:17px">この日程にかかるお金</h3><b style="font-size:25px;line-height:1.5">${planCostLabel(e)}</b><p style="margin:4px 0;color:var(--ink)">${e.people?e.people+'人分':'人数未定のため、1人分'}・料金が分かる予定だけの目安</p><p style="margin:4px 0">${e.unknown?'交通費・宿代など、未計算の予定が'+e.unknown+'件あります。旅行全体の合計はまだ未確定です。':'日程の料金を集計しています。買い物など日程以外の費用は含みません。'}${t.budget?' 設定した予算は全員で'+yen(t.budget)+'です。':''}</p><details style="margin-top:12px"><summary style="min-height:44px;padding:10px 0;font-weight:600">内訳・未計算の予定を見る</summary><ul style="padding-left:20px">${e.rows.map(x=>`<li style="margin:10px 0">${esc(md(x.date))} ${esc(x.title)}：${x.lo==null?'未計算':x.shared?'宿代の人数・部屋数を要確認（'+esc(x.fee)+'）':esc(x.fee)}${!e.people&&x.lo>0&&!x.shared?'（1人分）':''}</li>`).join('')}</ul><p>場所の詳細で料金を入力すると集計に反映します。料金は入力・AI回答に基づく目安です。使った金額とは別で、二重に足しません。</p></details><button class="btn" data-a="tab" data-t="split">予算・使ったお金を見る</button></section>`}
 /* AIが既存予定を再出力しても、追加モードでは重複を入れない。 */
-function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const an=name(a),bn=name(b);return an&&bn?an===bn:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
+function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const an=name(a),bn=name(b);return an||bn?(an||normName(a.title))===(bn||normName(b.title)):normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
 function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date));let dup=0,adjusted=0,unknown=0,unresolved=0;
   const origin=String(S.ai?.o&&Object.hasOwn(S.ai.o,'from')?S.ai.o.from:t.from||DB.home||'').trim();const hasOrigin=!!origin&&!/^(未定|不明|わからない|あとで)$/.test(origin);const ds=dates(t);
   Object.entries(c.days).forEach(([date,list])=>{const seen=kept.filter(x=>x.date===date);const fresh=[];
