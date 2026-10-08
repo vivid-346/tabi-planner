@@ -1,0 +1,25 @@
+import {DatabaseSync} from 'node:sqlite';
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {scheduleRequest,runScheduled} from './scheduler.js';
+const sql=new DatabaseSync(':memory:');sql.exec(fs.readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));
+const db={prepare(text){let args=[];return {bind(...a){args=a;return this},async first(){return sql.prepare(text).get(...args)||null},async all(){return {results:sql.prepare(text).all(...args)}},run(){return sql.prepare(text).run(...args)}}},async batch(q){sql.exec('BEGIN');try{for(const s of q)s.run();sql.exec('COMMIT')}catch(e){sql.exec('ROLLBACK');throw e}}};
+const env={NOTIFY_DB:db},token='a'.repeat(64),subscription={endpoint:'https://web.push.apple.com/test',keys:{}};
+const call=(path,notifications,secret=token)=>scheduleRequest(new Request('https://notify.test'+path,{method:'POST',headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json'},body:JSON.stringify({subscription,notifications})}),env,()=>true);
+const future=Date.now()+60000;
+assert.equal((await (await call('/schedule',[{at:future,kind:'before'}])).json()).saved,1);
+assert.equal((await (await call('/schedule',[{at:future,kind:'morn'},{at:future,kind:'morn'}])).json()).saved,1);
+assert.equal(sql.prepare('SELECT count(*) n FROM reminders').get().n,1);
+assert.equal((await call('/schedule',[], 'b'.repeat(64))).status,403);
+assert.equal((await call('/schedule',[{at:future,kind:'unknown'}])).status,400);
+assert.equal((await call('/schedule',[{at:Date.now()-1,kind:'before'}])).status,400);
+assert.equal((await call('/schedule',[{at:Date.now()+61*86400000,kind:'before'}])).status,400);
+assert.equal((await call('/schedule',Array(201).fill({at:future,kind:'before'}))).status,400);
+let sends=0;sql.prepare('UPDATE reminders SET at=?').run(Date.now()-1000);
+await Promise.all([runScheduled(env,async()=>{sends++;return {ok:true,status:201}}),runScheduled(env,async()=>{sends++;return {ok:true,status:201}})]);
+assert.equal(sends,1);assert.equal(sql.prepare('SELECT count(*) n FROM reminders').get().n,0);
+await call('/schedule',[{at:future,kind:'before'}]);await call('/stop');await runScheduled(env,async()=>{sends++;return {ok:true,status:201}});assert.equal(sends,1);
+await call('/schedule',[{at:future,kind:'before'}]);sql.prepare('UPDATE reminders SET at=?').run(Date.now()-700000);await runScheduled(env,async()=>{throw Error('must not send late')});assert.equal(sql.prepare('SELECT count(*) n FROM reminders').get().n,0);
+await call('/schedule',[{at:future,kind:'before'}]);sql.prepare('UPDATE reminders SET at=?').run(Date.now()-1000);await runScheduled(env,async()=>({ok:false,status:410}));assert.equal(sql.prepare('SELECT count(*) n FROM devices').get().n,0);
+console.log('PASS: replace, dedupe, ownership, validation, concurrent dispatch, stop, expiry, revoked subscription');
+
