@@ -1105,7 +1105,7 @@ body.onhero .bar{backdrop-filter:blur(24px) saturate(150%)!important;-webkit-bac
 @media(max-width:699px){.dprow{flex-wrap:wrap}.dprow .daypills{flex:1 0 100%;width:100%;box-sizing:border-box}.dprow>.btn{margin-left:auto}.day,.day .tl li{scroll-margin-top:210px!important}.daypills button{min-width:112px!important;padding-inline:12px!important}}
 .btn[data-a="moneySet"],.btn[data-a="tab"][data-t="split"],#aiForm .btn[data-a="aiClose"]{background:#fff!important;border:2px solid #7354CB!important;color:#34265F!important;box-shadow:0 1px 2px rgba(0,0,0,.08)!important;text-align:center;justify-content:center}
 
-.vote-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.vote-tools .btn{min-height:44px}.vote-tools p{margin:0;width:100%;color:#344054;font-size:14px}.vote-row{border:1px solid #D0D5DD;border-radius:16px;padding:12px;margin:8px 0;background:#fff;min-width:0}.vote-row legend{font-weight:700;font-size:17px;padding:0 4px}.vote-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.vote-choices .btn{min-height:44px;padding:8px 4px;font-size:14px;justify-content:center}.vote-count{font-weight:600;color:#1D2939!important;background:rgba(255,255,255,.94);border-radius:8px;padding:3px 7px;align-self:flex-start}.vote-form h2{font-size:28px}.vote-form p{color:#344054}
+.vote-tools{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.vote-tools .btn{min-height:44px}.vote-tools p{margin:0;width:100%;color:#344054;font-size:14px}.vote-row{border:1px solid #D0D5DD;border-radius:16px;padding:12px;margin:8px 0;background:#fff;min-width:0}.vote-row legend{font-weight:700;font-size:17px;padding:0 4px}.vote-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.vote-choices .btn{min-height:44px;padding:8px 4px;font-size:14px;justify-content:center}.exc .exo .vote-count{font-weight:600;color:#1D2939!important;background:rgba(255,255,255,.94);border-radius:8px;padding:3px 7px;align-self:flex-start}.vote-form h2{font-size:28px}.vote-form p{color:#344054}
 </style>
 
 <header class="bar"><div class="in" id="bar"></div></header>
@@ -1661,15 +1661,15 @@ const voteSafeId=v=>typeof v==='string'&&/^[A-Za-z0-9_-]{1,60}$/.test(v)&&!['__p
 const voteName=v=>typeof v==='string'?v.trim().slice(0,20):'';
 function voteInviteData(t){
  if(!voteSafeId(t.sid))throw new Error('trip');
- const c=Object.entries(t.spots||{}).filter(([id,s])=>voteSafeId(id)&&s&&typeof s.name==='string'&&s.name.trim()).slice(0,500).map(([id,s])=>[id,s.name.slice(0,60)]);
- if(!c.length)throw new Error('empty');
+ const c=Object.entries(t.spots||{}).filter(([id,s])=>voteSafeId(id)&&s&&typeof s.name==='string'&&s.name.trim()).map(([id,s])=>[id,s.name.slice(0,60)]);
+ if(!c.length)throw new Error('empty');if(c.length>500)throw new Error('limit');
  return {v:1,t:t.sid,n:String(t.title||'旅行').slice(0,40),c};
 }
 function voteCleanInvite(o){
  if(!o||o.v!==1||!voteSafeId(o.t)||!Array.isArray(o.c)||o.c.length>500)throw new Error('vote');
  const ids=new Set(),c=[];
  for(const x of o.c){if(!Array.isArray(x)||x.length!==2||!voteSafeId(x[0])||typeof x[1]!=='string'||!x[1].trim()||ids.has(x[0]))throw new Error('vote');ids.add(x[0]);c.push([x[0],x[1].slice(0,60)])}
- if(!c.length)throw new Error('empty');
+ if(!c.length)throw new Error('empty');if(c.length>500)throw new Error('limit');
  return {v:1,t:o.t,n:typeof o.n==='string'?o.n.slice(0,40):'旅行',c};
 }
 function voteResponseData(invite,rid,name,answers){
@@ -1727,7 +1727,7 @@ async function voteReceive(code){const r=await unpackCode(code);if(r.kind==='VOT
  if(r.kind==='ANSWER'){S.voteImport={response:voteCleanResponse(r.data)};S.voteFriend=null;S.imp=null;S.codeOut=null;draw();window.scrollTo(0,0);return true}return false}
 async function voteAction(a,b){const id=b.dataset.id;
  switch(a){
- case 'voteInvite':{const t=T();if(!t.sid&&!change('',x=>x.sid=uid(),true))return true;try{const data=voteInviteData(T());const code=await packCode('VOTE',data);await voteSend('みんなに聞く',`「${data.n}」の行きたい場所を選んでください。旅のノートの「受け取った旅行を取り込む」に、このメッセージを貼ってください。\n\n${code}`)}catch(e){toast('候補を追加してから、みんなに聞いてください')}return true}
+ case 'voteInvite':{const t=T();if(!t.sid&&!change('',x=>x.sid=uid(),true))return true;try{const data=voteInviteData(T());const code=await packCode('VOTE',data);await voteSend('みんなに聞く',`「${data.n}」の行きたい場所を選んでください。旅のノートの「受け取った旅行を取り込む」に、このメッセージを貼ってください。\n\n${code}`)}catch(e){toast(e.message==='limit'?'一度に聞ける候補は500件までです。候補を整理してから、もう一度押してください':'候補を追加してから、みんなに聞いてください')}return true}
  case 'voteImport':S.voteImport={text:''};S.codeOut=null;draw();window.scrollTo(0,0);return true;
  case 'voteRead':{const text=$('vote_text').value;S.voteImport.text=text;try{if(!await voteReceive(text))toast('投票お願いコードか回答コードを貼ってください')}catch(e){toast('投票コードを読めませんでした。メッセージをまるごと貼り直してください')}return true}
  case 'voteChoose':if(S.voteFriend){S.voteFriend.name=$('vote_name').value;S.voteFriend.answers[id]=+b.dataset.value;S.codeOut=null;draw()}return true;

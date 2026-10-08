@@ -5,6 +5,7 @@ vm.runInContext(source.slice(source.indexOf('/* 行きたい投票：'),source.i
 vm.runInContext(source.slice(source.indexOf('const b64u='),source.indexOf('/* 受け取ったデータは')),c);
 (async()=>{
  const t={sid:'trip1',title:'福岡',spots:{a:{name:'公園',photo:{u:'SECRET'}},b:{name:'カフェ'}}};
+ const large={sid:'trip1',spots:Object.fromEntries(Array.from({length:501},(_,k)=>['s'+k,{name:'候補'+k}]))};assert.throws(()=>c.voteInviteData(large),/limit/);delete large.spots.s500;assert.equal(c.voteInviteData(large).c.length,500);
  const i=c.voteInviteData(t),code=await c.packCode('VOTE',i),decoded=await c.unpackCode('招待です\n'+code);assert.equal(decoded.kind,'VOTE');assert.equal(decoded.all,false);assert.equal(decoded.data.c.length,2);assert(!JSON.stringify(decoded.data).includes('SECRET'));
  const r=c.voteResponseData(decoded.data,'friend1','とも',{a:1,b:0});const rcode=await c.packCode('ANSWER',r),read=await c.unpackCode(rcode);assert.equal(read.kind,'ANSWER');
  t.votes=c.voteApplyResponse(t,read.data).votes;assert.equal(c.voteCounts(t).a,1);t.votes=c.voteApplyResponse(t,read.data).votes;assert.equal(c.voteCounts(t).a,1);
