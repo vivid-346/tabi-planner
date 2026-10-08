@@ -1904,7 +1904,7 @@ function planEstimate(t){const rows=[];const people=+t.people>0?+t.people:null;
   priced.forEach(x=>{const n=people||1;lo+=x.lo*n;if(x.hi==null)open=true;else hi+=x.hi*n});
   return {rows,lo,hi:open?null:hi,people,priced:priced.length,unknown:rows.filter(x=>x.unknown).length}}
 function planCostLabel(e){return !e.priced?'まだ計算できません':`${yen(e.lo)}${e.hi==null?'〜':e.hi!==e.lo?'〜'+yen(e.hi):''}`}
-function planCostBox(t){const e=planEstimate(t);if(!e.rows.length)return '';return `<section class="card form" aria-label="日程の予定金額"><h3 style="font-size:17px">この日程にかかるお金</h3><b style="font-size:25px;line-height:1.5">${planCostLabel(e)}</b><p style="margin:4px 0;color:var(--ink)">${e.people?e.people+'人分':'人数未定のため、1人分'}・料金が分かる予定だけの目安</p><p style="margin:4px 0">${e.unknown?'交通費・宿代など、未計算の予定が'+e.unknown+'件あります。旅行全体の合計はまだ未確定です。':'日程の料金を集計しています。買い物など日程以外の費用は含みません。'}${t.budget?' 設定した予算は全員で'+yen(t.budget)+'です。':''}</p><details style="margin-top:12px"><summary style="min-height:44px;padding:10px 0;font-weight:600">内訳・未計算の予定を見る</summary><ul style="padding-left:20px">${e.rows.map(x=>`<li style="margin:10px 0">${esc(md(x.date))} ${esc(x.title)}：${x.lo==null?'未計算':x.shared?'宿代の人数・部屋数を要確認（'+esc(x.fee)+'）':esc(x.fee)}${!e.people&&x.lo>0&&!x.shared?'（1人分）':''}</li>`).join('')}</ul><p>場所の詳細で料金を入力すると集計に反映します。料金は入力・AI回答に基づく目安です。使った金額とは別で、二重に足しません。</p></details><button class="btn" data-a="tab" data-t="split">予算・使ったお金を見る</button></section>`}
+function planCostBox(t){const e=planEstimate(t);if(!e.rows.length)return '';return `<section class="card form" aria-label="日程の予定金額"><h3 style="font-size:17px">この旅行の予定金額</h3><b style="font-size:25px;line-height:1.5">${planCostLabel(e)}</b><p style="margin:4px 0;color:var(--ink)">${e.people?e.people+'人分':'人数未定のため、1人分'}・旅行全体で、料金が分かる予定だけの目安</p><p style="margin:4px 0">${e.unknown?'交通費・宿代など、未計算の予定が'+e.unknown+'件あります。旅行全体の合計はまだ未確定です。':'日程の料金を集計しています。買い物など日程以外の費用は含みません。'}${t.budget?' 設定した予算は全員で'+yen(t.budget)+'です。':''}</p><details style="margin-top:12px"><summary style="min-height:44px;padding:10px 0;font-weight:600">内訳・未計算の予定を見る</summary><ul style="padding-left:20px">${e.rows.map(x=>`<li style="margin:10px 0">${esc(md(x.date))} ${esc(x.title)}：${x.lo==null?'未計算':x.shared?'宿代の人数・部屋数を要確認（'+esc(x.fee)+'）':esc(x.fee)}${!e.people&&x.lo>0&&!x.shared?'（1人分）':''}</li>`).join('')}</ul><p>場所の詳細で料金を入力すると集計に反映します。料金は入力・AI回答に基づく目安です。使った金額とは別で、二重に足しません。</p></details><button class="btn" data-a="tab" data-t="split">予算・使ったお金を見る</button></section>`}
 /* AIが既存予定を再出力しても、追加モードでは重複を入れない。 */
 function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const an=name(a),bn=name(b);return an||bn?(an||normName(a.title))===(bn||normName(b.title)):normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
 function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date));let dup=0,adjusted=0,unknown=0,unresolved=0;
@@ -1925,6 +1925,7 @@ function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kep
   if(unknown)out.warn.push('出発地が未定のため、行き・帰りの移動'+unknown+'件の時刻を未定にしました');
   if(unresolved)out.warn.push('固定予定までに収まらないなど、時間の確認が必要な予定が'+unresolved+'件あります。時刻や場所を見直してください');
   out.nItems=Object.values(out.days).reduce((n,a)=>n+a.length,0);return out}
+
 
 
 
