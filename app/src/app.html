@@ -2178,7 +2178,7 @@ function costAiView(t,A){const o=A.o;return `<section class="card form" id="aiFo
 
 
 /* AIが既存予定を再出力しても、追加モードでは重複を入れない。 */
-function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time;const an=name(a),bn=name(b);return an||bn?(an||title(a))===(bn||title(b))&&a.time===b.time:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
+function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time&&(a.arrive||'')===(b.arrive||'');const an=name(a),bn=name(b);return an||bn?(an||title(a))===(bn||title(b))&&a.time===b.time:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
 function aiPrepare(t,c,mode){const out={...c,days:{},warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date));let dup=0,adjusted=0,unknown=0,unresolved=0;
   const origin=String(S.ai?.o&&Object.hasOwn(S.ai.o,'from')?S.ai.o.from:t.from||DB.home||'').trim();const hasOrigin=!!origin&&!/^(未定|不明|わからない|あとで)$/.test(origin);const ds=dates(t);
   Object.entries(c.days).forEach(([date,list])=>{const seen=kept.filter(x=>x.date===date);const fresh=[];
@@ -2384,7 +2384,7 @@ function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[]
     const incoming=(Array.isArray(d.items)?d.items:[]).slice(0,30).map(x=>({time:okTime(x&&x.time),arrive:okTime(x&&x.arrive),kind:KINDS[x&&x.kind]?x.kind:"other",title:str(x&&x.title,60),note:str(x&&x.note,140),spotName:str(x&&x.spot,60)})).filter(x=>x.title);
     if(Object.hasOwn(out.days,date)){
       if(!warn.includes(`${date} が重複していたため、空の回答で予定を消さず、同じ予定をまとめました`))warn.push(`${date} が重複していたため、空の回答で予定を消さず、同じ予定をまとめました`);
-      for(const x of incoming){const same=out.days[date].find(y=>y.time===x.time&&y.kind===x.kind&&normName(y.title)===normName(x.title)&&(!y.spotName||!x.spotName||normName(y.spotName)===normName(x.spotName)));
+      for(const x of incoming){const same=out.days[date].find(y=>y.time===x.time&&(!y.arrive||!x.arrive||y.arrive===x.arrive)&&y.kind===x.kind&&normName(y.title)===normName(x.title)&&(!y.spotName||!x.spotName||normName(y.spotName)===normName(x.spotName)));
         if(same){for(const key of ['spotName','arrive','note'])if(!same[key]&&x[key])same[key]=x[key]}else out.days[date].push(x)}
       if(!out.areas[date])out.areas[date]=str(d.area,30);
     }else{out.areas[date]=str(d.area,30);out.days[date]=incoming}
