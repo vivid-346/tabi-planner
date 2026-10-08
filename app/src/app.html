@@ -1720,8 +1720,7 @@ async function voteSend(title,message){S.codeOut=message;draw();const r=await Na
 async function voteReceive(code){const r=await unpackCode(code);if(r.kind==='VOTE'){const invite=voteCleanInvite(r.data);S.voteFriend={invite,answers:{},name:votePerson().name};S.voteImport=null;S.imp=null;S.codeOut=null;draw();window.scrollTo(0,0);return true}
  if(r.kind==='ANSWER'){S.voteImport={response:voteCleanResponse(r.data)};S.voteFriend=null;S.imp=null;S.codeOut=null;draw();window.scrollTo(0,0);return true}return false}
 async function voteAction(a,b){const id=b.dataset.id;
- if(a.startsWith("vote")&&await voteAction(a,b))return;
-  switch(a){
+ switch(a){
  case 'voteInvite':{const t=T();if(!t.sid&&!change('',x=>x.sid=uid(),true))return true;try{const data=voteInviteData(T());const code=await packCode('VOTE',data);await voteSend('みんなに聞く',`「${data.n}」の行きたい場所を選んでください。旅のノートの「受け取った旅行を取り込む」に、このメッセージを貼ってください。\n\n${code}`)}catch(e){toast('候補を追加してから、みんなに聞いてください')}return true}
  case 'voteImport':S.voteImport={text:''};S.codeOut=null;draw();window.scrollTo(0,0);return true;
  case 'voteRead':{const text=$('vote_text').value;S.voteImport.text=text;try{if(!await voteReceive(text))toast('投票お願いコードか回答コードを貼ってください')}catch(e){toast('投票コードを読めませんでした。メッセージをまるごと貼り直してください')}return true}
@@ -2365,6 +2364,7 @@ function go(tab){const ch=tab!==S.tab;if(tab==="split"&&S.tid)setTimeout(()=>fet
 document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b){if(S.menu){S.menu=null;draw()}return}const a=b.dataset.a,id=b.dataset.id;const t=T();
   if(a==="more"){S.menu=S.menu===id?null:id;draw();return}if(S.menu)S.menu=null;
   if(a==="openUrl"){draw();window.open(b.dataset.url,"_blank","noopener");return}
+  if(a.startsWith("vote")&&await voteAction(a,b))return;
   switch(a){
    case"undo":$("toast").hidden=true;undo();break;
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
