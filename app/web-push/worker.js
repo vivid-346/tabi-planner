@@ -1,4 +1,5 @@
-import {scheduleRequest,runScheduled} from './scheduler.js';
+import {scheduleRequest,runScheduled,authorizedDevice} from './scheduler.js';
+import {TEST_HTML,TEST_SW,TEST_MANIFEST} from './test-assets.js';
 // 予定通知には時刻・種類・購読先だけを保存する。
 const ORIGIN = 'https://vivid-346.github.io';
 const recentTests = new Map();
@@ -39,12 +40,17 @@ export default {
   async fetch(request, env) {
     const headers = {'Access-Control-Allow-Origin': ORIGIN, 'Access-Control-Allow-Methods':'GET, POST, OPTIONS', 'Access-Control-Allow-Headers':'Content-Type, Authorization', 'Cache-Control':'no-store', 'Content-Type':'application/json'};
     const reply = (value, status = 200) => new Response(JSON.stringify(value), {status, headers});
+    const ownOrigin=new URL(request.url).origin,requestOrigin=request.headers.get('Origin');
+    if(requestOrigin===ownOrigin)headers['Access-Control-Allow-Origin']=ownOrigin;
     const path = new URL(request.url).pathname;
+    if(request.method==='GET'&&path==='/')return new Response(TEST_HTML,{headers:{'Content-Type':'text/html;charset=utf-8','Cache-Control':'no-store'}});
+    if(request.method==='GET'&&path==='/sw.js')return new Response(TEST_SW,{headers:{'Content-Type':'application/javascript;charset=utf-8','Cache-Control':'no-cache'}});
+    if(request.method==='GET'&&path==='/manifest.webmanifest')return new Response(TEST_MANIFEST,{headers:{'Content-Type':'application/manifest+json'}});
     if (request.method === 'OPTIONS') return new Response(null, {status:204, headers});
     if (!env.VAPID_PRIVATE_JWK || !env.VAPID_PUBLIC_KEY) return reply({error:'not_configured'},503);
     if (path === '/config' && request.method === 'GET') return reply({publicKey:env.VAPID_PUBLIC_KEY, mode:env.NOTIFY_DB?'scheduled':'test-only'});
     if(['/schedule','/stop'].includes(path)&&request.method==='POST'){
-      if(request.headers.get('Origin')!==ORIGIN)return reply({error:'origin'},403);
+      if(requestOrigin!==ORIGIN&&requestOrigin!==ownOrigin)return reply({error:'origin'},403);
       try{const response=await scheduleRequest(request,env,validSubscription);return reply(await response.json(),response.status)}catch(_){return reply({error:'storage_failed'},503)}
     }
     if(path==='/health'&&request.method==='GET'){
@@ -58,7 +64,7 @@ export default {
       }catch(error){return reply({ok:false,stage,kind:/^[A-Za-z]+$/.test(error.name||'')?error.name:'Error'},503)}
     }
     if (path !== '/test' || request.method !== 'POST') return reply({error:'not_found'},404);
-    if (request.headers.get('Origin') !== ORIGIN) return reply({error:'origin'},403);
+    if(requestOrigin!==ORIGIN&&requestOrigin!==ownOrigin)return reply({error:'origin'},403);
     if (!request.headers.get('Content-Type')?.startsWith('application/json')) return reply({error:'content_type'},415);
     const raw = await request.text();
     if (raw.length > 4096) return reply({error:'too_large'},413);
@@ -69,6 +75,7 @@ export default {
     if (endpoint.protocol!=='https:' || endpoint.username || endpoint.password || endpoint.port || !(
       host==='web.push.apple.com' || host.endsWith('.push.apple.com') || host==='fcm.googleapis.com' || host==='updates.push.services.mozilla.com')) return reply({error:'invalid_endpoint'},400);
     if (!sub.keys || typeof sub.keys.p256dh!=='string' || typeof sub.keys.auth!=='string') return reply({error:'invalid_keys'},400);
+    if(!await authorizedDevice(request,env,sub))return reply({error:'authorization'},403);
     const now=Date.now();
     for(const [key,at] of recentTests)if(now-at>=60000)recentTests.delete(key);
     if(recentTests.size>=1000||now-(recentTests.get(endpoint.href)||0)<10000)return reply({error:'try_later'},429);

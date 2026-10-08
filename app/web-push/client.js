@@ -1,5 +1,6 @@
 /* Web版通知。旅行名・場所・メモは送信しない。 */
 const WebNotify={
+ messages:{before:'まもなく予定の時間です。日程を確認しましょう。',eve:'明日の予定を確認しましょう。',morn:'今日の予定を確認しましょう。',pre:'旅行前の予約と持ち物を確認しましょう。'},
  url:'https://tabinote-notify-test.hourensou2048.workers.dev',busy:false,error:'',saved:0,
  enabled(){return localStorage.getItem(KEY+'-push-on')==='1'},
  supported(){return 'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window},

@@ -1,11 +1,17 @@
 // Only timestamps and notification kinds leave the phone. No trip/place/note/photo data.
 export const messages = {
- before:'旅行前の予約と持ち物を確認しましょう。',
+ before:'まもなく予定の時間です。日程を確認しましょう。',
  eve:'明日の予定を確認しましょう。',
  morn:'今日の予定を確認しましょう。',
- pre:'まもなく予定の時間です。日程を確認しましょう。'
+ pre:'旅行前の予約と持ち物を確認しましょう。'
 };
 const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),v=>v.toString(16).padStart(2,'0')).join('');
+export async function authorizedDevice(request,env,sub){
+ const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');
+ if(!env.NOTIFY_DB||!/^[a-f0-9]{64}$/.test(token||''))return false;
+ const row=await env.NOTIFY_DB.prepare('SELECT token_hash,expires FROM devices WHERE id=?').bind(await hash(sub.endpoint)).first();
+ return !!row&&row.expires>Date.now()&&row.token_hash===await hash(token);
+}
 export async function scheduleRequest(request,env,validSubscription){
  const json=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
  if(!env.NOTIFY_DB)return json({error:'schedule_not_configured'},503);
@@ -39,14 +45,15 @@ export async function scheduleRequest(request,env,validSubscription){
 export async function runScheduled(env,send){
  if(!env.NOTIFY_DB)return;
  const db=env.NOTIFY_DB,now=Date.now();
- // Expired schedules do not produce a burst of late notifications after an outage.
- await db.batch([db.prepare('DELETE FROM reminders WHERE at<? OR device IN (SELECT id FROM devices WHERE expires<?)').bind(now-600000,now),db.prepare('DELETE FROM devices WHERE expires<?').bind(now)]);
+ // Keep overdue queued reminders: a busy minute must not silently discard unsent jobs.
+ await db.batch([db.prepare('DELETE FROM reminders WHERE device IN (SELECT id FROM devices WHERE expires<?)').bind(now),db.prepare('DELETE FROM devices WHERE expires<?').bind(now)]);
  const jobs=await db.prepare('SELECT r.*,d.subscription FROM reminders r JOIN devices d ON d.id=r.device WHERE r.at<=? AND r.lease<=? ORDER BY r.at LIMIT 10').bind(now,now).all();
  for(const job of jobs.results||[]){
   const claim=await db.prepare('UPDATE reminders SET lease=?,attempts=attempts+1 WHERE id=? AND lease<=? RETURNING id').bind(now+120000,job.id,now).first();
   if(!claim)continue;
   try{
-   const result=await send(JSON.parse(job.subscription),{title:'旅のノート',body:messages[job.kind],tag:'reminder-'+job.id},env);
+   const body=now-job.at>600000?'遅れて届いた通知です。日程を確認してください。':messages[job.kind];
+   const result=await send(JSON.parse(job.subscription),{title:'旅のノート',body,tag:'reminder-'+job.id},env);
    if(result.status===404||result.status===410){await db.batch([db.prepare('DELETE FROM reminders WHERE device=?').bind(job.device),db.prepare('DELETE FROM devices WHERE id=?').bind(job.device)]);continue;}
    if(result.ok||job.attempts>=2||[400,401,403].includes(result.status))await db.prepare('DELETE FROM reminders WHERE id=?').bind(job.id).run();
   }catch(_){if(job.attempts>=2)await db.prepare('DELETE FROM reminders WHERE id=?').bind(job.id).run();}

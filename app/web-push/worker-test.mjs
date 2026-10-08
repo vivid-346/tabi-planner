@@ -1,12 +1,18 @@
 import worker from './worker-bundle.js';
+import canonical from './worker.js';
+import {DatabaseSync} from 'node:sqlite';
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {createECDH, hkdfSync, createDecipheriv, randomBytes} from 'node:crypto';
 const origin='https://tabinote-notify-test.hourensou2048.workers.dev';
 const pair=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
 const jwk=await crypto.subtle.exportKey('jwk',pair.privateKey);
 const publicKey=Buffer.concat([Buffer.from([4]),Buffer.from(jwk.x,'base64url'),Buffer.from(jwk.y,'base64url')]).toString('base64url');
-const env={VAPID_PRIVATE_JWK:JSON.stringify(jwk),VAPID_PUBLIC_KEY:publicKey};
-const req=(path,body,requestOrigin=origin)=>new Request(origin+path,{method:body?'POST':'GET',headers:{Origin:requestOrigin,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+const sql=new DatabaseSync(':memory:');sql.exec(fs.readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));
+const db={prepare(text){let args=[];return {bind(...a){args=a;return this},async first(){return sql.prepare(text).get(...args)||null},async all(){return {results:sql.prepare(text).all(...args)}},run(){return sql.prepare(text).run(...args)}}},async batch(q){sql.exec('BEGIN');try{for(const s of q)s.run();sql.exec('COMMIT')}catch(e){sql.exec('ROLLBACK');throw e}}};
+const env={VAPID_PRIVATE_JWK:JSON.stringify(jwk),VAPID_PUBLIC_KEY:publicKey,NOTIFY_DB:db},deviceToken='a'.repeat(64);
+const req=(path,body,requestOrigin=origin,secret=deviceToken)=>new Request(origin+path,{method:body?'POST':'GET',headers:{Origin:requestOrigin,'Content-Type':'application/json',Authorization:'Bearer '+secret},body:body?JSON.stringify(body):undefined});
+for(const path of ['/','/sw.js','/manifest.webmanifest','/config'])assert.equal(await (await worker.fetch(req(path),env)).text(),await (await canonical.fetch(req(path),env)).text());
 assert.equal((await worker.fetch(req('/'),env)).status,200);
 assert.match(await (await worker.fetch(req('/sw.js'),env)).text(),/notificationclick/);
 assert.equal((await worker.fetch(req('/config'),{})).status,503);
@@ -14,6 +20,10 @@ assert.equal((await worker.fetch(req('/test',{subscription:{endpoint:'https://ex
 assert.equal((await worker.fetch(req('/test',{},'https://evil.example'),env)).status,403);
 let sent=0;
 const ua=createECDH('prime256v1');ua.generateKeys();const auth=randomBytes(16);
+const subscription={endpoint:'https://web.push.apple.com/demo',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}};
+assert.equal((await worker.fetch(req('/schedule',{subscription,notifications:[]}),env)).status,200);
+assert.equal((await worker.fetch(req('/test',{subscription},origin,''),env)).status,403);
+assert.equal((await worker.fetch(req('/test',{subscription},origin,'b'.repeat(64)),env)).status,403);
 globalThis.fetch=async(url,opts)=>{sent++;assert.equal(url,'https://web.push.apple.com/demo');assert.equal(opts.redirect,'manual');assert.equal(opts.headers['Content-Encoding'],'aes128gcm');const token=opts.headers.Authorization.match(/t=([^,]+)/)[1];const [a,b,c]=token.split('.');assert.equal(JSON.parse(Buffer.from(b,'base64url')).aud,'https://web.push.apple.com');assert.ok(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pair.publicKey,Buffer.from(c,'base64url'),new TextEncoder().encode(a+'.'+b)));
   // 別のNode暗号APIで端末側の復号を検証する。
   const body=Buffer.from(opts.body),salt=body.subarray(0,16),pub=body.subarray(21,21+body[20]);assert.equal(body.readUInt32BE(16),4096);
@@ -28,6 +38,7 @@ const result=await worker.fetch(req('/test',{subscription:{endpoint:'https://web
 assert.equal(result.status,200);assert.equal((await result.json()).accepted,true);assert.equal(sent,1);
 assert.equal((await worker.fetch(req('/test',{subscription:{endpoint:'https://web.push.apple.com/demo',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}}}),env)).status,429);
 globalThis.fetch=async()=>new Response(JSON.stringify({reason:'BadJwtToken'}),{status:403});
+const sub2={...subscription,endpoint:'https://web.push.apple.com/demo2'};assert.equal((await worker.fetch(req('/schedule',{subscription:sub2,notifications:[]}),env)).status,200);
 const rejected=await worker.fetch(req('/test',{subscription:{endpoint:'https://web.push.apple.com/demo2',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}}}),env);
 assert.equal((await rejected.json()).reason,'BadJwtToken');
-console.log('PASS: routes, validation, VAPID signature, independent payload decryption, cooldown, provider error');
+console.log('PASS: canonical/bundle routes, device authorization, VAPID signature, independent payload decryption, cooldown, provider error');

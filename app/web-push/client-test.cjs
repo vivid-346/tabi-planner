@@ -11,5 +11,13 @@ c.client.request=async(p,data)=>{await new Promise(r=>setTimeout(r,5));sent.push
  await c.client.sync();assert.equal(sent.at(-1).p,'/stop');
  assert(src.includes('kind:"pre"')&&src.includes('kind:"eve"')&&src.includes('kind:"morn"')&&src.includes('kind:"before"'));
  assert(!src.includes('いまはブラウザで開いているので、実際の通知は届きません'));
+ const {messages}=await import('./scheduler.js');assert.equal(JSON.stringify(c.client.messages),JSON.stringify(messages));
+ assert(src.includes('body:WebNotify.messages[x.kind]'));
+ for(const kind of ['pageshow','focus','visibilitychange'])assert(src.includes('"'+kind+'"'));
+ const wipe=src.slice(src.indexOf('case"wipeYes":')+'case"wipeYes":'.length,src.indexOf('case"checkTpl":'));
+ Object.assign(c,{Native:{isApp:false,plug:()=>null},S:{},UNDO:null,phWipe(){},toast(){},draw(){}});
+ for(const k of ['test','test-push-on','test-push-token','test-push-saved'])store.set(k,'1');
+ vm.runInContext('globalThis.wipe=async()=>{while(true){'+wipe+'}}',c);await c.wipe();
+ for(const k of ['test','test-push-on','test-push-token','test-push-saved'])assert(!store.has(k));
  console.log('PASS: JavaScript syntax, minimal data, sample exclusion, serialized stop, disabled schedule');
 })().catch(e=>{console.error(e);process.exitCode=1});
