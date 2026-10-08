@@ -1,5 +1,5 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const src=fs.readFileSync('src/app.html','utf8');
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const src=fs.readFileSync(path.join(__dirname,'src/app.html'),'utf8');
 const source=src.slice(src.indexOf('async function memGc(){'),src.indexOf('/* JPEG の撮影日時'));
 async function run({referenced=[],saved=[],undo=[],marked={}}={}){
  const deleted=[],store={trip:JSON.stringify({trips:{t:{mem:Object.fromEntries(saved.map(id=>[id,{}]))}}}), 'trip-mem-gc':JSON.stringify(marked)};
