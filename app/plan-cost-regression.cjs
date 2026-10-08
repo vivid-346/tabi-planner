@@ -14,6 +14,7 @@ for(const file of ['app.html','index.html']){
  assert(!c.aiSameItem(t,{date:t.end,kind:'move',title:'電車で移動',time:'10:00'},{date:t.end,kind:'move',title:'電車で移動',time:'14:00'}));
  assert(c.aiSameItem(t,{date:t.end,kind:'see',title:'博多駅',time:'12:00'},{date:t.end,kind:'other',title:'博多駅',time:'11:00',spot:'station'}));c.S.ai.o.from='';assert.equal(c.aiPrepare(t,raw,'add').days[t.start][0].time,'');
  if(file==='index.html'){assert(s.startsWith('<!doctype html>'));assert(s.includes('name="viewport"'));assert(s.includes('const GEO={"d":'));assert(!s.includes('const GEO=__GEO__'));}
+ c.tripPhoto=()=>null;c.li=()=>'';c.wd=()=>'';c.S.ai=null;const chatRaw=JSON.parse(JSON.stringify(tight));chatRaw.days[t.end].push({...constrained.items.fixed});c.S.cg={step:'preview',c:chatRaw};vm.runInContext(s.slice(s.indexOf('function cgView('),s.indexOf('function aiFlowBox(')),c);const preview=c.cgView(constrained);assert(preview.includes('時間の確認が必要'));assert(preview.includes('固定予定までに'));
  assert(s.includes('if(!S.mapAdding)'));assert(s.includes('else if(S.mapAdding)'));assert(s.includes('data-a="mapAddMode"'));assert(s.includes('しおり・書き出し'));console.log('PASS '+file+': cost ranges/unknowns/people; AI duplicate exclusion/time adjustment/origin safety/fixed return boundary; map explicit add mode; source syntax');
 }
 
