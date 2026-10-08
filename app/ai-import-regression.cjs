@@ -10,6 +10,7 @@ result=c.aiCheck({}, {days:[{date:'2026-11-21',items:[]},{date:'2026-11-21',item
 assert.equal(result.nItems,2);assert.equal(result.days['2026-11-21'][1].title,'伏見稲荷');
 result=c.aiCheck({}, {days:[{date:'2026-11-21',items:[item('清水寺','10:00'),item('清水寺','15:00')]}]},'plan');assert.equal(result.nItems,2);
 result=c.aiCheck({}, {days:[{date:'2026-11-21',items:[item('清水寺')]},{date:'2026-11-21',items:[{...item('清水寺'),spot:'清水寺',note:'後の回答にだけ場所情報'}]}]},'plan');assert.equal(result.nItems,1);assert.equal(result.days['2026-11-21'][0].spotName,'清水寺');assert.equal(result.days['2026-11-21'][0].note,'後の回答にだけ場所情報');
+result=c.aiCheck({}, {days:[{date:'2026-11-21',items:[{title:'電車で移動',kind:'move',time:'10:00',arrive:'11:00'}]},{date:'2026-11-21',items:[{title:'電車で移動',kind:'move',time:'10:00',arrive:'11:30'}]}]},'plan');assert.equal(result.nItems,2);
 for(const [name,count] of [['actual-ai-answer.txt',39],['actual-ai-consult.txt',37]]){
  const text=fs.readFileSync(path.join(__dirname,name),'utf8');
  const raw=JSON.parse(text.slice(text.indexOf('{'),text.lastIndexOf('}')+1));
