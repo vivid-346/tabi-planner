@@ -1,0 +1,7 @@
+{
+  "name": "tabinote-notify-test",
+  "main": "worker-bundle.js",
+  "compatibility_date": "2026-10-08",
+  "d1_databases": [{"binding":"NOTIFY_DB","database_name":"tabinote-reminders","database_id":"a1ba4c03-7440-46b4-a4b2-3795f66de653"}],
+  "triggers": {"crons":["* * * * *"]}
+}

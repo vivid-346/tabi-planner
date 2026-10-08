@@ -1,0 +1,75 @@
+import worker from './worker-bundle.js';
+import canonical from './worker.js';
+import {DatabaseSync} from 'node:sqlite';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {TEST_HTML} from './test-assets.js';
+import assert from 'node:assert/strict';
+import {createECDH, hkdfSync, createDecipheriv, randomBytes} from 'node:crypto';
+const origin='https://tabinote-notify-test.hourensou2048.workers.dev';
+const pair=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
+const jwk=await crypto.subtle.exportKey('jwk',pair.privateKey);
+const publicKey=Buffer.concat([Buffer.from([4]),Buffer.from(jwk.x,'base64url'),Buffer.from(jwk.y,'base64url')]).toString('base64url');
+const sql=new DatabaseSync(':memory:');sql.exec(fs.readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));
+const db={prepare(text){let args=[];return {bind(...a){args=a;return this},async first(){return sql.prepare(text).get(...args)||null},async all(){return {results:sql.prepare(text).all(...args)}},run(){return sql.prepare(text).run(...args)}}},async batch(q){sql.exec('BEGIN');try{for(const s of q)s.run();sql.exec('COMMIT')}catch(e){sql.exec('ROLLBACK');throw e}}};
+const env={VAPID_PRIVATE_JWK:JSON.stringify(jwk),VAPID_PUBLIC_KEY:publicKey,NOTIFY_DB:db},deviceToken='a'.repeat(64);
+const req=(path,body,requestOrigin=origin,secret=deviceToken)=>new Request(origin+path,{method:body?'POST':'GET',headers:{Origin:requestOrigin,'Content-Type':'application/json',Authorization:'Bearer '+secret},body:body?JSON.stringify(body):undefined});
+for(const path of ['/','/sw.js','/manifest.webmanifest','/config'])assert.equal(await (await worker.fetch(req(path),env)).text(),await (await canonical.fetch(req(path),env)).text());
+assert.equal((await worker.fetch(req('/'),env)).status,200);
+assert.match(await (await worker.fetch(req('/sw.js'),env)).text(),/notificationclick/);
+assert.equal((await worker.fetch(req('/config'),{})).status,503);
+assert.equal((await worker.fetch(req('/test',{subscription:{endpoint:'https://example.com'}}),env)).status,400);
+assert.equal((await worker.fetch(req('/test',{},'https://evil.example'),env)).status,403);
+let sent=0;
+const ua=createECDH('prime256v1');ua.generateKeys();const auth=randomBytes(16);
+const subscription={endpoint:'https://web.push.apple.com/demo',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}};
+assert.equal((await worker.fetch(req('/schedule',{subscription,notifications:[]}),env)).status,200);
+assert.equal((await worker.fetch(req('/test',{subscription},origin,''),env)).status,403);
+assert.equal((await worker.fetch(req('/test',{subscription},origin,'b'.repeat(64)),env)).status,403);
+globalThis.fetch=async(url,opts)=>{sent++;assert.equal(url,'https://web.push.apple.com/demo');assert.equal(opts.redirect,'manual');assert.equal(opts.headers['Content-Encoding'],'aes128gcm');const token=opts.headers.Authorization.match(/t=([^,]+)/)[1];const [a,b,c]=token.split('.');assert.equal(JSON.parse(Buffer.from(b,'base64url')).aud,'https://web.push.apple.com');assert.ok(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pair.publicKey,Buffer.from(c,'base64url'),new TextEncoder().encode(a+'.'+b)));
+  // 別のNode暗号APIで端末側の復号を検証する。
+  const body=Buffer.from(opts.body),salt=body.subarray(0,16),pub=body.subarray(21,21+body[20]);assert.equal(body.readUInt32BE(16),4096);
+  const shared=ua.computeSecret(pub),info=Buffer.concat([Buffer.from('WebPush: info\0'),ua.getPublicKey(),pub]);
+  const ikm=Buffer.from(hkdfSync('sha256',shared,auth,info,32));
+  const cek=Buffer.from(hkdfSync('sha256',ikm,salt,Buffer.from('Content-Encoding: aes128gcm\0'),16));
+  const nonce=Buffer.from(hkdfSync('sha256',ikm,salt,Buffer.from('Content-Encoding: nonce\0'),12));
+  const encrypted=body.subarray(21+pub.length),dec=createDecipheriv('aes-128-gcm',cek,nonce);dec.setAuthTag(encrypted.subarray(-16));
+  const clear=Buffer.concat([dec.update(encrypted.subarray(0,-16)),dec.final()]);assert.equal(clear.at(-1),2);assert.equal(JSON.parse(clear.subarray(0,-1)).body,'テスト通知が届きました。');
+  return new Response(null,{status:201});};
+const result=await worker.fetch(req('/test',{subscription:{endpoint:'https://web.push.apple.com/demo',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}}}),env);
+assert.equal(result.status,200);assert.equal((await result.json()).accepted,true);assert.equal(sent,1);
+assert.equal((await worker.fetch(req('/test',{subscription:{endpoint:'https://web.push.apple.com/demo',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}}}),env)).status,429);
+globalThis.fetch=async()=>new Response(JSON.stringify({reason:'BadJwtToken'}),{status:403});
+const sub2={...subscription,endpoint:'https://web.push.apple.com/demo2'};assert.equal((await worker.fetch(req('/schedule',{subscription:sub2,notifications:[]}),env)).status,200);
+const rejected=await worker.fetch(req('/test',{subscription:{endpoint:'https://web.push.apple.com/demo2',keys:{p256dh:ua.getPublicKey().toString('base64url'),auth:auth.toString('base64url')}}}),env);
+assert.equal((await rejected.json()).reason,'BadJwtToken');
+const unavailable={...env,NOTIFY_DB:{prepare(){throw Error('database unavailable')}}};const outage=await worker.fetch(req('/test',{subscription}),unavailable);assert.equal(outage.status,503);assert.deepEqual(await outage.json(),{error:'storage_failed'});
+// Execute the real test-page script with an expired saved registration and click Send.
+const sub3={...subscription,endpoint:'https://web.push.apple.com/demo3'},thirdToken='c'.repeat(64);
+assert.equal((await worker.fetch(req('/schedule',{subscription:sub3,notifications:[]},origin,thirdToken),env)).status,200);sql.prepare('UPDATE devices SET expires=0 WHERE subscription LIKE ?').run('%demo3%');
+const storage=new Map([['notify-test-on','1'],['notify-test-token',thirdToken]]),elements=new Map();const get=id=>{if(!elements.has(id))elements.set(id,{});return elements.get(id)};
+const reg={pushManager:{getSubscription:async()=>({toJSON:()=>sub3,unsubscribe:async()=>true})}};let deliveries=0;globalThis.fetch=async()=>{deliveries++;return new Response(null,{status:201})};
+let lockTail=Promise.resolve();const locks={request:(_name,fn)=>{const task=lockTail.then(fn);lockTail=task.catch(()=>{});return task}};
+const context={Promise,crypto,Uint8Array,atob,localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},document:{getElementById:get},navigator:{locks,userAgent:'test',platform:'test',maxTouchPoints:0,serviceWorker:{register:async()=>reg,ready:Promise.resolve(reg)}},window:{matchMedia:()=>({matches:false}),PushManager:{},Notification:{}},fetch:(path,options={})=>worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
+vm.createContext(context);const script=TEST_HTML.match(/<script>([\s\S]*?)<\/script>/)[1].replace(';init();',';globalThis.ready=init();');vm.runInContext(script,context);await context.ready;assert.equal(get('send').disabled,false);await get('send').onclick();assert.equal(deliveries,1);assert.match(get('state').textContent,/送信を受け付け/);assert(sql.prepare('SELECT expires FROM devices WHERE subscription LIKE ?').get('%demo3%').expires>Date.now());
+// Send and Stop cannot overlap: the visible Stop control and its handler are locked.
+let release,stopped=0,unsubscribed=0;
+reg.pushManager.getSubscription=async()=>({toJSON:()=>sub3,unsubscribe:async()=>{unsubscribed++;return true}});
+// A separate document shares local storage and the browser operation lock.
+const raceElements=new Map();context.document={getElementById:id=>{if(!raceElements.has(id))raceElements.set(id,{});return raceElements.get(id)}};
+const race=vm.createContext({...context});vm.runInContext(script,race);await race.ready;
+race.fetch=async(path,options={})=>{if(path==='/schedule')await new Promise(resolve=>{release=resolve});if(path==='/stop')stopped++;return worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)};
+const sending=raceElements.get('send').onclick();await Promise.resolve();assert.equal(raceElements.get('stop').disabled,true);await raceElements.get('stop').onclick();assert.equal(stopped,0);assert.equal(unsubscribed,0);await raceElements.get('send').onclick();release();await sending;
+assert.equal(raceElements.get('stop').disabled,false);await raceElements.get('stop').onclick();assert.equal(stopped,1);assert.equal(unsubscribed,1);assert.equal(sql.prepare('SELECT count(*) AS n FROM devices WHERE subscription LIKE ?').get('%demo3%').n,0);assert.equal(storage.has('notify-test-on'),false);
+// An already-open second tab must not recreate a device after another tab stopped it.
+await get('send').onclick();assert.equal(sql.prepare('SELECT count(*) AS n FROM devices WHERE subscription LIKE ?').get('%demo3%').n,0);assert.equal(get('send').disabled,true);
+await get('stop').onclick();assert.equal(storage.has('notify-test-token'),false);assert.match(get('state').textContent,/登録を解除/);
+// Renewal failure remains retryable: Send and Stop are restored, registration controls are not locked.
+storage.set('notify-test-on','1');storage.set('notify-test-token',thirdToken);
+const failedElements=new Map(),failedContext=vm.createContext({...context,document:{getElementById:id=>{if(!failedElements.has(id))failedElements.set(id,{});return failedElements.get(id)}},fetch:(path,options={})=>path==='/schedule'?Promise.resolve(new Response(JSON.stringify({error:'storage_failed'}),{status:503})):worker.fetch(new Request(origin+path,{...options,headers:{...options.headers,Origin:origin}}),env)});
+vm.runInContext(script,failedContext);await failedContext.ready;await failedElements.get('send').onclick();assert.equal(failedElements.get('send').disabled,false);assert.equal(failedElements.get('stop').disabled,false);assert.match(failedElements.get('state').textContent,/storage_failed/);
+// Permission is requested synchronously in the click, before waiting for a held cross-tab lock.
+let releaseLock,permissionCalled=false;const held=locks.request('notify-test-operation',()=>new Promise(resolve=>{releaseLock=resolve}));await Promise.resolve();
+failedContext.Notification={requestPermission:()=>{permissionCalled=true;return Promise.resolve('denied')}};
+const enabling=failedElements.get('enable').onclick();assert.equal(permissionCalled,true);releaseLock();await held;await enabling;assert.equal(failedElements.get('send').disabled,false);
+console.log('PASS: routes, encryption, expired renewal, failed renewal retry, duplicate Send exclusion, stale-tab Send/Stop, synchronous permission request');

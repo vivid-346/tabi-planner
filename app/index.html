@@ -1,4 +1,7 @@
 <!doctype html><html lang="ja" data-theme="light"><head><meta charset="utf-8">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#FFFFFF">
@@ -1391,15 +1394,51 @@ const NDEF={before:30,eve:{on:true,time:"20:00"},morn:{on:false,time:"07:00"},pr
 function nset(t){return Object.assign({},NDEF,t.notif||{},{eve:{...NDEF.eve,...(t.notif||{}).eve},morn:{...NDEF.morn,...(t.notif||{}).morn},pre:{...NDEF.pre,...(t.notif||{}).pre}})}
 function at(date,time){const [h,m]=time.split(":").map(Number);const d=toD(date);d.setHours(h,m,0,0);return d}
 function notifList(t){const n=nset(t),ds=dates(t),out=[];if(!ds.length)return out;
-  if(n.pre.on){const d=toD(ds[0]);d.setDate(d.getDate()-n.pre.days);d.setHours(19,0,0,0);out.push({at:d,title:`${t.title}まであと${n.pre.days}日`,body:"予約や持ち物を確認しておきましょう"})}
+  if(n.pre.on){const d=toD(ds[0]);d.setDate(d.getDate()-n.pre.days);d.setHours(19,0,0,0);out.push({at:d,kind:"pre",title:`${t.title}まであと${n.pre.days}日`,body:"予約や持ち物を確認しておきましょう"})}
   ds.forEach((date,i)=>{const its=items(t,date),first=its.find(x=>x.time);
-    if(n.eve.on&&its.length){const d=at(date,n.eve.time);d.setDate(d.getDate()-1);out.push({at:d,title:`明日は${i+1}日目（${md(date)}）`,body:first?`最初は ${first.time} ${first.title}${its.length>1?` ほか${its.length-1}件`:""}`:`予定 ${its.length}件`})}
-    if(n.morn.on&&its.length)out.push({at:at(date,n.morn.time),title:`今日の予定（${i+1}日目）`,body:its.slice(0,3).map(x=>`${x.time||""} ${x.title}`.trim()).join(" / ")+(its.length>3?` ほか${its.length-3}件`:"")});
-    if(n.before>0)its.forEach(x=>{if(!x.time)return;const d=at(date,x.time);d.setMinutes(d.getMinutes()-n.before);out.push({at:d,title:`${n.before>=60?n.before/60+"時間":n.before+"分"}後：${x.title}`,body:`${x.time}${x.note?"　"+x.note:""}`})});
+    if(n.eve.on&&its.length){const d=at(date,n.eve.time);d.setDate(d.getDate()-1);out.push({at:d,kind:"eve",title:`明日は${i+1}日目（${md(date)}）`,body:first?`最初は ${first.time} ${first.title}${its.length>1?` ほか${its.length-1}件`:""}`:`予定 ${its.length}件`})}
+    if(n.morn.on&&its.length)out.push({at:at(date,n.morn.time),kind:"morn",title:`今日の予定（${i+1}日目）`,body:its.slice(0,3).map(x=>`${x.time||""} ${x.title}`.trim()).join(" / ")+(its.length>3?` ほか${its.length-3}件`:"")});
+    if(n.before>0)its.forEach(x=>{if(!x.time)return;const d=at(date,x.time);d.setMinutes(d.getMinutes()-n.before);out.push({at:d,kind:"before",title:`${n.before>=60?n.before/60+"時間":n.before+"分"}後：${x.title}`,body:`${x.time}${x.note?"　"+x.note:""}`})});
   });
   return out.sort((a,b)=>a.at-b.at)}
 /* アプリでは保存のたびに通知を入れ直す（全旅行ぶん） */
-let schedT=0;function schedNotif(){if(!Native.isApp)return;clearTimeout(schedT);schedT=setTimeout(()=>Native.schedule(Object.values(DB.trips).flatMap(notifList)),800)}
+/* Web版通知。旅行名・場所・メモは送信しない。 */
+const WebNotify={
+ messages:{before:'まもなく予定の時間です。日程を確認しましょう。',eve:'明日の予定を確認しましょう。',morn:'今日の予定を確認しましょう。',pre:'旅行前の予約と持ち物を確認しましょう。'},
+ url:'https://tabinote-notify-test.hourensou2048.workers.dev',busy:false,error:'',saved:0,
+ enabled(){return localStorage.getItem(KEY+'-push-on')==='1'},
+ supported(){return 'serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window},
+ standalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone},
+ token(){let v=localStorage.getItem(KEY+'-push-token');if(!v){v=Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');localStorage.setItem(KEY+'-push-token',v)}return v},
+ async registration(){await navigator.serviceWorker.register('./sw.js');return navigator.serviceWorker.ready},
+ async request(path,data){const r=await fetch(this.url+path,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+this.token()},body:JSON.stringify(data)});const v=await r.json();if(!r.ok)throw Error(v.error||'送信失敗');return v},
+ async enable(){
+  if(!this.supported())throw Error('このブラウザは通知に対応していません');
+  if(/iPhone|iPad|iPod/.test(navigator.userAgent)&&!this.standalone())throw Error('Safariからホーム画面に追加し、そのアイコンから開いてください');
+  // 権限ダイアログはユーザーが押した直後に出す。
+  const permission=await Notification.requestPermission();if(permission!=='granted')throw Error('通知が許可されていません');
+  const response=await fetch(this.url+'/config');const config=await response.json();if(config.mode!=='scheduled')throw Error('予定通知の準備中です');
+  const reg=await this.registration();let sub=await reg.pushManager.getSubscription();
+  if(!sub){const key=Uint8Array.from(atob(config.publicKey.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-config.publicKey.length%4)%4)),c=>c.charCodeAt(0));sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key})}
+  localStorage.setItem(KEY+'-push-on','1');await this.sync();
+ },
+ sync(){this.chain=(this.chain||Promise.resolve()).catch(()=>{}).then(()=>this.syncCore());return this.chain},
+ async syncCore(){
+  if(!this.enabled())return;
+  this.busy=true;this.error='';
+  try{const reg=await this.registration(),subscription=await reg.pushManager.getSubscription();if(!subscription)throw Error('通知をもう一度オンにしてください');
+   const now=Date.now(),until=now+60*86400000;
+   const notifications=Object.values(DB.trips).filter(t=>!t.sample).flatMap(notifList).filter(n=>+n.at>now&&+n.at<=until).map(n=>({at:+n.at,kind:n.kind}));
+   if(notifications.length>200)throw Error('通知が200件を超えています。設定を減らしてください');
+   const result=await this.request('/schedule',{subscription:subscription.toJSON(),notifications});this.saved=result.saved;localStorage.setItem(KEY+'-push-saved',String(result.saved));
+  }catch(e){this.error=e.message;throw e}finally{this.busy=false}
+ },
+ async stop(){localStorage.removeItem(KEY+'-push-on');await (this.chain||Promise.resolve()).catch(()=>{});try{const reg=await this.registration(),sub=await reg.pushManager.getSubscription();if(sub){await this.request('/stop',{subscription:sub.toJSON()});await sub.unsubscribe()}this.saved=0;this.error=''}catch(e){localStorage.setItem(KEY+'-push-on','1');this.error='通知を停止できませんでした';throw Error(this.error)}},
+ async test(){const reg=await this.registration(),sub=await reg.pushManager.getSubscription();if(!sub)throw Error('先に通知をオンにしてください');await this.request('/test',{subscription:sub.toJSON()})},
+ view(){return `<section class="card form"><h3>画面を閉じても通知を受け取る</h3><p class="note">通知時刻・通知の種類・端末の通知先をCloudflareに保存します。旅行名・場所・メモ・写真は送りません。通知から日程を開けます。</p><p class="sub">先60日・最大200件。時刻はこの端末の設定です。通信状況によって遅れることがあります。予定を変えたら、オンラインでアプリを開くと更新します。</p>${this.enabled()?`<p role="status">${this.error?'更新できませんでした。前の通知が残っている可能性があります。':`通知はオン・${this.saved||Number(localStorage.getItem(KEY+'-push-saved'))||0}件を登録`}</p><div class="row"><button class="btn" data-a="webPushSync">通知を更新する</button><button class="btn" data-a="webPushStop">通知を止める</button></div>`:`<button class="btn fill" data-a="webPushEnable">同意して通知をオンにする</button><p class="sub">iPhoneはSafariの共有から「ホーム画面に追加」し、追加したアイコンから開いてください（iOS 16.4以降）。</p>`}</section>`}
+};
+
+let schedT=0;function schedNotif(){clearTimeout(schedT);schedT=setTimeout(()=>{if(Native.isApp)Native.schedule(Object.values(DB.trips).flatMap(notifList));else if(WebNotify.enabled())WebNotify.sync().catch(()=>{if(S.tab==="notif")draw()})},800)}
 function showBanner(n){const b=$("banner");b.innerHTML=`<span class="ic">旅</span><div><small>旅のノート ・ いま</small><b></b><div class="bd"></div></div>`;b.querySelector("b").textContent=n.title;b.querySelector(".bd").textContent=n.body;b.hidden=false;setTimeout(()=>b.hidden=true,5000)}
 
 /* ================= 画面：旅行の一覧 ================= */
@@ -2205,16 +2244,16 @@ function splitView(t){const ms=mems(t),ds=dates(t);const list=Object.entries(t.e
 
 /* ================= 画面：通知 ================= */
 function sw(id,on,label){return `<label class="sw"><input type="checkbox" id="${id}" ${on?"checked":""} aria-label="${label}"><span></span></label>`}
-function notifView(t){const n=nset(t),list=notifList(t),now=new Date();const fut=list.filter(x=>x.at>now);
+function notifView(t){const n=nset(t),list=notifList(t).map(x=>Native.isApp?x:{...x,title:"旅のノート",body:WebNotify.messages[x.kind]}),now=new Date();const fut=list.filter(x=>x.at>now);
   const tm=(id,v)=>{const [h,m]=v.split(":");return `<span class="tsel"><select id="${id}_h" aria-label="時">${Array.from({length:24},(_,k)=>`<option value="${k}" ${+h===k?"selected":""}>${k}時</option>`).join("")}</select><select id="${id}_m" aria-label="分">${["00","15","30","45"].map(v=>`<option ${v===m?"selected":""}>${v}</option>`).join("")}</select></span>`};
-  return `<section class="card"><div class="nset">
-   <div class="nrow"><b>各予定の前</b><span class="ctl"><select id="n_before" aria-label="何分前">${[[0,"通知しない"],[10,"10分前"],[15,"15分前"],[30,"30分前"],[60,"1時間前"],[120,"2時間前"]].map(([v,l])=>`<option value="${v}" ${n.before===v?"selected":""}>${l}</option>`).join("")}</select></span><small>時間が入っている予定ごとに届きます。例：「30分後：美ら海水族館」</small></div>
-   <div class="nrow"><b>前日の夜</b><span class="ctl">${n.eve.on?tm("n_eve",n.eve.time):""}${sw("n_eve_on",n.eve.on,"前日の夜の通知")}</span><small>翌日の最初の予定をお知らせ。例：「明日は2日目。最初は 8:30 那覇 → 本部」</small></div>
+  return `${!Native.isApp?WebNotify.view():""}<section class="card"><div class="nset">
+   <div class="nrow"><b>各予定の前</b><span class="ctl"><select id="n_before" aria-label="何分前">${[[0,"通知しない"],[10,"10分前"],[15,"15分前"],[30,"30分前"],[60,"1時間前"],[120,"2時間前"]].map(([v,l])=>`<option value="${v}" ${n.before===v?"selected":""}>${l}</option>`).join("")}</select></span><small>時間が入っている予定の前に、日程の確認をうながします。</small></div>
+   <div class="nrow"><b>前日の夜</b><span class="ctl">${n.eve.on?tm("n_eve",n.eve.time):""}${sw("n_eve_on",n.eve.on,"前日の夜の通知")}</span><small>翌日の予定の確認をうながします。</small></div>
    <div class="nrow"><b>当日の朝</b><span class="ctl">${n.morn.on?tm("n_morn",n.morn.time):""}${sw("n_morn_on",n.morn.on,"当日の朝の通知")}</span><small>その日の予定をまとめてお知らせ</small></div>
    <div class="nrow"><b>出発の前に</b><span class="ctl">${n.pre.on?`<select id="n_pre_days" aria-label="何日前">${[1,3,7,14,30].map(d=>`<option value="${d}" ${n.pre.days===d?"selected":""}>${d}日前</option>`).join("")}</select>`:""}${sw("n_pre_on",n.pre.on,"出発前の通知")}</span><small>予約や持ち物の確認をうながします（19時に届きます）</small></div>
   </div></section>
   <section class="card form"><div class="row" style="justify-content:space-between"><h3 style="font-size:17px">これから届く通知</h3><button class="btn" data-a="testNotif">通知を試す</button></div>
-   ${!Native.isApp?`<p class="note">いまはブラウザで開いているので、実際の通知は届きません。アプリ版では、この一覧のとおりにiPhoneへ届きます。</p>`
+   ${!Native.isApp?`<p class="note">上の「通知をオンにする」で、画面を閉じても通知を受け取れます。見本の旅行は通知しません。</p>`
     :S.perm==="granted"?`<p class="note">通知はオンです。予定を変えると自動で入れ直します。</p>`
     :S.perm==="denied"?`<p class="warn" style="font-weight:500">通知が許可されていないので届きません。iPhoneの「設定」→「通知」→「旅のノート」で「通知を許可」をオンにしてください。</p>`
     :`<div class="note row" style="justify-content:space-between"><span>通知を届けるには、許可が必要です。</span><button class="btn fill" data-a="askPerm">通知を許可する</button></div>`}
@@ -2486,7 +2525,7 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-a]")
    case"about":S.about=true;S.confirm=null;draw();window.scrollTo(0,0);break;
    case"aboutClose":S.about=false;S.confirm=null;draw();break;
    case"wipe":S.confirm="wipe";draw();break;
-   case"wipeYes":{try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro")}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
+   case"wipeYes":{if(!Native.isApp&&WebNotify.enabled()){try{await WebNotify.stop()}catch(e){toast("通知を停止できませんでした。通信を確認してからもう一度消してください");break}}try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+"-ui");localStorage.removeItem(KEY+"-voter");localStorage.removeItem(KEY+"-flow");localStorage.removeItem("tabinote-hint-ro");for(const k of ["-push-on","-push-token","-push-saved"])localStorage.removeItem(KEY+k)}catch(e){}DB={trips:{}};UNDO=null;phWipe();S.confirm=null;S.about=false;S.tid=null;
      const LN=Native.plug("LocalNotifications");if(Native.isApp&&LN){try{const p=await LN.getPending();if(p.notifications.length)await LN.cancel({notifications:p.notifications.map(n=>({id:n.id}))})}catch(e){}}
      toast("すべてのデータを消しました");draw();break}
    case"checkTpl":if(change("よく使う項目を入れました",t=>{t.checks=t.checks||{};let o=0;CHECK_TPL.forEach(([g,its])=>its.forEach(x=>{t.checks[uid()+(o++)]={title:x,group:g,done:false,order:o}}))}))draw();break;
@@ -2637,8 +2676,9 @@ ${aiCopyRules()}
    case"delMember":if(Object.values(t.expenses||{}).some(x=>x.payer===id||(x.split||[]).includes(id))){toast("記録に使われているので外せません");break}if(change("メンバーを外しました",t=>{delete t.members[id]}))draw();break;
    case"shareSettle":{const ms=mems(t);const list=Object.values(t.expenses||{});const {pays}=settle(ms,list);const txt=`【${t.title} 精算】\n`+pays.map(p=>`${mName(t,p.from)} → ${mName(t,p.to)}　${yen(p.amount)}`).join("\n")+`\n（合計 ${yen(list.reduce((s,e)=>s+(e.amount||0),0))}・${list.length}件）`;
      const r=await Native.share(t.title,txt);if(r==="copied")toast("精算をコピーしました。LINEなどに貼れます");else if(!r){S.tab="plan";S.copy=txt;draw()}break}
+   case"webPushEnable":case"webPushSync":case"webPushStop":{try{if(a==="webPushEnable")await WebNotify.enable();else if(a==="webPushStop")await WebNotify.stop();else await WebNotify.sync();toast(a==="webPushStop"?"通知を止めました":"通知を登録しました")}catch(e){toast(e.message)}draw();break}
    case"askPerm":{S.perm=await Native.perm(true);if(S.perm==="granted"){schedNotif();toast("通知をオンにしました")}draw();break}
-   case"testNotif":{const f=notifList(t).find(x=>x.at>new Date())||{title:`${t.title}`,body:"通知はこのように届きます"};const r=await Native.testNotify(f);if(r==="app")toast("5秒後に通知が届きます");else if(r==="web")showBanner(f);else{S.perm=await Native.perm(false);draw();toast("通知が許可されていません。iPhoneの設定から許可してください")}break}
+   case"testNotif":{if(!Native.isApp&&WebNotify.enabled()){try{await WebNotify.test();toast("テスト通知を送信しました")}catch(e){toast(e.message)}break}const f=notifList(t).find(x=>x.at>new Date())||{title:`${t.title}`,body:"通知はこのように届きます"};const r=await Native.testNotify(f);if(r==="app")toast("5秒後に通知が届きます");else if(r==="web")showBanner(f);else{S.perm=await Native.perm(false);draw();toast("通知が許可されていません。iPhoneの設定から許可してください")}break}
   }});
 /* 並べ替えのドラッグ（≡ を押したまま上下） */
 /* 並べ替え：「≡」はすぐ、並べ替えの行や日程の予定カードは長押し（0.42秒）で持ち上げて動かす（iPhoneのアプリ移動と同じ感覚） */
@@ -2767,6 +2807,6 @@ function onboard(){if(DB.onboarded||Object.keys(DB.trips).length)return;let k=0;
   ov.addEventListener("click",e=>{const b=e.target.closest("[data-ob]");if(!b)return;const a=b.dataset.ob;if(a==="next"){k++;r()}else if(a==="end")end();else if(a==="sample"){end();openSample()}});
   let x0=null;ov.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});ov.addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(dx<-50&&k<OB.length-1){k++;r()}else if(dx>50&&k>0){k--;r()}x0=null});
   r();document.body.appendChild(ov)}
-const FLOW_BACK=flowRestore();draw();if(FLOW_BACK){setTimeout(()=>{($("aiBox")||$("cgFlow"))?.scrollIntoView({block:"start"});toast("さっきAIに聞いた続きです。答えをコピーして読み込んでください")},80)}schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();memGc();addEventListener("online",()=>{phCache();wxAll()});
+const FLOW_BACK=flowRestore();draw();if(FLOW_BACK){setTimeout(()=>{($("aiBox")||$("cgFlow"))?.scrollIntoView({block:"start"});toast("さっきAIに聞いた続きです。答えをコピーして読み込んでください")},80)}schedNotif();onboard();phLoad().then(()=>setTimeout(phCache,2000));bkGc();memGc();addEventListener("online",()=>{phCache();wxAll();schedNotif()});addEventListener("pageshow",schedNotif);addEventListener("focus",schedNotif);document.addEventListener("visibilitychange",()=>{if(!document.hidden)schedNotif()});
 Native.perm(false).then(p=>{S.perm=p;if(S.tab==="notif")draw()});
 </script></body></html>
