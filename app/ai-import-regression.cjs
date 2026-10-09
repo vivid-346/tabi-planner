@@ -41,3 +41,14 @@ assert.equal(inbound.items.old.arrive,'11:00');assert(inbound.items.early.flag);
 assert(c.conflict(inbound,'2026-11-21','08:00','early').includes('到着前'));
 console.log('PASS inbound arrival enrichment flags pre-departure and in-transit stops; local transfer does not block the morning');
 
+const savedDates=c.dates;c.dates=()=>['2026-11-21'];
+const airport={dest:'京都',from:'東京',items:{m:{id:'m',date:'2026-11-21',kind:'move',title:'京都から空港へ移動',time:'16:00',arrive:'17:00'}}};
+assert.equal(c.conflict(airport,'2026-11-21','09:00',''), '');
+assert(c.conflict(airport,'2026-11-21','16:30','').includes('移動中'));
+const bus={dest:'京都',from:'',items:{old:{id:'old',date:'2026-11-21',kind:'move',title:'バスで京都へ',time:'10:00',arrive:''},early:{id:'early',date:'2026-11-21',kind:'see',title:'観光',time:'08:00'}}};
+const busAnswer={spots:[],areas:{},warn:[],days:{'2026-11-21':[{kind:'move',title:'バスで京都へ',time:'10:00',arrive:'11:00'}]}};
+const busPreview=c.aiPrepare(bus,busAnswer,'add');assert.deepEqual(Array.from(busPreview.overlaps),['early']);assert(!bus.items.early.flag);
+Object.assign(c,{T:()=>bus,change:(msg,fn)=>fn(bus)});c.aiApply(busAnswer,'add');assert(bus.items.early.flag);assert(c.conflict(bus,'2026-11-21','09:00','early').includes('到着前'));assert(!c.conflict(bus,'2026-11-21','11:00','early'));
+c.dates=savedDates;
+console.log('PASS one-day outbound airport transfer leaves morning open; inbound bus to destination blocks pre-arrival and enrichment flags existing stops');
+

@@ -1423,7 +1423,7 @@ function conflict(t,date,time,skip){const k=timeKey(time);if(k==null)return"";co
   const mv=items(t,date).filter(x=>x.id!==skip&&x.kind==="move"&&timeKey(x.time)!=null);
   for(const m of mv){const a=timeKey(m.time),b=timeKey(m.arrive);if(b!=null&&b>a&&k>=a&&k<b)return `移動中です（${m.title} ${m.time}〜${m.arrive}）`}
   /* 現地内の移動を「旅行先への到着」と取り違えない。往路と分かる移動だけ初日の境界にする。 */
-  if(date===ds[0]){const f=mv.find(m=>timeKey(m.arrive)!=null&&timeKey(m.arrive)>timeKey(m.time)&&!/帰路|帰宅|帰り|市内|現地内/.test(m.title)&&(/往路|旅行先|出発地|飛行機|新幹線|空港/.test(m.title)||(String(t.from||'').trim()&&String(m.title||'').includes(String(t.from).trim()))));if(f&&k<timeKey(f.arrive))return `到着前です（${f.arrive}着）`}
+  if(date===ds[0]){const arrival=m=>{const title=String(m.title||''),dest=String(t.dest||'').trim(),origin=String(t.from||'').trim();if(/帰路|帰宅|帰り|市内|現地内/.test(title))return false;const toDest=!!dest&&[dest+'へ',dest+'に到着',dest+'空港へ',dest+'空港に到着'].some(v=>title.includes(v));if(/空港(?:へ|に|まで|行き)/.test(title)&&!toDest&&!/往路|旅行先|出発地/.test(title))return false;return toDest||/往路|旅行先|出発地|飛行機|新幹線/.test(title)||(!!origin&&title.includes(origin))};const f=mv.find(m=>timeKey(m.arrive)!=null&&timeKey(m.arrive)>timeKey(m.time)&&arrival(m));if(f&&k<timeKey(f.arrive))return `到着前です（${f.arrive}着）`}
   if(date===ds[ds.length-1]&&ds.length>1&&mv.length){const l=mv[mv.length-1];if(k>=timeKey(l.time))return `帰りの出発（${l.time}）より後です`}
   return""}
 function countdown(t){const today=ymd(new Date());if(!t.start)return"";if(today<t.start){const n=Math.round((toD(t.start)-toD(today))/864e5);return `出発まで ${n}日`}if(today<=t.end)return "旅行中";return "おわった旅"}
