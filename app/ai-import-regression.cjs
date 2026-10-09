@@ -45,6 +45,17 @@ const savedDates=c.dates;c.dates=()=>['2026-11-21'];
 const airport={dest:'京都',from:'東京',items:{m:{id:'m',date:'2026-11-21',kind:'move',title:'京都から空港へ移動',time:'16:00',arrive:'17:00'}}};
 assert.equal(c.conflict(airport,'2026-11-21','09:00',''), '');
 assert(c.conflict(airport,'2026-11-21','16:30','').includes('移動中'));
+for(const [dest,from,title] of [['京都','東京','京都駅→空港へ移動'],['京都','東京','新幹線で東京へ帰る'],['京都','東京','東京へ戻る'],['京都','東京','新幹線で東京へ'],['大阪','東京','大阪空港へ移動']]){
+ const trip={dest,from,items:{m:{id:'m',date:'2026-11-21',kind:'move',title,time:'17:00',arrive:'17:30'}}};
+ assert.equal(c.conflict(trip,'2026-11-21','08:00',''),'','morning before '+title);
+ assert(c.conflict(trip,'2026-11-21','17:15','').includes('移動中'));
+}
+for(const title of ['東京から京都へ','東京駅から京都駅へ','東京→京都','新幹線で京都へ']){
+ const trip={dest:'京都',from:'東京',items:{m:{id:'m',date:'2026-11-21',kind:'move',title,time:'07:00',arrive:'09:00'}}};
+ assert(c.conflict(trip,'2026-11-21','06:00','').includes('到着前'),title);
+ assert.equal(c.conflict(trip,'2026-11-21','09:00',''),'');
+}
+console.log('PASS Devin airport example, named-airport departure, return train/home destination, and directional inbound travel');
 const bus={dest:'京都',from:'',items:{old:{id:'old',date:'2026-11-21',kind:'move',title:'バスで京都へ',time:'10:00',arrive:''},early:{id:'early',date:'2026-11-21',kind:'see',title:'観光',time:'08:00'}}};
 const busAnswer={spots:[],areas:{},warn:[],days:{'2026-11-21':[{kind:'move',title:'バスで京都へ',time:'10:00',arrive:'11:00'}]}};
 const busPreview=c.aiPrepare(bus,busAnswer,'add');assert.deepEqual(Array.from(busPreview.overlaps),['early']);assert(!bus.items.early.flag);
