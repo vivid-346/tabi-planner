@@ -7,6 +7,6 @@ for(const file of ['app.html','index.html']){
  vm.runInContext(s.slice(s.indexOf('function planFee('),s.indexOf('function moneyStats(')),c);
  const t={start:'2026-11-21',end:'2026-11-23',people:2,from:'東京',spots:{},items:{}};
  const raw={warn:[],spots:[],days:{[t.start]:[{time:'09:00',arrive:'11:30',kind:'move',title:'飛行機で那覇へ',note:''}]}};const out=c.aiPrepare(t,raw,'replace');assert.equal(out.days[t.start][0].time,'09:00');assert.equal(out.days[t.start][0].arrive,'11:30');assert(out.originHint);assert(!out.warn.some(x=>x.includes('時刻を未定')));assert.equal(raw.days[t.start][0].note,'');
- const box=c.planCostBox(t);assert(box.includes('詳しく（内訳・予約金額）'));assert(box.indexOf('交通費の見積もり条件')<0);assert(box.includes('data-a="moneySet"'));assert(box.includes('data-t="split"'));
+ const box=c.planCostBox(t);assert(box.includes('内訳・金額の修正'));assert(box.indexOf('交通費の見積もり条件')<0);assert(box.includes('data-a="moneySet"'));assert(box.includes('data-t="split"'));
  console.log('PASS '+file+' first-use form, preserved AI times and compact budget');
 }
