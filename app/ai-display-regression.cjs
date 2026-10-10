@@ -13,6 +13,6 @@ for(const text of [JSON.stringify(raw),'```json\n'+JSON.stringify(raw)+'\n```'])
 const saved=JSON.stringify(trip);c.S.ai={step:'form',kind:'plan',o:{}};
 c.aiParse('↓ 下のJSON枠のコピーアイコンを押してください。');assert.equal(c.S.ai.step,'form');assert(c.S.ai.manual);assert.equal(JSON.stringify(trip),saved);assert(notices.at(-1).includes('表示されない'));
 c.aiParse(c.aiCopyRules()+'\n'+JSON.stringify(raw));assert.equal(c.S.ai.step,'form');assert(notices.at(-1).includes('指示文'));
-assert(c.aiCopyRules().includes('通常の本文'));assert(!c.aiCopyRules().includes('コードブロック1つに必ず'));assert(c.aiRecoveryPrompt().includes('件数を変えず'));
+assert(c.aiCopyRules().includes('通常の本文'));assert(!c.aiCopyRules().includes('コードブロック1つに必ず'));assert(c.aiRecoveryPrompt().includes('件数を変えず'));assert(c.aiRecoveryPrompt().includes('JSONを作成していない場合'));assert(c.aiRecoveryPrompt().includes('最初の依頼の条件と指定されたJSON構造'));
 assert(!s.includes('1つのJSONコード枠だけ'));assert(s.includes('case"aiRecover"'));assert(s.includes('case"cgRecover"'));
 c.aiRecoverCopy('ai').then(()=>{assert(notices.at(-1).includes('選択'));console.log('PASS plain JSON and legacy fenced JSON; incomplete answer preserves trip; prompt rejection; recovery clipboard-denied fallback; all output rules consistent')});
