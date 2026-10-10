@@ -15,7 +15,9 @@ async function notification(){
  c.Notification.permission='denied';await a.rejects(c.client.registration(),/通知の許可/);
  await a.rejects(c.waitLimit(new Promise(()=>{}),5,'timed out'),/timed out/);
  c.fetch=async()=>({ok:false,json:async()=>({error:'storage_failed'})});await a.rejects(c.client.request('/schedule',{}),/保存できません/);
- console.log('PASS notification subscription validation, meaningful errors, timeouts, deduplication, no private metadata');
+ c.setTimeout=fn=>{queueMicrotask(fn);return 1};c.clearTimeout=()=>{};c.fetch=(u,o)=>new Promise((resolve,reject)=>o.signal.addEventListener('abort',()=>{const e=Error('aborted');e.name='AbortError';reject(e)}));
+ await a.rejects(c.client.request('/schedule',{}),/応答がありません/);
+ console.log('PASS notification subscription validation, meaningful errors, request abort, timeouts, deduplication, no private metadata');
 }
 async function clipboard(){
  let parsed=[],notes=[],draws=0;const A={};const c={...base,S:{ai:A,tid:'a'},navigator:{clipboard:{readText:async()=>'{"spots":[]}' }},$:()=>null,draw:()=>draws++,toast:x=>notes.push(x),aiParse:x=>parsed.push(x),cgParse:x=>parsed.push(x)};
@@ -31,7 +33,7 @@ function ai(){
  vm.createContext(c);vm.runInContext(part('function costRanges(','function cleanCosts(')+part('const normName=','function aiApply('),c);
  const raw={costs:{transport:{min:0,max:0,note:'未確認のためnull'},hotel:null,other:{min:0,max:0,note:'無料の公園のみ'}}};const checked=c.aiCheck({},raw,'cost');a(!checked.costs.transport);a.equal(checked.costs.other.min,0);a(checked.warn.some(x=>x.includes('矛盾')));
  const empty=c.aiCheck({},{costs:{transport:null,hotel:null,food:null,other:null}},'cost');a.equal(Object.keys(empty.costs).length,0);a(empty.warn.some(x=>x.includes('0円としては扱いません')));
- const bad=c.aiCheck({},{days:[{date:'2026-11-21',items:[{kind:'move',title:'夜行バス',time:'23:00',arrive:'07:00'},{kind:'see',title:'観光',time:'25:00'}]}]},'plan');a.equal(bad.days['2026-11-21'][0].arrive,'');a(bad.days['2026-11-21'][0].flag);a.equal(bad.days['2026-11-21'][1].time,'');a(bad.warn.some(x=>x.includes('到着が出発以前')));a(bad.warn.some(x=>x.includes('形式が正しくない')));
+ const bad=c.aiCheck({},{days:[{date:'2026-11-21',items:[{kind:'move',title:'夜行バス',time:'23:00',arrive:'07:00'},{kind:'see',title:'観光',time:'25:00'}]}]},'plan');a.equal(bad.days['2026-11-21'][0].arrive,'');a(bad.days['2026-11-21'][0].flag);a(bad.days['2026-11-21'][0].note.includes('23:00発→07:00着'));a.equal(bad.days['2026-11-21'][1].time,'');a(bad.warn.some(x=>x.includes('到着が出発以前')));a(bad.warn.some(x=>x.includes('形式が正しくない')));
  console.log('PASS AI unknown-vs-zero, explicit free, all-unknown estimates and reversed/invalid times');
 }
 async function photo(){
@@ -42,4 +44,19 @@ async function photo(){
  await c.phCache();a(aborted);a(!stored,'failed IndexedDB transaction must not masquerade as cached');a(!c.PH.busy);
  console.log('PASS corrupted cache remote fallback, failed remote marked retryable, abort never treated as persistent success');
 }
-(async()=>{for(const script of src.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(script[1]);await notification();await clipboard();ai();await photo()})().catch(e=>{console.error(e);process.exitCode=1});
+async function reviewed(){
+ const c={...base,costRanges:x=>Object.fromEntries(Object.entries(x||{}).filter(([,v])=>v!=null)),costScope:t=>t.scope};vm.createContext(c);vm.runInContext(part('function aiCostForecast(','function aiApply('),c);
+ const old={scope:'same',method:'電車',forecast:{transport:{min:12000,max:12000},hotel:{min:8000,max:8000}}};
+ a.equal(c.aiCostForecast({scope:'same'},old,{},'電車').transport.min,12000);
+ a.equal(c.aiCostForecast({scope:'same'},old,{hotel:{min:9000,max:9000}},'電車').transport.min,12000);
+ a.equal(c.aiCostForecast({scope:'same'},old,{hotel:{min:9000,max:9000}},'電車').hotel.min,9000);
+ a(!c.aiCostForecast({scope:'changed'},old,{},'電車').transport);a(!c.aiCostForecast({scope:'same'},old,{},'飛行機').transport);
+ const urls=Array.from({length:61},(_,i)=>'https://upload.wikimedia.org/'+i+'.jpg'),deleted=[],fetched=[];
+ const db={transaction:()=>{const tx={objectStore:()=>({openKeyCursor(){const q={};queueMicrotask(()=>{q.result=null;q.onsuccess()});return q},put(){queueMicrotask(()=>tx.oncomplete())},delete(u){deleted.push(u);queueMicrotask(()=>tx.oncomplete())}})};return tx}};
+ const p={...base,PH:{map:new Map(),busy:false,failed:new Set(),invalid:new Set(),evictions:new Map()},DB:{trips:{a:{spots:Object.fromEntries(urls.map(u=>[u,{photo:{u}}]))}}},S:{},navigator:{onLine:true},phDB:async()=>db,URL:{createObjectURL:()=> 'blob:good',revokeObjectURL:()=>{}},fetch:async u=>{fetched.push(u);return {ok:u===urls[60],blob:async()=>({type:'image/jpeg',size:100})}},draw:()=>{}};
+ vm.createContext(p);vm.runInContext(part('function phSrc(','function phDB(')+part('async function phCache(','async function fillPhotos('),p);
+ await p.phCache();a.equal(fetched.length,60);a(!p.PH.map.has(urls[60]));await p.phCache();a(p.PH.map.has(urls[60]),'later valid image must be reached after 60 permanent failures');
+ let imageUrl='blob:good';a(p.photoFallback({dataset:{},getAttribute:()=>imageUrl,set src(v){imageUrl=v}}));await Promise.all(p.PH.evictions.values());a(!p.PH.map.has(urls[60]));a(deleted.includes(urls[60]));await p.phCache();a(p.PH.map.has(urls[60]));a(!p.PH.invalid.has(urls[60]));
+ console.log('PASS reviewed estimate preservation/scope, fair photo retry, corrupt cache eviction and recache, overnight original retained');
+}
+(async()=>{for(const script of src.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(script[1]);await notification();await clipboard();ai();await photo();await reviewed()})().catch(e=>{console.error(e);process.exitCode=1});
