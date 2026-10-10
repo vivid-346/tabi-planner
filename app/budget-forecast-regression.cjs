@@ -23,3 +23,6 @@ for(const file of ['app.html','index.html']){
 }
 
 
+
+// An unanswered cost category must not switch off live facility pricing.
+(async()=>{const s=fs.readFileSync(path.join(__dirname,'src/app.html'),'utf8');const c={S:{ai:{kind:'cost',o:{from:'東京',people:2,move:'電車'}}},cleanCosts:x=>x,costRanges:x=>x,costScope:()=> 'same',costTransportScope:()=> 'same'};let trip={people:2,costPlan:{facilityAuto:true,scope:'same',forecast:{},method:'電車'}};c.change=(msg,fn)=>{fn(trip);return true};vm.createContext(c);vm.runInContext(s.slice(s.indexOf('function aiCostForecast('),s.indexOf('function aiView(')),c);c.aiApply({costs:{}},'replace');assert.equal(trip.costPlan.facilityAuto,true);c.aiApply({costs:{other:{min:0,max:0}}},'replace');assert.equal(trip.costPlan.facilityAuto,false);trip.costPlan.routeChanged=true;c.aiApply({costs:{hotel:{min:100,max:100}}},'replace');assert.equal(trip.costPlan.routeChanged,true);c.aiApply({costs:{transport:{min:12000,max:12000}}},'replace');assert.equal(trip.costPlan.routeChanged,false);console.log('PASS unknown facility estimate retains live pricing; explicit free replaces it')})().catch(e=>{console.error(e);process.exitCode=1});
