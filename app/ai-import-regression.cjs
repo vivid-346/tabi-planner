@@ -63,3 +63,8 @@ Object.assign(c,{T:()=>bus,change:(msg,fn)=>fn(bus)});c.aiApply(busAnswer,'add')
 c.dates=savedDates;
 console.log('PASS one-day outbound airport transfer leaves morning open; inbound bus to destination blocks pre-arrival and enrichment flags existing stops');
 
+const plainAnswer=fs.readFileSync(path.join(__dirname,'actual-ai-plain-answer.txt'),'utf8');
+vm.runInContext(src.slice(src.indexOf('function pickJSON('),src.indexOf('const normName=')),c);
+const plainRaw=c.pickJSON(plainAnswer);const plainChecked=c.aiCheck({},plainRaw,'plan');
+assert.equal(plainChecked.nItems,28);assert.equal(plainChecked.spots.length,25);assert(!plainRaw._cut);assert.equal(plainRaw.days.length,3);
+console.log('PASS actual ChatGPT plain-text answer including escaped Markdown: all 28 items, 25 spots, 3 days preserved without truncation');
