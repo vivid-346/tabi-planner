@@ -1,0 +1,16 @@
+const fs=require('fs'),vm=require('vm'),a=require('assert'),path=require('path');
+const s=fs.readFileSync(path.join(__dirname,'src/app.html'),'utf8');
+const c={items:t=>Object.values(t.items||{}),dates:t=>[t.start,t.end],Date,URL,Native:{dirUrl:()=> 'maps://?daddr=2,3&dirflg=r'}};vm.createContext(c);
+vm.runInContext(s.slice(s.indexOf('function planFee('),s.indexOf('function costRangeLabel(')),c);
+let t={start:'2026-11-21',end:'2026-11-23',people:2,items:{a:{kind:'see',title:'museum',spot:'a',time:'10:00'}},spots:{a:{cat:'see',fee:'1人1000円'}},costPlan:{facilityAuto:true,facilityScope:'old hash'}};
+a.equal(c.costSummary(t).rows.find(x=>x.key==='other').min,2000);
+t.items.a.time='11:00';t.spots.a.fee='1人1200円';a.equal(c.costSummary(t).rows.find(x=>x.key==='other').min,2400);
+t.items.b={kind:'other',title:'体験',spot:'b'};t.spots.b={cat:'activity',fee:'1人500円'};
+t.items.c={kind:'food',title:'食事',spot:'c'};t.spots.c={cat:'food',fee:'1人2000円'};
+a.equal(c.facilityBudget(t).total,3400);
+t.costPlan.booked={other:9000};t.costPlan.bookScope=c.costScope(t);a.equal(c.costSummary(t).rows.find(x=>x.key==='other').min,9000);
+vm.runInContext(s.slice(s.indexOf('function cleanPhoto('),s.indexOf('function cleanTrip(')),c);
+const at=Date.now()-1000;a.equal(c.cleanPhoto({none:1,at}).photo.at,at);a.equal(c.cleanPhoto({none:1}).photo.at,undefined);a.equal(c.cleanPhoto({none:1,at:Infinity}).photo.at,undefined);
+vm.runInContext(s.slice(s.indexOf('function routeNavUrl('),s.indexOf('function focusRoute(')),c);
+let u=new URL(c.routeNavUrl({lat:1,lon:4},{lat:2,lon:3},'train'));a.equal(u.searchParams.get('saddr'),'1,4');a.equal(u.searchParams.get('daddr'),'2,3');a.equal(u.searchParams.get('dirflg'),'r');
+console.log('PASS itinerary edits/fee edits remain dynamic; activity vs food categories; manual priority; imported photo retry deadline; iOS route origin/destination/mode');
