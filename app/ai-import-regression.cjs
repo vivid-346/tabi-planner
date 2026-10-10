@@ -2,6 +2,8 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('p
 const src=fs.readFileSync(path.join(__dirname,'src/app.html'),'utf8');
 const c={pad:n=>String(n).padStart(2,'0'),dates:t=>['2026-11-21','2026-11-22','2026-11-23'],spots:()=>[],KINDS:{see:1,food:1,move:1,stay:1,other:1},CATS:{see:1},costRanges:()=>({}),conflict:()=>false};
 vm.createContext(c);
+vm.runInContext(src.slice(src.indexOf('function aiCostCheck('),src.indexOf('function cleanCosts(')),c);
+c.timeKey=x=>x?Number(x.slice(0,2))*60+Number(x.slice(3)):null;
 vm.runInContext(src.slice(src.indexOf('const normName='),src.indexOf('function aiApply(')),c);
 const item=(title,time='10:00')=>({title,time,kind:'see'});
 let result=c.aiCheck({}, {days:[{date:'2026-11-21',area:'京都',items:[item('清水寺')]},{date:'2026-11-21',items:[]}]},'plan');
