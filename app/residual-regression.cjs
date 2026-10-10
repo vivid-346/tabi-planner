@@ -45,18 +45,18 @@ async function photo(){
  console.log('PASS corrupted cache remote fallback, failed remote marked retryable, abort never treated as persistent success');
 }
 async function reviewed(){
- const c={...base,costRanges:x=>Object.fromEntries(Object.entries(x||{}).filter(([,v])=>v!=null)),costScope:t=>t.scope};vm.createContext(c);vm.runInContext(part('function aiCostForecast(','function aiApply('),c);
- const old={scope:'same',method:'電車',forecast:{transport:{min:12000,max:12000},hotel:{min:8000,max:8000}}};
+ const c={...base,costRanges:x=>Object.fromEntries(Object.entries(x||{}).filter(([,v])=>v!=null)),costScope:(t,plan,budget)=>budget===false?t.route:t.scope,costTransportScope:t=>t.transport};vm.createContext(c);vm.runInContext(part('function aiCostForecast(','function aiApply('),c);
+ const old={scope:'same',routeScope:'route',transportScope:'transport',method:'電車',forecast:{transport:{min:12000,max:12000},hotel:{min:8000,max:8000}}};
  a.equal(c.aiCostForecast({scope:'same'},old,{},'電車').transport.min,12000);
  a.equal(c.aiCostForecast({scope:'same'},old,{hotel:{min:9000,max:9000}},'電車').transport.min,12000);
  a.equal(c.aiCostForecast({scope:'same'},old,{hotel:{min:9000,max:9000}},'電車').hotel.min,9000);
- a(!c.aiCostForecast({scope:'changed'},old,{},'電車').transport);a(!c.aiCostForecast({scope:'same'},old,{},'飛行機').transport);
+ a(!c.aiCostForecast({scope:'changed',route:'other',transport:'other'},old,{},'電車').transport);a.equal(c.aiCostForecast({scope:'budget-changed',route:'route',transport:'transport'},old,{},'電車').transport.min,12000);a(!c.aiCostForecast({scope:'same'},old,{},'飛行機').transport);
  const urls=Array.from({length:61},(_,i)=>'https://upload.wikimedia.org/'+i+'.jpg'),deleted=[],fetched=[];
  const db={transaction:()=>{const tx={objectStore:()=>({openKeyCursor(){const q={};queueMicrotask(()=>{q.result=null;q.onsuccess()});return q},put(){queueMicrotask(()=>tx.oncomplete())},delete(u){deleted.push(u);queueMicrotask(()=>tx.oncomplete())}})};return tx}};
- const p={...base,PH:{map:new Map(),busy:false,failed:new Set(),invalid:new Set(),evictions:new Map()},DB:{trips:{a:{spots:Object.fromEntries(urls.map(u=>[u,{photo:{u}}]))}}},S:{},navigator:{onLine:true},phDB:async()=>db,URL:{createObjectURL:()=> 'blob:good',revokeObjectURL:()=>{}},fetch:async u=>{fetched.push(u);return {ok:u===urls[60],blob:async()=>({type:'image/jpeg',size:100})}},draw:()=>{}};
+ const cursorStore=new Map();const p={...base,KEY:'test',localStorage:{getItem:k=>cursorStore.get(k),setItem:(k,v)=>cursorStore.set(k,v)},PH:{map:new Map(),busy:false,failed:new Set(),invalid:new Set(),evictions:new Map()},DB:{trips:{a:{spots:Object.fromEntries(urls.map(u=>[u,{photo:{u}}]))}}},S:{},navigator:{onLine:true},phDB:async()=>db,URL:{createObjectURL:()=> 'blob:good'+fetched.length,revokeObjectURL:()=>{}},fetch:async u=>{fetched.push(u);return {ok:u===urls[60],blob:async()=>({type:'image/jpeg',size:100})}},draw:()=>{}};
  vm.createContext(p);vm.runInContext(part('function phSrc(','function phDB(')+part('async function phCache(','async function fillPhotos('),p);
- await p.phCache();a.equal(fetched.length,60);a(!p.PH.map.has(urls[60]));await p.phCache();a(p.PH.map.has(urls[60]),'later valid image must be reached after 60 permanent failures');
- let imageUrl='blob:good';a(p.photoFallback({dataset:{},getAttribute:()=>imageUrl,set src(v){imageUrl=v}}));await Promise.all(p.PH.evictions.values());a(!p.PH.map.has(urls[60]));a(deleted.includes(urls[60]));await p.phCache();a(p.PH.map.has(urls[60]));a(!p.PH.invalid.has(urls[60]));
+ await p.phCache();a.equal(fetched.length,60);a(!p.PH.map.has(urls[60]));p.PH.cacheAfter='';await p.phCache();a(p.PH.map.has(urls[60]),'later valid image must be reached after 60 permanent failures');
+ let imageUrl=p.PH.map.get(urls[60]),oldBlob=imageUrl;a(p.photoFallback({dataset:{},getAttribute:()=>imageUrl,set src(v){imageUrl=v}}));await Promise.all(p.PH.evictions.values());a(!p.PH.map.has(urls[60]));a(deleted.includes(urls[60]));await p.phCache();a(p.PH.map.has(urls[60]));a(!p.PH.invalid.has(urls[60]));const refreshed=p.PH.map.get(urls[60]);a(p.photoFallback({dataset:{},getAttribute:()=>oldBlob,set src(v){}}));a.equal(p.PH.map.get(urls[60]),refreshed,'late old blob failure must preserve refreshed cache');
  console.log('PASS reviewed estimate preservation/scope, fair photo retry, corrupt cache eviction and recache, overnight original retained');
 }
 (async()=>{for(const script of src.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(script[1]);await notification();await clipboard();ai();await photo();await reviewed()})().catch(e=>{console.error(e);process.exitCode=1});
