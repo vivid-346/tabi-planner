@@ -1698,6 +1698,7 @@ function roRender(){const t=T();if(!t||!S.ro)return;const sec=document.querySele
 /* ===== AI 旅のコンシェルジュ（理想の4番）：会話で頼む → あなたのAIが答える → 「このプランでOK」で反映 ===== */
 const CG_Q=["混雑を避けて、ゆっくり回りたい","雨の日でも楽しめるプランにして","グルメを多めにしたい","移動を少なくしたい","朝はゆっくりスタートしたい"];
 /* 専用JSONコピーパネルを優先し、提供できないAIは本文JSONへフォールバックする。 */
+function aiCompactDisplayRules(){return "あなたは旅行プランナー兼、スマートフォン向けUI設計者です。\n旅行条件に基づいて完全な旅行データを作成し、スマートフォンで見やすいコンパクトな画面として出力してください。\n## データの完全性\n日程、全予定、全スポット、説明、料金、座標、予約情報、所要時間、雨天対応、予算と計算根拠を、下の構造の完全なJSONオブジェクトとして保持してください。情報を削除・要約・省略せず、null・空文字・false・0を区別してください。日程内のspotはspotsの対応するnameと正確に一致させてください。表示用の情報とコピー用の完全なJSONを分離し、表示をコンパクトにしても元データを変更しないでください。\n## 最初の画面\n最初は「旅程ができました。詳細はこちら ↓」の一文と、最初から開いた詳細パネルを直接表示してください。長い前置き・説明文・出典一覧は不要です。詳細パネル先頭に必ず「完全なJSONデータをコピー」ボタンを表示してください。\n## 詳細パネル\n日程・場所・予算を実際に切り替えられるタブまたはセクションにしてください。日程は日付・エリア・全予定の時刻・予定名・種別・説明・関連スポット・移動時刻・注意点を確認でき、時刻不明は未定と表示してください。場所は予定の場所と追加候補を全件表示し、全フィールドをカードや折りたたみで確認できるようにし、説明を省略しないでください。予算は全費目の最小額・最大額・計算根拠・未確認事項を保持し、nullを0円に置き換えず、確定・概算・通常料金・日付未確認を区別してください。文字を過度に小さくせず縦スクロールを減らしてください。\n## コピー機能\n専用ボタンで表示文章やMarkdownではなく、日程・場所・費用の全フィールドを含む完全なJSONをクリップボードにコピーしてください。折りたたんだ情報も除外しないでください。見た目だけのボタンではなく、タブ切り替えとコピーを実際に動かしてください。コピーできたふりをしないでください。機能を実行できない環境では、完全なJSON全文を本文に表示してコピーできるようにしてください。JSONにコメントや省略記号を含めないでください。"}
 function aiCopyRules(){return "## コピーしやすく、画面をコンパクトにする出力ルール\n- 旅行データは指定された構造の正しいJSONオブジェクト1つとして全件保持する。項目名・説明・料金・座標・未確認事項・予定と候補の数を変えず、省略や要約をしない。\n- 操作できる表示を生成できる場合は、回答を「旅程ができました。下の『完全なJSONデータをコピー』を押して、旅ノートに戻ってください。↓」という短い案内とコンパクトな詳細パネルにする。最初から詳細パネルを開いた状態にし、先頭に『完全なJSONデータをコピー』ボタンを表示する。コピーするために詳細を開く操作を追加させない。長いJSON全文は初期表示せず、詳細内の『JSON全文』で確認できるようにする。日程・場所・予算も必要に応じて詳細内で切り替えられるようにする。\n- 専用コピーボタンは説明やHTMLや表示ラベルではなく、保持しているJSON全文を文字列としてクリップボードへコピーすること。ボタンの見た目だけ、コピーできたふり、途中までのデータ、ファイルやリンクだけの回答は禁止。コピー成功時だけ成功を表示し、失敗時はJSON全文を表示して手動コピーできるようにする。通常の回答コピーに非表示データが含まれるとは案内しない。\n- 操作できる表示や全JSONをコピーする機能を提供できない場合は、ボタンを装った文字やHTMLソースを出さず、通常の本文としてJSON全文だけを直接表示する。コードブロック・バッククォート・添付ファイルを使わず、最初の文字は {、最後の文字は } にする。\n- コピーするJSONに案内・前置き・表・出典一覧を混ぜない。必要な説明や注意点は既存のJSON項目内に入れる。各予定・各場所は原則1行にし、空行と不要なインデントを省く。日程と場所を分割しない。コメント、省略記号、不正なエスケープを付けない。"}
 function aiRecoveryPrompt(){return '前の回答のJSON全文が画面に表示されません。既にJSONを作成している場合は内容・項目名・予定と候補の件数を変えず、省略せずに出力し直してください。前の回答にJSONを作成していない場合は、最初の依頼の条件と指定されたJSON構造に従って新規に作成してください。コードブロック、バッククォート、Markdown、添付ファイル、コピー案内を一切使わず、通常の本文として正しいJSONオブジェクト1つだけを表示してください。最初の文字を {、最後の文字を } にしてください。'}
 async function aiRecoverCopy(prefix){try{await navigator.clipboard.writeText(aiRecoveryPrompt());toast("コピーしました。さっきのAIの会話に貼って送ってください")}catch(e){const el=$(prefix+"_recover");el?.focus();el?.select();toast("下の文を選択してコピーしてください")}}
@@ -2344,7 +2345,8 @@ let SAMPLE=null;(async()=>{try{SAMPLE=await window.claude?.use?.("sample")}catch
 const CATS={see:"観光",food:"ごはん",shop:"買い物",nature:"自然",activity:"体験",view:"景色",cafe:"カフェ"};
 const PREFS=["定番の名所","ごはん・グルメ","映える景色","自然","歴史・文化","カフェ","買い物","体験・アクティビティ","温泉","のんびり"];
 function aiDefaults(t){return {dest:t.dest||t.title.replace(/\s*\d+泊\d+日.*$/,""),from:t.from||DB.home||"",people:t.people||"",prefs:["定番の名所","ごはん・グルメ"],pace:"ふつう",move:t.move==="owncar"?"自家用車":t.move==="car"?"レンタカー":t.move==="walk"?"徒歩と電車":"電車・バス",budget:t.budget?`${t.budget}円（全員分）`:"",src:"",extra:"",count:12,theme:"",mode:"replace"}}
-function aiPrompt(t,o,kind){if(kind==="cost")return costPrompt(t,o);const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）`).join("、");
+function aiPrompt(t,o,kind){const body=aiPromptData(t,o,kind);return kind==="cost"?body:aiCompactDisplayRules()+"\n\n"+body}
+function aiPromptData(t,o,kind){if(kind==="cost")return costPrompt(t,o);const ds=dates(t);const day=ds.map((d,k)=>`${k+1}日目 ${d}（${wd(d)}）`).join("、");
   const have=spots(t).map(s=>s.name);
   const rules=`## 守ってほしいこと
 - 実在して、今も営業している場所だけ。自信がない場所は入れない
@@ -2353,7 +2355,7 @@ function aiPrompt(t,o,kind){if(kind==="cost")return costPrompt(t,o);const ds=dat
 - 緯度・経度（lat, lon）は小数5桁。分からなければ null
 - feeは日本円で「1人1000円」「1000〜2000円」「無料」のように書く。宿は「1室15000円」のように単位を明記する。分からない費用は「未確認」。実在しない料金を作らない。変わりやすいものはnoteに「要確認」と書く
 - 返事のデータは下の形の JSON にする。長いURLや出典一覧は入れず、料金を調べた場合はnoteに公式サイト名・確認日・券種を短く残す。検索できなければ「検索不可・未確認」と明記し、公式確認済みと称さない
-${aiCopyRules()}`;
+`;
   const shape=`## 返事の形（JSON）
 {
   "days": [ { "date": "YYYY-MM-DD", "area": "その日のエリア", "items": [
@@ -2548,7 +2550,7 @@ async function aiReadClipboard(cg=false){const key=cg?'cg':'ai',A=S[key],tid=S.t
   if(!tx||!tx.includes('{')&&!tx.includes('#ai='))throw Error('empty');A.paste=tx;if(cg)cgParse(tx);else aiParse(tx);
  }catch(e){if(S[key]!==A||S.tid!==tid)return;A.manual=true;A.clipError=e.name==='NotAllowedError'||e.name==='SecurityError'?'このブラウザではコピーの自動読み取りが許可されていません。下の欄を長押しして「ペースト」してください。':e.message==='timeout'?'コピーの読み取りに時間がかかっています。下の欄を長押しして「ペースト」してください。':e.message==='unsupported'?'このブラウザはコピーの自動読み取りに対応していません。下の欄に貼ってください。':e.message==='empty'?'旅行データが見つかりません。AIの回答全体をコピーし直すか、下の欄に貼ってください。':'コピーを読み取れませんでした。下の欄に貼ってください。';draw();$(cg?'cg_paste':'ai_paste')?.focus();toast(A.clipError)
  }finally{A.clipBusy=false;const b=$(cg?'cgClip':'aiClip');if(b){b.disabled=false;b.textContent='コピーした答えを読み込む'}}}
-function aiParse(text){const t=T();try{if(String(text||"").includes("## コピーしやすく、画面をコンパクトにする出力ルール")){S.ai.manual=true;draw();toast("AIに送る指示文がコピーされています。AIの回答をコピーし直すか、回答を下の欄に貼ってください");return}const raw=pickJSON(text);S.ai.c=aiCheck(t,raw,S.ai.kind);if(raw._cut)S.ai.c.cut=true;if(raw._cut)S.ai.c.warn.unshift("AIの答えが途中で切れていたので、最後まで読めたところまで入れます。足りない分は、取り込んだあと「AIで候補を増やす」で足せます");S.ai.step="preview";draw();window.scrollTo(0,0)}
+function aiParse(text){const t=T();try{if((String(text||"").includes("## コピーしやすく、画面をコンパクトにする出力ルール")||String(text||"").replace(/\r\n/g,"\n").trimStart().startsWith(aiCompactDisplayRules()))){S.ai.manual=true;draw();toast("AIに送る指示文がコピーされています。AIの回答をコピーし直すか、回答を下の欄に貼ってください");return}const raw=pickJSON(text);S.ai.c=aiCheck(t,raw,S.ai.kind);if(raw._cut)S.ai.c.cut=true;if(raw._cut)S.ai.c.warn.unshift("AIの答えが途中で切れていたので、最後まで読めたところまで入れます。足りない分は、取り込んだあと「AIで候補を増やす」で足せます");S.ai.step="preview";draw();window.scrollTo(0,0)}
   catch(e){S.ai.manual=true;draw();toast(e.message==="ambiguousjson"?"異なる旅行データが複数あります。見本を除き、本番のJSONだけをコピーしてください":e.message==="empty"?"場所も予定も見つかりませんでした。AIの回答全体をコピーしてください":"回答のJSONが見つかりません。回答全体をコピーするか「AIの答えが表示されない」から出し直してください")}}
 
 /* ================= 旅行を渡す・バックアップ =================
