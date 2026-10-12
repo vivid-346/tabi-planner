@@ -4,7 +4,7 @@ The app now asks capable external AI interfaces for a short notice, an initially
 
 Copy guidance distinguishes the dedicated JSON button from the normal overlapping-squares answer copy button. Returning to the app opens the manual paste alternative. The importer finds travel JSON among explanatory text and multiple fenced blocks. ChatGPT and Claude links retain prompt auto-fill for long prompts; Gemini retains the copy/paste flow. Resuming an interrupted flow reconstructs the prompt.
 
-The home-screen icon is the existing sand notebook design with a red destination, white route and yellow bookmark. PNGs are generated at 180, 192 and 512 pixels. Icon URLs are versioned to avoid reusing the old purple icon. The existing blue/cream app design is retained.
+The home-screen icon is the existing sand notebook design with a red destination, white route and yellow bookmark. PNGs are generated at 180, 192 and 512 pixels. Icon URLs are versioned to avoid reusing the old purple icon. The existing blue/cream app design is retained. Native build resources also use the notebook icon and a white launch background; the iOS asset-generation command no longer requests the old purple/dark backgrounds. Native build resources also use the notebook icon and a white launch background; the iOS asset-generation command no longer requests the old purple/dark backgrounds. Native build resources also use the notebook icon and a white launch background; the iOS asset-generation command no longer requests the old purple/dark backgrounds.
 
 ## Validation
 
