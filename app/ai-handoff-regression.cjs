@@ -8,6 +8,8 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');const s=fs.read
  assert(h.includes('id="ai_sendfail"')&&!/<details[^>]*\bopen\b/.test(h.split('<summary>')[0]),'復旧欄は閉じた状態で出る');
  assert(h.includes('href="https://chatgpt.com/"')&&!h.includes('?q='),'自動入力なしで開き直すリンク');
  assert(h.includes('data-a="aiCopy"'),'同じ指示文をコピーするボタン');
+ assert(h.includes('入力欄に文字が残っていたら、すべて消してからコピーした指示文を貼り付けて送信してください。'),'下書きが残っていたら全部消してから貼る案内（二重送信の防止）');
+ assert(!/そのまま送信/.test(h),'残った下書きをそのまま送らせない');
  assert(h.includes('>指示&lt;全文&gt;&quot;テスト&quot;</textarea>'),'表示する指示文は渡された全文');
  const g=c2.aiRecoverBox({promptAi:'gemini'},'cg',pr);assert(g.includes('data-a="cgCopy"')&&!g.includes('<a '),'Geminiは従来どおりコピーのみ');
  assert(s.includes('case"aiEdit":S.ai.sent=null;S.ai.copyText=null;S.ai.back=false;S.ai.promptText=null;'),'条件を変えたら古い指示文を消す');
