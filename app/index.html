@@ -2260,7 +2260,7 @@ function costAiView(t,A){const o=A.o,previewTrip={...t,from:String(o.from||'').t
 
 
 /* AIが既存予定を再出力しても、追加モードでは重複を入れない。 */
-function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time&&(a.arrive||'')===(b.arrive||'');const an=name(a),bn=name(b);return an||bn?(an||title(a))===(bn||title(b))&&a.time===b.time:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
+function aiSameItem(t,a,b){if(a.date!==b.date)return false;const name=x=>normName(x.spotName||t.spots?.[x.spot]?.name||'');const title=x=>normName(x.title).replace(/(?:を)?(?:見学|散策|観光|参拝|訪問|へ行く)$/,'');if(a.kind==='move'||b.kind==='move')return a.kind===b.kind&&normName(a.title)===normName(b.title)&&a.time===b.time&&(a.arrive||'')===(b.arrive||'');const an=name(a),bn=name(b);if(!a.time&&!b.time&&(a.kind!==b.kind||!normName(a.title)||normName(a.title)!==normName(b.title)))return false;return an||bn?(an||title(a))===(bn||title(b))&&a.time===b.time:normName(a.title)===normName(b.title)&&a.kind===b.kind&&a.time===b.time}
 function aiPrepare(t,c,mode){const out={...c,days:{},updates:[],warn:[...c.warn]};const kept=mode==='replace'?[]:items(t).filter(x=>mode!=='days'||!Object.hasOwn(c.days,x.date)).map(x=>({...x}));let dup=0,adjusted=0,unknown=0,unresolved=0;
   const origin=String(S.ai?.o&&Object.hasOwn(S.ai.o,'from')?S.ai.o.from:t.from||DB.home||'').trim();const hasOrigin=!!origin&&!/^(未定|不明|わからない|あとで)$/.test(origin);const ds=dates(t);
   Object.entries(c.days).forEach(([date,list])=>{const seen=kept.filter(x=>x.date===date);const fresh=[];
@@ -2478,6 +2478,11 @@ function fixJSON(s){s=unescapeJSONMarkdown(s);s=s.replace(/[“”„‟″＂]/
 const normName=s=>String(s||"").replace(/[\s　・（）()「」]/g,"").toLowerCase();
 const okTime=s=>{const m=/^(\d{1,2}):(\d{2})$/.exec(String(s||"").trim());return m&&+m[1]<24&&+m[2]<60?pad(+m[1])+":"+m[2]:""};
 const str=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
+/* AIの time/arrive が HH:MM でないときは時刻を空（未定）にするが、AIが書いた文字は予定のメモに残す（時刻は推測で作らない）。
+   保存できるメモは160字まで。元のメモは削らず、入りきらない分は補足の側を短くして知らせる */
+const AI_NOTE_MAX=160;
+function aiTimeNote(x,note,warn){const tags=[];for(const [key,label] of [["time","AIの開始時刻"],["arrive","AIの到着時刻"]]){const v=x&&x[key];const raw=typeof v==="string"?v.trim():v==null?"":String(v).trim();if(raw&&!okTime(raw)){const tag=`【${label}：${raw.slice(0,40)}】`;if(!note.includes(tag))tags.push(tag)}}
+  if(!tags.length)return note;let head=tags.join("");const room=AI_NOTE_MAX-note.length;if(head.length>room){head=room>2?head.slice(0,room-2)+"…】":"";const msg="AIの時刻の補足が長いため、短くして残した予定があります。取り込み後に時刻を確認してください";if(warn&&!warn.includes(msg))warn.push(msg)}return head+note}
 /* AIの返事を検査して、取り込める形にする */
 function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[],days:{},areas:{}};if(kind==="cost"){const costs=aiCostCheck(raw.costs,warn);if(!raw.costs||!Object.keys(COST_CATS).some(k=>Object.hasOwn(raw.costs,k)))throw new Error("empty");if(!Object.keys(costs).length)warn.push("費用はまだ確認できていません。0円としては扱いません");return {...out,costs,nItems:0,warn}}
   if(kind==="plan")out.costs=aiCostCheck(raw.costs,warn);const exist=new Map(spots(t).map(s=>[normName(s.name),s.id]));const seen=new Set();
@@ -2486,7 +2491,7 @@ function aiCheck(t,raw,kind){const ds=dates(t);const warn=[];const out={spots:[]
     out.spots.push({name,dup:exist.has(k),wiki:str(r.wiki,80),en:str(r.name_en,80),area:str(r.area,30),cat:CATS[r.category]?r.category:"see",note:str(r.note,300),fee:str(r.fee,40),lat,lon,book:!!r.booking,minutes:+r.minutes>0?Math.min(600,Math.round(+r.minutes)):null,rain:!!r.rain_ok})});
   if(kind==="plan"){let invalid=0,reversed=0;for(const day of Array.isArray(raw.days)?raw.days:[])for(const x of Array.isArray(day?.items)?day.items:[]){if(!x||typeof x!=='object')continue;if((x.time&&!okTime(x.time))||(x.arrive&&!okTime(x.arrive)))invalid++;if(x.kind==='move'&&okTime(x.time)&&okTime(x.arrive)&&timeKey(okTime(x.arrive))<=timeKey(okTime(x.time)))reversed++}if(invalid)warn.push(`形式が正しくない時刻が${invalid}件あり、未定として扱います。取り込み後に確認してください`);if(reversed)warn.push(`到着が出発以前の移動が${reversed}件あります。翌日到着の場合も含め、到着日と時刻を確認してください`)}
   if(kind==="plan")(Array.isArray(raw.days)?raw.days:[]).forEach(d=>{const date=str(d&&d.date,10);if(!ds.includes(date)){if(date)warn.push(`${date} は旅行の日にちの外なので入れません`);return}
-    const incoming=(Array.isArray(d.items)?d.items:[]).slice(0,30).map(x=>({time:okTime(x&&x.time),arrive:okTime(x&&x.arrive),kind:KINDS[x&&x.kind]?x.kind:"other",title:str(x&&x.title,60),note:str(x&&x.note,140),spotName:str(x&&x.spot,60)})).filter(x=>x.title).map(x=>{if(x.kind==='move'&&x.time&&x.arrive&&timeKey(x.arrive)<=timeKey(x.time)){const arrival=x.arrive;x.arrive='';x.flag=true;x.note=('【到着日・時刻を確認：'+x.time+'発→'+arrival+'着】'+x.note).slice(0,140)}return x});
+    const incoming=(Array.isArray(d.items)?d.items:[]).slice(0,30).map(x=>({time:okTime(x&&x.time),arrive:okTime(x&&x.arrive),kind:KINDS[x&&x.kind]?x.kind:"other",title:str(x&&x.title,60),note:aiTimeNote(x,str(x&&x.note,140),warn),spotName:str(x&&x.spot,60)})).filter(x=>x.title).map(x=>{if(x.kind==='move'&&x.time&&x.arrive&&timeKey(x.arrive)<=timeKey(x.time)){const arrival=x.arrive;x.arrive='';x.flag=true;x.note=('【到着日・時刻を確認：'+x.time+'発→'+arrival+'着】'+x.note).slice(0,140)}return x});
     if(Object.hasOwn(out.days,date)){
       if(!warn.includes(`${date} が重複していたため、空の回答で予定を消さず、同じ予定をまとめました`))warn.push(`${date} が重複していたため、空の回答で予定を消さず、同じ予定をまとめました`);
       for(const x of incoming){const same=out.days[date].find(y=>y.time===x.time&&(!y.arrive||!x.arrive||y.arrive===x.arrive)&&y.kind===x.kind&&normName(y.title)===normName(x.title)&&(!y.spotName||!x.spotName||normName(y.spotName)===normName(x.spotName)));
