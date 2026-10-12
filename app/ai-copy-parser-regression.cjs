@@ -18,3 +18,12 @@ for(let repeat=0;repeat<5;repeat++){
   assert.deepEqual(JSON.parse(JSON.stringify(c.pickJSON(JSON.stringify(full)+'\n'+JSON.stringify(full)))),full);
 }
 console.log('PASS ambiguous populated samples are rejected instead of guessing; identical repeated answers remain accepted');
+function reorder(value){if(Array.isArray(value))return value.map(reorder);if(value&&typeof value==='object')return Object.fromEntries(Object.keys(value).reverse().map(k=>[k,reorder(value[k])]));return value}
+for(let repeat=0;repeat<5;repeat++){
+  for(const wrapped of [{data:full},{result:{itinerary:full}},{metadata:{source:'AI'},data:full}])assert.deepEqual(JSON.parse(JSON.stringify(c.pickJSON(JSON.stringify(wrapped)))),full);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.pickJSON(JSON.stringify(full)+'\n'+JSON.stringify(reorder(full))))),full);
+  const values={spots:[{name:'確認',note:'',booking:false,lat:null,minutes:0}],costs:{other:{min:0,max:0,note:''}}};
+  assert.deepEqual(JSON.parse(JSON.stringify(c.pickJSON(JSON.stringify(values)+'\n'+JSON.stringify(reorder(values))))),values);
+  assert.throws(()=>c.pickJSON(JSON.stringify(full)+'\n'+JSON.stringify({...full,spots:[...full.spots].reverse().concat({name:'異なる候補'})})),/ambiguousjson/);
+}
+console.log('PASS wrapper recovery and semantic duplicate keys; array order and null/false/zero/empty-string distinctions preserved');

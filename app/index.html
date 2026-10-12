@@ -2433,13 +2433,13 @@ function pickJSON(s){s=String(s||"");if(typeof unescapeJSONMarkdown==="function"
   // 空の見本を除き旅行データを探す。複数の異なる本番候補は推測で選ばない。
   const consider=(o,cut)=>{if(!o||typeof o!=="object")return;if(!fallback)fallback=o;if(!["days","spots","costs"].some(k=>Object.hasOwn(o,k)))return;
     const count=(Array.isArray(o.days)?o.days.reduce((n,d)=>n+(Array.isArray(d?.items)?d.items.length:0),0):0)+(Array.isArray(o.spots)?o.spots.length:0)+(o.costs&&typeof o.costs==="object"?Object.keys(o.costs).length:0);
-    if(count){const key=JSON.stringify(o),previous=candidates.get(key);if(cut)Object.defineProperty(o,"_cut",{value:true});if(!previous||previous._cut&&!cut)candidates.set(key,o)}else if(!best)best=o};
+    if(count){const key=JSON.stringify(o,(k,v)=>v&&typeof v==="object"&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(key=>[key,v[key]])):v),previous=candidates.get(key);if(cut)Object.defineProperty(o,"_cut",{value:true});if(!previous||previous._cut&&!cut)candidates.set(key,o)}else if(!best)best=o;return true};
   const fence=String.fromCharCode(96).repeat(3),blocks=[...s.matchAll(new RegExp(fence+'(?:json)?\\s*([\\s\\S]*?)'+fence,'g'))].map(m=>m[1]);blocks.push(s);
   for(const block of blocks){let attempts=0;for(let a=block.indexOf("{");a>=0&&attempts++<80;a=block.indexOf("{",a+1)){
     let depth=0,inString=false,escaped=false,closed=-1;
     for(let b=a;b<block.length;b++){const ch=block[b];if(inString){if(escaped)escaped=false;else if(ch==="\\")escaped=true;else if(ch==='"')inString=false;continue}if(ch==='"'){inString=true;continue}if(ch==="{")depth++;if(ch==="}"&&!--depth){closed=b;break}}
     const chunk=block.slice(a,closed<0?undefined:closed+1);let parsed=false;
-    try{consider(JSON.parse(chunk),false);parsed=true}catch(e){try{const r=fixJSON(chunk);consider(JSON.parse(r.text),r.cut);parsed=true}catch(e){}}
+    try{parsed=!!consider(JSON.parse(chunk),false)}catch(e){try{const r=fixJSON(chunk);parsed=!!consider(JSON.parse(r.text),r.cut)}catch(e){}}
     // 正しい外側オブジェクトの子要素を別の回答として拾わない。
     if(parsed&&closed>=0)a=closed;
   }}
