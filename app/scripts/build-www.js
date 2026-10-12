@@ -8,7 +8,7 @@ if(!app.includes("__GEO__"))throw new Error("src/app.html に __GEO__ があり�
 const head=`<!doctype html><html lang="ja" data-theme="light"><head><meta charset="utf-8">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png?v=notebook-sand-1">
 <meta name="color-scheme" content="light only">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#FFFFFF">
