@@ -18,3 +18,5 @@ assert(!s.includes('1つのJSONコード枠だけ'));assert(s.includes('case"aiR
 c.aiRecoverCopy('ai').then(()=>{assert(notices.at(-1).includes('選択'));console.log('PASS plain JSON and legacy fenced JSON; incomplete answer preserves trip; prompt rejection; recovery clipboard-denied fallback; all output rules consistent')});
 
 const quoted=JSON.parse(JSON.stringify(raw));quoted.spots[0].note="あなたは旅行プランナー兼、スマートフォン向けUI設計者です。";c.aiCheck=(t,x)=>{assert.equal(x.spots[0].note,quoted.spots[0].note);return {nItems:1,spots:x.spots,warn:[]}};c.aiParse(JSON.stringify(quoted));assert.equal(c.S.ai.step,"preview");c.S.ai.step="form";c.aiParse(c.aiCompactDisplayRules()+"\n"+JSON.stringify(raw));assert.equal(c.S.ai.step,"form");console.log("PASS quoted role sentence imports; full copied display prompt is rejected");
+
+c.S.ai.step="form";c.aiParse(c.aiCompactDisplayRules().replace(/\n/g,"\r\n")+"\r\n"+JSON.stringify(raw));assert.equal(c.S.ai.step,"form");assert(notices.at(-1).includes("指示文"));console.log("PASS Windows CRLF copied prompt rejected before schema placeholder import");
