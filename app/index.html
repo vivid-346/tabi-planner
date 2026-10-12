@@ -1761,7 +1761,7 @@ function cgAsk(q){q=String(q||"").trim();if(!q)return;cgPush("u",q);S.cg={step:"
 function cgScroll(){setTimeout(()=>{const m=$("cgmsgs");if(m)m.lastElementChild?.scrollIntoView({block:"end",behavior:"smooth"})},50)}
 function cgParse(text){const t=T();try{const raw=pickJSON(text);const c=aiCheck(t,raw,"plan");if(!c.nItems)throw new Error("noplan");
   const msg=Array.isArray(raw.message)?raw.message.map(x=>String(x).slice(0,80)).filter(Boolean).slice(0,6):raw.message?[String(raw.message).slice(0,160)]:[];
-  S.cg={...S.cg,step:"preview",c,msg};draw();cgScroll()}catch(e){S.cg.manual=true;draw();toast(e.message==="noplan"?"答えに日程が見つかりませんでした。AIの答えをまるごとコピーしてください":"読み取れませんでした。AIの答えを { から } までまるごとコピーしてください")}}
+  S.cg={...S.cg,step:"preview",c,msg};draw();cgScroll()}catch(e){S.cg.manual=true;draw();toast(e.message==="ambiguousjson"?"異なる旅行データが複数あります。見本を除き、本番のJSONだけをコピーしてください":e.message==="noplan"?"答えに日程が見つかりませんでした。AIの答えをまるごとコピーしてください":"読み取れませんでした。AIの答えを { から } までまるごとコピーしてください")}}
 function planView(t){const ds=dates(t),selected=selectedPlanDay(t);setTimeout(()=>wxFetch(S.tid),0);
   return `${t.sample?`<div class="samplebar">これは見本の旅行です。自由にさわってOK。いらなくなったら「設定」から削除できます。</div>`:""}${planHero(t)}${!Object.keys(t.items||{}).length?`<div class="empty"><b>AIに下書きを作ってもらう</b><span>行き先と好みを選ぶと、日程と行きたい場所の候補をAIが考えます。あとからこの画面で自由に直せます。</span><button class="btn fill" data-a="aiOpen" data-k="plan">AIで日程と候補を作る</button></div>`:""}${dates(t).includes(ymd(new Date()))&&nextStop(t)?"":nowCard(t)}
   ${S.codeOut&&!S.tripForm?`<div id="codeOutWrap">${codeOutBox()}</div>`:""}
@@ -2429,12 +2429,11 @@ ${o.move==="自家用車"?"- 自家用車で移動する。レンタカーの予
 ${rules}
 
 ${shape}`}
-function pickJSON(s){s=String(s||"");if(typeof unescapeJSONMarkdown==="function")s=unescapeJSONMarkdown(s);let fallback=null,best=null,bestScore=-1;
-  // 見本の空JSONで止まらず、回答全体から最も情報のある旅行データを選ぶ。
+function pickJSON(s){s=String(s||"");if(typeof unescapeJSONMarkdown==="function")s=unescapeJSONMarkdown(s);let fallback=null,best=null;const candidates=new Map();
+  // 空の見本を除き旅行データを探す。複数の異なる本番候補は推測で選ばない。
   const consider=(o,cut)=>{if(!o||typeof o!=="object")return;if(!fallback)fallback=o;if(!["days","spots","costs"].some(k=>Object.hasOwn(o,k)))return;
     const count=(Array.isArray(o.days)?o.days.reduce((n,d)=>n+(Array.isArray(d?.items)?d.items.length:0),0):0)+(Array.isArray(o.spots)?o.spots.length:0)+(o.costs&&typeof o.costs==="object"?Object.keys(o.costs).length:0);
-    const score=count*10+["days","spots","costs"].filter(k=>Object.hasOwn(o,k)).length;
-    if(score>=bestScore){if(cut)Object.defineProperty(o,"_cut",{value:true});best=o;bestScore=score}};
+    if(count){const key=JSON.stringify(o),previous=candidates.get(key);if(cut)Object.defineProperty(o,"_cut",{value:true});if(!previous||previous._cut&&!cut)candidates.set(key,o)}else if(!best)best=o};
   const fence=String.fromCharCode(96).repeat(3),blocks=[...s.matchAll(new RegExp(fence+'(?:json)?\\s*([\\s\\S]*?)'+fence,'g'))].map(m=>m[1]);blocks.push(s);
   for(const block of blocks){let attempts=0;for(let a=block.indexOf("{");a>=0&&attempts++<80;a=block.indexOf("{",a+1)){
     let depth=0,inString=false,escaped=false,closed=-1;
@@ -2444,7 +2443,7 @@ function pickJSON(s){s=String(s||"");if(typeof unescapeJSONMarkdown==="function"
     // 正しい外側オブジェクトの子要素を別の回答として拾わない。
     if(parsed&&closed>=0)a=closed;
   }}
-  if(best)return best;if(fallback)return fallback;throw new Error(s.includes("{")?"invalidjson":"nojson")}
+  if(candidates.size>1)throw new Error("ambiguousjson");if(candidates.size)return candidates.values().next().value;if(best)return best;if(fallback)return fallback;throw new Error(s.includes("{")?"invalidjson":"nojson")}
 /* AIの答えをコピーしたときによく崩れる所を直す：
    ・" が “ ” になる　・ChatGPTの出典リンクが改行つきで文の中に入る　・答えが途中で切れる（最後まで読めた所までにする） */
 /* コピー時のMarkdownエスケープだけを除く。JSONの正しいエスケープは保つ。 */
@@ -2559,7 +2558,7 @@ async function aiReadClipboard(cg=false){const key=cg?'cg':'ai',A=S[key],tid=S.t
  }catch(e){if(S[key]!==A||S.tid!==tid)return;A.manual=true;A.clipError=e.name==='NotAllowedError'||e.name==='SecurityError'?'このブラウザではコピーの自動読み取りが許可されていません。下の欄を長押しして「ペースト」してください。':e.message==='timeout'?'コピーの読み取りに時間がかかっています。下の欄を長押しして「ペースト」してください。':e.message==='unsupported'?'このブラウザはコピーの自動読み取りに対応していません。下の欄に貼ってください。':e.message==='empty'?'旅行データが見つかりません。AIの回答全体をコピーし直すか、下の欄に貼ってください。':'コピーを読み取れませんでした。下の欄に貼ってください。';draw();$(cg?'cg_paste':'ai_paste')?.focus();toast(A.clipError)
  }finally{A.clipBusy=false;const b=$(cg?'cgClip':'aiClip');if(b){b.disabled=false;b.textContent='コピーした答えを読み込む'}}}
 function aiParse(text){const t=T();try{if(String(text||"").includes("## コピーしやすく、画面をコンパクトにする出力ルール")){S.ai.manual=true;draw();toast("AIに送る指示文がコピーされています。AIの回答をコピーし直すか、回答を下の欄に貼ってください");return}const raw=pickJSON(text);S.ai.c=aiCheck(t,raw,S.ai.kind);if(raw._cut)S.ai.c.cut=true;if(raw._cut)S.ai.c.warn.unshift("AIの答えが途中で切れていたので、最後まで読めたところまで入れます。足りない分は、取り込んだあと「AIで候補を増やす」で足せます");S.ai.step="preview";draw();window.scrollTo(0,0)}
-  catch(e){S.ai.manual=true;draw();toast(e.message==="empty"?"場所も予定も見つかりませんでした。AIの回答全体をコピーしてください":"回答のJSONが見つかりません。回答全体をコピーするか「AIの答えが表示されない」から出し直してください")}}
+  catch(e){S.ai.manual=true;draw();toast(e.message==="ambiguousjson"?"異なる旅行データが複数あります。見本を除き、本番のJSONだけをコピーしてください":e.message==="empty"?"場所も予定も見つかりませんでした。AIの回答全体をコピーしてください":"回答のJSONが見つかりません。回答全体をコピーするか「AIの答えが表示されない」から出し直してください")}}
 
 /* ================= 旅行を渡す・バックアップ =================
    旅行のデータを圧縮して「コード」（TABI1:…）にする。LINEなどで送り、相手は貼るだけで取り込める */

@@ -11,3 +11,10 @@ for(let repeat=0;repeat<5;repeat++){
   for(const text of ['説明 {未確認}\n'+cut,'{"example":1}\n'+cut,fence+'text\n説明 {未確認}\n'+fence+'\n'+cut]){const parsed=c.pickJSON(text);assert.deepEqual(JSON.parse(JSON.stringify(parsed)),full);assert(parsed._cut)}
 }
 console.log('PASS five repetitions: empty sample before/after real answer; multiple fences; prose before truncated full itinerary; days/spots/costs and cut warning preserved');
+const populatedExample={days:[{items:[{title:'見本'}]}],spots:[{name:'見本'}],costs:{hotel:{min:0,max:0}}};
+for(let repeat=0;repeat<5;repeat++){
+  assert.throws(()=>c.pickJSON(JSON.stringify(populatedExample)+'\n'+JSON.stringify(full)),/ambiguousjson/);
+  assert.throws(()=>c.pickJSON(JSON.stringify(populatedExample)+'\n'+JSON.stringify({costs:{other:{min:200,max:200}}})),/ambiguousjson/);
+  assert.deepEqual(JSON.parse(JSON.stringify(c.pickJSON(JSON.stringify(full)+'\n'+JSON.stringify(full)))),full);
+}
+console.log('PASS ambiguous populated samples are rejected instead of guessing; identical repeated answers remain accepted');
