@@ -39,6 +39,7 @@ for(const file of ['src/app.html','index.html']){
  assert(reversed.days[trip.start][0].note.includes(original),'arrival warning must preserve original note');
  c.aiApply(reversed,'replace');c.DB=JSON.parse(storage.get(c.KEY));
  assert(Object.values(c.cleanTrip(c.T()).items)[0].note.includes(original),'reversed arrival must survive save, reload and shared-trip import');
+ assert(Object.values(c.cleanTrip(c.T()).items)[0].note.includes('【到着要確認：17:00】'),'original reversed arrival must remain available after reload');
  const longWarnings=[];const longNote=c.aiTimeNote({time:'時'.repeat(60)},'',longWarnings);
  assert(longNote.includes('…')&&longWarnings.some(x=>x.includes('短くして残した')),'40-character shortening must be disclosed');
  const visits=c.aiCheck(c.T(),{days:[{date:trip.start,items:['朝','夕方'].map(time=>({title:'Same place',kind:'see',spot:'Park',time,note:''}))}]},'plan');
