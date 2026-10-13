@@ -23,4 +23,52 @@ for(const file of ['src/app.html','index.html']){const s=fs.readFileSync(file,'u
  const box=s.slice(s.indexOf('function aiRecoverBox('),s.indexOf('function aiFlowBox('));
  assert(box.includes('『再試行』が表示されていれば試してください。回答が途中なら『続けて』と送れます。取り込みには完全なJSONが必要です。'),'回答停止の案内');
  assert(!/続き.*そのまま貼/.test(box),'続きの断片を貼れば成功すると案内しない');}
-console.log('PASS mis-copy guidance only after parse failure: label-only text and the unsent prompt are recognised; empty, short, garbage and valid JSON keep existing handling; reply-stopped guidance inside the recovery panel');
+/* Execute the actual importer and clipboard entry points, rather than checking
+   only helper results or the position of calls in the source. */
+async function importerRegression(file){
+ const s=fs.readFileSync(file,'utf8'),messages=[],button={focus:()=>{}};
+ const trip={items:{keep:{title:'Existing itinerary'}},spots:{}};
+ const before=JSON.stringify(trip);
+ const prompt='Sent travel instructions '.repeat(30)+' {JSON schema}';
+ const c={S:{tid:'test',ai:{kind:'plan',promptText:prompt},cg:{promptText:prompt}},
+  T:()=>trip,dates:()=>['2026-11-21'],spots:()=>[],pad:n=>String(n).padStart(2,'0'),
+  KINDS:{see:1,food:1,move:1,stay:1,other:1},CATS:{see:1},
+  costRanges:()=>({}),conflict:()=>false,timeKey:()=>null,
+  toast:msg=>messages.push(msg),draw:()=>{},cgScroll:()=>{},
+  window:{scrollTo:()=>{}},$:()=>button,
+  navigator:{clipboard:{readText:async()=>c.clipboardText}},
+  waitLimit:p=>p};
+ vm.createContext(c);
+ const load=(start,end)=>{const a=s.indexOf(start),b=s.indexOf(end,a);assert(a>=0&&b>a,start);vm.runInContext(s.slice(a,b),c)};
+ load('function aiCostCheck(','function cleanCosts(');
+ load('function pickJSON(','const normName=');
+ load('const normName=','function aiCostForecast(');
+ load('function aiCompactDisplayRules(','function cgParse(');
+ load('function cgParse(','function planView(');
+ load('async function aiReadClipboard(','/* ================= 旅行を渡す');
+ c.cgScroll=()=>{};
+ const raw={days:[{date:'2026-11-21',items:[{time:'10:00',kind:'see',title:'Test stop'}]}],spots:[]};
+ const json=JSON.stringify(raw),fence=String.fromCharCode(96).repeat(3);
+ for(const key of ['ai','cg'])for(const clipboard of [false,true]){
+  const run=async text=>{
+   c.S[key]={kind:'plan',promptText:prompt,step:'wait'};messages.length=0;
+   if(clipboard){c.clipboardText=text;const requestState=c.S[key];await c.aiReadClipboard(key==='cg');assert.equal(requestState.clipBusy,false);assert.equal(button.disabled,false)}
+   else c[key==='cg'?'cgParse':'aiParse'](text);
+   assert.equal(JSON.stringify(trip),before,'preview/error must not modify the trip');
+  };
+  for(const text of ['JSONをコピーします','完全なJSONデータをコピー']){
+   await run(text);assert.equal(c.S[key].step,'wait');assert.equal(c.S[key].manual,true);
+   assert(messages.some(m=>m.includes('データをコピーできていないようです')&&m.includes('枠もない場合は')),`${file} ${key} clipboard=${clipboard}: label recovery must be visible`);
+  }
+  await run(prompt);assert.equal(c.S[key].manual,true);assert(messages.some(m=>m.includes('AIに送る指示文がコピーされています')));
+  for(const text of ['', 'JSON', '{"days":[']){
+   await run(text);assert.equal(c.S[key].manual,true);assert(messages.length>0);
+   assert(!messages.some(m=>m.includes('データをコピーできていないようです')||m.includes('AIに送る指示文がコピーされています')),'other errors keep their own advice');
+  }
+  for(const text of [json,fence+'json\n'+json+'\n'+fence]){
+   await run(text);assert.equal(c.S[key].step,'preview');assert.equal(c.S[key].c.nItems,1);
+   assert.equal(c.S[key].c.days['2026-11-21'][0].title,'Test stop');assert.equal(messages.length,0,'valid data must not show mis-copy advice');
+  }
+ }
+}
+(async()=>{for(const file of ['src/app.html','index.html'])await importerRegression(file);console.log('PASS actual planning/consultation import and clipboard flows: recovery messages, valid JSON previews and unchanged trip data')})().catch(e=>{console.error(e);process.exitCode=1});
