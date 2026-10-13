@@ -2366,6 +2366,8 @@ function aiPromptData(t,o,kind){if(kind==="cost")return costPrompt(t,o);const ds
 - 返事のデータは下の形の JSON にする。長いURLや出典一覧は入れず、料金を調べた場合はnoteに公式サイト名・確認日・券種を短く残す。検索できなければ「検索不可・未確認」と明記し、公式確認済みと称さない
 `;
   const shape=`## 返事の形（JSON）
+time と arrive は "HH:MM"（例："09:30"）か空文字 "" だけにする。未定・目安・範囲・条件などの説明は time に書かず note に書く。
+詳細パネルには、コピーボタンとは別に「JSON全文」を折りたたみで必ず置き、コピーできない場合でもそこから全文を選んでコピーできるようにする。
 {
   "days": [ { "date": "YYYY-MM-DD", "area": "その日のエリア", "items": [
     { "time": "HH:MM", "arrive": "HH:MM（移動のときだけ。着く時間）", "kind": "move | see | food | stay | other",
