@@ -1383,13 +1383,13 @@ async function phCache(){if(PH.busy||navigator.onLine===false)return;const db=aw
     if(!PH.cacheAfter)try{PH.cacheAfter=localStorage.getItem(KEY+'-photo-after')||''}catch(e){}const urls=[...want],start=urls.indexOf(PH.cacheAfter)+1,ordered=urls.slice(start).concat(urls.slice(0,start));let n=0,attempts=0;for(const u of ordered){if(PH.map.has(u))continue;if(attempts++>=60)break;PH.cacheAfter=u;try{localStorage.setItem(KEY+'-photo-after',u)}catch(e){}await PH.evictions?.get(u);const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),10000);try{const r=await fetch(u,{mode:"cors",signal:ctl.signal});if(!r.ok)continue;const b=await r.blob();if(!/^image\//.test(b.type)||b.size>1.5e6)continue;
       const stored=await new Promise(ok=>{const tx=db.transaction("p","readwrite");tx.objectStore("p").put(b,u);tx.oncomplete=()=>ok(true);tx.onerror=()=>ok(false);tx.onabort=()=>ok(false)});if(stored){PH.invalid?.delete(u);PH.map.set(u,URL.createObjectURL(b));n++}}catch(e){}finally{clearTimeout(timer)}}if(n&&!S.edit&&!S.ai&&!S.ro&&!S.wform)draw();
   }finally{PH.busy=false}}
-async function fillPhotos(tid,ids){const t=DB.trips[tid];if(!t||!photoOn()||navigator.onLine===false||PH.jobs.has(tid))return;
+async function fillPhotos(tid,ids){const t=DB.trips[tid];if(!t||!photoOn()||navigator.onLine===false)return;if(PH.jobs.has(tid)){const pending=PH.pending||(PH.pending=new Map()),queued=pending.get(tid)||new Set();for(const id of ids||Object.keys(t.spots||{}))queued.add(id);pending.set(tid,queued);return}
   const todo=(ids||Object.keys(t.spots||{})).filter(id=>t.spots?.[id]&&(!t.spots[id].photo||t.spots[id].photo.none&&(!t.spots[id].photo.at||Date.now()-t.spots[id].photo.at>86400000)));if(!todo.length)return;PH.jobs.add(tid);
   S.phBusy=(S.phBusy||0)+todo.length;if(S.tab==="spots"&&!S.edit&&!S.ai)draw();let i=0,got=0,failed=0;
-  const work=async()=>{while(i<todo.length){const id=todo[i++];let ph;try{ph=await findPhoto(DB.trips[tid]?.spots?.[id]||{})}catch(e){ph=undefined;failed++}
-    const sp=DB.trips[tid]?.spots?.[id];if(sp&&ph!==undefined){sp.photo=ph||{none:1,at:Date.now()};if(ph)got++}S.phBusy--;
+  const work=async()=>{while(i<todo.length){const id=todo[i++],source=DB.trips[tid]?.spots?.[id],before=source?.photo,query=JSON.stringify([source?.name,source?.wiki,source?.en,source?.cat]);let ph;try{ph=source?await findPhoto({...source}):undefined}catch(e){ph=undefined;failed++}
+    const sp=DB.trips[tid]?.spots?.[id];if(DB.trips[tid]===t&&sp===source&&sp?.photo===before&&JSON.stringify([sp?.name,sp?.wiki,sp?.en,sp?.cat])===query&&ph!==undefined){sp.photo=ph||{none:1,at:Date.now()};if(ph)got++}S.phBusy--;
     if(S.tid===tid&&S.tab==="spots"&&!S.edit&&!S.ai){const el=$("phn");if(el)el.textContent=S.phBusy}}};
-  try{await Promise.all([work(),work(),work()]);save()}finally{PH.jobs.delete(tid)};setTimeout(phCache,500);S.phBusy=Math.max(0,S.phBusy);
+  try{await Promise.all([work(),work(),work()]);save()}finally{PH.jobs.delete(tid);const queued=PH.pending?.get(tid);if(queued){PH.pending.delete(tid);setTimeout(()=>fillPhotos(tid,[...queued]),0)}};setTimeout(phCache,500);S.phBusy=Math.max(0,S.phBusy);
   if(S.tid===tid&&!S.edit&&!S.ai&&!S.tripForm)draw();if(got||failed)toast(`${got?got+"か所に写真を付けました。":""}${failed?failed+"か所は通信できませんでした。場所タブを開き直すか「写真を探す」で再試行できます":""}`)}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const $=id=>document.getElementById(id);
