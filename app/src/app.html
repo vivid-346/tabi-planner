@@ -73,6 +73,7 @@ h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
 input[type=text],input[type=date],input[type=number],select,textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 11px;min-width:0;font-size:16px}
 textarea{min-height:64px;resize:vertical}
 .tsel{display:flex;gap:4px}.tsel select{width:auto}
+.bkbar{width:100%;justify-content:space-between;text-align:left;margin:8px 0;gap:8px}.bkbar small{display:block;font-weight:400;color:var(--sub,#667);font-size:12px}
 .bkdt{display:grid;gap:10px}.bkdt .tsel select{flex:1}
 .warn{margin:0;padding:7px 11px;border-radius:9px;background:var(--warn-soft);color:var(--warn);font-size:13px;font-weight:700}
 .note{margin:0;padding:9px 12px;border-radius:10px;background:var(--accent-soft);color:var(--ink);font-size:13px}
@@ -1593,7 +1594,9 @@ function bkRows(){return (S.bk||[]).map((b,i)=>{const p=`bk${i}`;const f=(k,l,ph
 function bkRead(){(S.bk||[]).forEach((b,i)=>{const p=`bk${i}`;if(!$(p+"_bookNo"))return;const v=k=>($(`${p}_${k}`)?.value||"").trim();
   if(b.type==="hotel")Object.assign(b,{name:v("name"),in:v("in"),inTime:readTime(`${p}_inTime`),out:v("out"),outTime:readTime(`${p}_outTime`),bookNo:v("bookNo")});
   else Object.assign(b,{no:v("no"),from:v("from"),to:v("to"),date:v("date"),time:readTime(`${p}_time`),adate:v("adate"),atime:readTime(`${p}_atime`),bookNo:v("bookNo")})})}
-function bkBox(){return `<details id="bkDetails" ${S.bk&&S.bk.length?"open":""}><summary style="min-height:44px;padding:12px 0;font-weight:600">飛行機・宿の予約（任意）</summary><div class="form" style="margin-top:8px"><span class="sub">決まっている便や宿の時間を入れると、日程に入ります。AIに日程を作ってもらうときも、この時間はそのまま残して前後に予定を組みます。</span><div id="bkList" class="form">${bkRows()}</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-a="bkAdd" data-type="flight">＋ 飛行機・列車など</button><button class="btn" type="button" data-a="bkAdd" data-type="hotel">＋ 宿</button></div></div></details>`}
+/* 日程の上に出す予約の入口。あとからでも飛行機・宿の時間を入れ直せる */
+function bkBar(t){const list=fixedList(t);const lb=list.map(b=>b.type==="hotel"?`宿 ${md(b.in)}${b.inTime?" "+b.inTime:""}`:`${b.no||"便"} ${md(b.date)}${b.time?" "+b.time:""}`).slice(0,3).join(" ・ ");return `<button class="btn bkbar" data-a="bkEdit"><span>${list.length?`飛行機・宿の予約 ${list.length}件<small>${esc(lb)}${list.length>3?" ほか":""}</small>`:`＋ 飛行機・宿の予約を入れる<small>便やチェックインの時間を日程に入れます</small>`}</span><b>${list.length?"変える ›":"›"}</b></button>`}
+function bkBox(){return `<details id="bkDetails" ${(S.bk&&S.bk.length)||S.bkOpen?"open":""}><summary style="min-height:44px;padding:12px 0;font-weight:600">飛行機・宿の予約（任意）</summary><div class="form" style="margin-top:8px"><span class="sub">決まっている便や宿の時間を入れると、日程に入ります。AIに日程を作ってもらうときも、この時間はそのまま残して前後に予定を組みます。</span><div id="bkList" class="form">${bkRows()}</div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-a="bkAdd" data-type="flight">＋ 飛行機・列車など</button><button class="btn" type="button" data-a="bkAdd" data-type="hotel">＋ 宿</button></div></div></details>`}
 function fixedPrompt(t){const list=fixedList(t);if(!list.length)return "";const w=d=>`${md(d)}（${wd(d)}）`;
   return "## 決まっている予約（時刻を変えない）\n"+list.map(b=>b.type==="hotel"?`- 宿「${bkLabel(b)}」：${w(b.in)}${b.inTime?" "+b.inTime:""}チェックイン 〜 ${w(b.out)}${b.outTime?" "+b.outTime:""}チェックアウト`:`- ${bkLabel(b)}：${w(b.date)}${b.time?" "+b.time:""}発${b.atime?` → ${w(b.adate||b.date)} ${b.atime}着`:""}`).join("\n")+"\n- これらはアプリの日程にすでに入っている。daysには書かず、到着前と出発後には予定を入れない。空港・駅との移動時間とチェックインの時間を見込んで、その前後に予定を組む。泊まる宿の場所をその日の拠点にする\n- 予約以外のすべての予定に time を HH:MM 形式で必ず入れる（空文字や未定にしない）。到着した日は、到着時刻＋空港・駅から最初の場所までの移動時間のあとから組む。チェックイン前でも観光してよい（荷物は宿に預ける想定）。帰る日は、帰りの便の出発の約2時間前（列車なら30分前）に空港・駅に着くように組む\n"}
 /* 予約に便・列車があれば、行きの出発地として使う */
@@ -1639,7 +1642,7 @@ ${p&&!p.photo.own?`<span class="h2cr">写真：${esc(p.photo.by)} / ${esc(p.phot
 </section>
   <div class="blue-utilities"><details class="blue-tools"><summary>旅の道具・共有</summary>${tripTools(t)}<button class="btn" data-a="compactPlan" aria-pressed="${!!S.compact}">${S.compact?"写真表示":"コンパクト"}</button>
   ${(()=>{const c=costSummary(t);return `<button class="btn big" style="width:100%;justify-content:space-between" data-a="tab" data-t="split"><span>旅行の予定金額<small style="display:block">${c.missing?'未確認'+c.missing+'項目':c.people+'人分'}</small></span><b>${c.rows.every(x=>x.missing)?'未確認':costRangeLabel({min:c.lo,max:c.hi})} ›</b></button>`})()}
-  </details>${planMenu(t)}</div><div class="dprow">${ds.length>1?`<nav class="daypills" aria-label="日にち"><button data-a="jumpDay" data-k="-1" aria-current="${selectedPlanDay(t)===-1}"><b>全日程</b><small>まとめて見る</small></button>${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}" aria-current="${k===selectedPlanDay(t)}"><b>${k+1}日目</b><small>${+d.slice(5,7)}.${+d.slice(8)}（${wd(d)}）</small></button>`).join("")}</nav>`:`<span style="flex:1"></span>`}</div>`}
+  </details>${planMenu(t)}</div>${typeof bkBar==="function"?bkBar(t):""}<div class="dprow">${ds.length>1?`<nav class="daypills" aria-label="日にち"><button data-a="jumpDay" data-k="-1" aria-current="${selectedPlanDay(t)===-1}"><b>全日程</b><small>まとめて見る</small></button>${ds.map((d,k)=>`<button data-a="jumpDay" data-k="${k}" aria-current="${k===selectedPlanDay(t)}"><b>${k+1}日目</b><small>${+d.slice(5,7)}.${+d.slice(8)}（${wd(d)}）</small></button>`).join("")}</nav>`:`<span style="flex:1"></span>`}</div>`}
 /* 旅の道具（理想の8番）：ルート最適化・持ち物・写真・共有 */
 function tripTools(t){const cs=checks(t),cd=cs.filter(c=>c.done).length;const m=moneyStats(t);const ds=dates(t),today=ymd(new Date());const selected=selectedPlanDay(t);const d0=selected>=0?ds[selected]:ds.includes(today)?today:ds[Math.min(S.sday||0,ds.length-1)];
   const T4=[["roOpen","route","ルート最適化","移動が短い順に並べ替え","#E6F6EE","#1E9E63",` data-date="${d0}"`],["tab","check","持ち物リスト",cs.length?`${cd} / ${cs.length} 準備済み`:"忘れ物を防ぐ","#E6F4F7","#138A9E",' data-t="notif"'],["tab","img","写真","旅行の写真を見る","#FFF2E6","#C76A21",' data-t="mem"'],["shareTrip","share","共有する","LINEなどで送る","#EEEBFC","#5B4BDB",""]];
@@ -2756,6 +2759,7 @@ ${aiCopyRules()}
    case"sample":openSample();break;
    case"open":if(S.cg&&S.cg.step!=="idle"&&S.cg.tid!==id)S.cg={step:"idle"};S.tid=id;S.tab="plan";S.vb=null;S.sel=null;S.mapDay=0;draw();window.scrollTo(0,0);break;
    case"home":S.print=false;S.ai=null;S.codeOut=null;S.imp=null;S.tid=null;S.edit=null;S.pick=null;S.draft=null;draw();window.scrollTo(0,0);break;
+   case"bkEdit":S.codeOut=null;S.tripForm="edit";S.bk=null;S.confirm=null;S.bkOpen=true;draw();S.bkOpen=false;{const el=$("bkDetails");if(el){el.scrollIntoView({block:"start"});scrollBy(0,-80)}}break;
    case"editTrip":S.codeOut=null;S.tripForm="edit";S.bk=null;S.confirm=null;draw();if(b.dataset.share){const el=$("shareBox");if(el){el.scrollIntoView({block:"start"});scrollBy(0,-80);el.classList.add("flash")}}else window.scrollTo(0,0);break;
    case"delTrip":S.confirm="trip";draw();break;
    case"delTripYes":{const old=DB.trips[S.tid];delete DB.trips[S.tid];if(!save()){DB.trips[S.tid]=old;toast("削除できませんでした");break}S.tripForm=null;S.confirm=null;S.tid=null;UNDO=null;toast("旅行を削除しました");memGc();draw();break}
