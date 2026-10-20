@@ -28,5 +28,30 @@ await p.click('[data-a="cgMustAdd"][data-n="兼六園"]');
 assert.equal(await p.inputValue('#cg_in'),'2日目をゆっくりにしたい','request draft survives chip click');
 assert.equal(await p.inputValue('#cg_must'),'近江町市場、兼六園','chip appended to typed must list');
 assert.equal(await p.evaluate(()=>T().must),'近江町市場、兼六園','must saved to the trip');
-assert.deepEqual(errs,[]);await b.close();console.log('PASS money fill keeps typed amount/unit and names the real button; consult draft survives must chips');
+// 3) 場所の検索で見つからなければ、その名前で追加できる
+await p.evaluate(()=>{S.tab='spots';S.q='';S.cat='';draw()});await p.waitForTimeout(200);
+await p.fill('#sq','ひがし茶屋街');await p.waitForTimeout(150);
+await p.click('[data-a="addSpotQ"]');
+assert.equal(await p.inputValue('#sf_name'),'ひがし茶屋街','search word carried into the add form');
+await p.evaluate(()=>{S.edit=null;S.q='';S.cat='';const t=T();t.items={z:{date:'2026-11-21',time:'10:00',kind:'see',title:'兼六園',spot:'s1',order:1}};save();draw()});await p.waitForTimeout(150);
+await p.click('[data-a="cat"][data-c="__unplanned"]');await p.waitForTimeout(150);
+const names=await p.evaluate(()=>[...document.querySelectorAll('#excards h3, #excards b')].map(x=>x.innerText).join('|'));
+assert(!names.includes('兼六園')&&names.includes('近江町市場'),'unplanned filter shows only places not in the plan: '+names);
+await p.evaluate(()=>{S.cat='';draw()});
+// 4) 出発日を変えると予定・予約・お金の記録も同じ日数ずれる（チェックを外すとずらさない）
+await p.evaluate(()=>{const t=T();t.items={a:{date:'2026-11-21',time:'10:00',kind:'see',title:'兼六園',spot:'',order:1},b:{date:'2026-11-23',time:'09:00',kind:'see',title:'近江町',spot:'',order:1}};t.fixed={f:{type:'flight',no:'JL1',from:'羽田',to:'小松',date:'2026-11-21',time:'08:00',adate:'',atime:'09:00'}};t.dayInfo={'2026-11-21':{area:'金沢駅'}};t.expenses.e1.date='2026-11-22';syncFixed(t);save();S.tab='plan';S.tripForm='edit';S.bk=null;draw()});await p.waitForTimeout(200);
+assert.equal(await p.isChecked('#tf_shift'),true,'shift is on by default');
+await p.fill('#tf_start','2026-11-28');await p.fill('#tf_end','2026-11-30');await p.click('#tripForm [type=submit]');await p.waitForTimeout(300);
+const sh=await p.evaluate(()=>{const t=T();return {a:t.items.a.date,b:t.items.b.date,fx:Object.values(t.items).filter(x=>x.fix).map(x=>x.date),bk:t.fixed.f.date,area:Object.keys(t.dayInfo),ex:t.expenses.e1.date}});
+assert.deepEqual(sh,{a:'2026-11-28',b:'2026-11-30',fx:['2026-11-28'],bk:'2026-11-28',area:['2026-11-28'],ex:'2026-11-29'},'everything moved by 7 days');
+await p.evaluate(()=>{S.tripForm='edit';S.bk=null;draw()});await p.uncheck('#tf_shift');await p.fill('#tf_start','2026-11-27');await p.click('#tripForm [type=submit]');await p.waitForTimeout(300);
+assert.equal(await p.evaluate(()=>T().items.a.date),'2026-11-28','unchecked keeps item dates');
+// 日付の外になった予定は日程に案内が出て、日を選んで戻せる（11/27〜11/30にしたので 11/30 は内側。期間を縮めて外に出す）
+await p.evaluate(()=>{S.tripForm='edit';S.bk=null;draw()});await p.uncheck('#tf_shift');await p.fill('#tf_end','2026-11-29');await p.click('#tripForm [type=submit]');await p.waitForTimeout(300);
+await p.evaluate(()=>{S.tripForm=null;S.tab='plan';draw()});await p.waitForTimeout(200);
+assert.equal(await p.locator('#orphanBox').count(),1,'orphan box shown');
+await p.selectOption('#orph_b','2026-11-29');await p.click('[data-a="orphanMove"][data-id="b"]');await p.waitForTimeout(200);
+assert.equal(await p.evaluate(()=>T().items.b.date),'2026-11-29','orphan moved back into the trip');
+assert.equal(await p.locator('#orphanBox').count(),0,'box disappears when none left');
+assert.deepEqual(errs,[]);await b.close();console.log('PASS trip date shift moves items/bookings/expenses; money fill keeps typed amount/unit and names the real button; consult draft survives must chips; search miss offers add');
 })().catch(e=>{console.error(e);process.exit(1)});
