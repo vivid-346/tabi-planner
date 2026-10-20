@@ -2443,7 +2443,7 @@ ${shape}`;
 ## 条件
 - 行き先：${o.dest}
 - 日程：${day}
-${typeof fixedGoBack==="function"&&fixedGoBack(t)?`- 出発地：${o.from||fixedGoBack(t)}（行きと帰りは「決まっている予約」の便・列車を使う。時刻は予約のとおりで、予定はその到着後から組む）`:`- 出発地：${o.from||"未定"}（未定なら行きと帰りの移動はtime・arriveを空文字にし、noteに「出発地を入力して時間を確認」と書く。出発時刻・移動時間を推測で決めない）`}
+${typeof fixedGoBack==="function"&&fixedGoBack(t)?`- 出発地：${fixedGoBack(t)}（行きと帰りは「決まっている予約」の便・列車を使う。時刻は予約のとおりで、予定はその到着後から組む）`:`- 出発地：${o.from||"未定"}（未定なら行きと帰りの移動はtime・arriveを空文字にし、noteに「出発地を入力して時間を確認」と書く。出発時刻・移動時間を推測で決めない）`}
 - 人数：${o.people||"未定"}　移動手段：${o.move}
 - 好み：${o.prefs.join("、")||"特になし"}
 ${typeof mustPrompt==="function"?mustPrompt(o):""}- ペース：${o.pace}（ゆったり＝観光は1日2〜3か所、ふつう＝3〜4か所、たくさん＝5か所まで）
