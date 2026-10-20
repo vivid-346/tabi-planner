@@ -28,6 +28,16 @@ await p.click('[data-a="cgMustAdd"][data-n="兼六園"]');
 assert.equal(await p.inputValue('#cg_in'),'2日目をゆっくりにしたい','request draft survives chip click');
 assert.equal(await p.inputValue('#cg_must'),'近江町市場、兼六園','chip appended to typed must list');
 assert.equal(await p.evaluate(()=>T().must),'近江町市場、兼六園','must saved to the trip');
+// 相談文の下書きは旅行ごと：別の旅行には出ず、元の旅行に戻ると残っている。旅行を消すと下書きも消える
+await p.evaluate(()=>{DB.trips.t2={title:'京都',dest:'京都',start:'2026-12-01',end:'2026-12-02',sid:'S2',spots:{},items:{},checks:{},ex:{}};save();S.tid=null;draw()});
+await p.evaluate(()=>{S.tid='t2';S.tab='ai';S.cg={step:'idle'};draw()});await p.waitForTimeout(150);
+assert.equal(await p.inputValue('#cg_in'),'','other trip does not get the draft');
+await p.fill('#cg_in','京都の1日目を短く');
+await p.evaluate(()=>{S.tid='t1';S.tab='ai';S.cg={step:'idle'};draw()});await p.waitForTimeout(150);
+assert.equal(await p.inputValue('#cg_in'),'2日目をゆっくりにしたい','original trip keeps its draft');
+await p.evaluate(()=>{S.tid='t2';S.tab='plan';S.tripForm='edit';S.bk=null;S.confirm='trip';draw()});await p.evaluate(()=>document.querySelector('[data-a="delTripYes"]').click());await p.waitForTimeout(200);
+assert.equal(await p.evaluate(()=>!!(S.cgDrafts||{}).t2),false,'deleting a trip drops its draft');
+await p.evaluate(()=>{S.tid='t1';S.tab='split';S.cg={step:'idle'};draw()});
 // 3) 場所の検索で見つからなければ、その名前で追加できる
 await p.evaluate(()=>{S.tab='spots';S.q='';S.cat='';draw()});await p.waitForTimeout(200);
 await p.fill('#sq','ひがし茶屋街');await p.waitForTimeout(150);
