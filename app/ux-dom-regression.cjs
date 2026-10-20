@@ -63,5 +63,23 @@ assert.equal(await p.locator('#orphanBox').count(),1,'orphan box shown');
 await p.selectOption('#orph_b','2026-11-29');await p.click('[data-a="orphanMove"][data-id="b"]');await p.waitForTimeout(200);
 assert.equal(await p.evaluate(()=>T().items.b.date),'2026-11-29','orphan moved back into the trip');
 assert.equal(await p.locator('#orphanBox').count(),0,'box disappears when none left');
-assert.deepEqual(errs,[]);await b.close();console.log('PASS trip date shift moves items/bookings/expenses; money fill keeps typed amount/unit and names the real button; consult draft survives must chips; search miss offers add');
+// 5) 出発日を変えても、新しく足した予約や日付を直した予約は入力どおり。保存エラーのあと直して保存しても二重にずらさない
+await p.evaluate(()=>{DB.trips.t4={title:'予約',dest:'金沢',start:'2026-11-13',end:'2026-11-16',sid:'S4',spots:{},items:{},checks:{},ex:{},fixed:{f1:{type:'flight',no:'OLD1',from:'羽田',to:'小松',date:'2026-11-13',time:'08:00',adate:'',atime:'09:00'},h1:{type:'hotel',name:'宿A',in:'2026-11-13',inTime:'15:00',out:'2026-11-14',outTime:'10:00'}}};syncFixed(DB.trips.t4);save();S.tid='t4';S.tab='plan';S.tripForm='edit';S.bk=null;draw()});await p.waitForTimeout(200);
+await p.fill('#tf_start','2026-11-14');await p.fill('#tf_end','2026-11-14');
+await p.evaluate(()=>document.getElementById('bkDetails').open=true);
+await p.click('[data-a="bkAdd"][data-type="flight"]');await p.waitForTimeout(150);
+const ni=await p.evaluate(()=>S.bk.length-1);await p.fill(`#bk${ni}_no`,'NEW1');
+assert.equal(await p.inputValue(`#bk${ni}_date`),'2026-11-14','new booking prefilled with the new start date');
+await p.fill('#bk1_in','2026-11-15');await p.fill('#bk1_out','2026-11-16');
+await p.click('#tripForm [type=submit]');await p.waitForTimeout(250);
+assert.match(await p.evaluate(()=>$('toast').innerText),/期間の外/,'first save fails because the trip is too short');
+await p.fill('#tf_end','2026-11-17');await p.click('#tripForm [type=submit]');await p.waitForTimeout(300);
+const fx=await p.evaluate(()=>{const t=DB.trips.t4;const by=n=>Object.values(t.fixed).find(b=>(b.no||b.name)===n);return {old:by('OLD1').date,neu:by('NEW1').date,hin:by('宿A').in,hout:by('宿A').out}});
+assert.deepEqual(fx,{old:'2026-11-14',neu:'2026-11-14',hin:'2026-11-15',hout:'2026-11-16'},'only the untouched saved booking moves, exactly once: '+JSON.stringify(fx));
+// 6) 種類が1つでも、日程に入っている場所と入っていない場所があれば「まだ日程にない」が出る。全部入っていれば出さない
+await p.evaluate(()=>{DB.trips.t5={title:'一種類',dest:'金沢',start:'2026-11-21',end:'2026-11-21',sid:'S5',spots:{a:{name:'兼六園',cat:'see'},b:{name:'21世紀美術館',cat:'see'}},items:{x:{date:'2026-11-21',time:'10:00',kind:'see',title:'兼六園',spot:'a',order:1}},checks:{},ex:{}};save();S.tid='t5';S.tripForm=null;S.tab='spots';S.cat='';S.q='';draw()});await p.waitForTimeout(150);
+assert.equal(await p.locator('[data-a="cat"][data-c="__unplanned"]').count(),1,'chip shown with a single category');
+await p.evaluate(()=>{DB.trips.t5.items.y={date:'2026-11-21',time:'13:00',kind:'see',title:'美術館',spot:'b',order:2};save();draw()});await p.waitForTimeout(100);
+assert.equal(await p.locator('[data-a="cat"][data-c="__unplanned"]').count(),0,'no chip when everything is planned');
+assert.deepEqual(errs,[]);await b.close();console.log('PASS booking shift keeps new/edited bookings and never double-shifts; unplanned chip with one category; trip date shift moves items/bookings/expenses; money fill keeps typed amount/unit and names the real button; consult draft survives must chips; search miss offers add');
 })().catch(e=>{console.error(e);process.exit(1)});
